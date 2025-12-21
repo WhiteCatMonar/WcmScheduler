@@ -324,15 +324,16 @@ namespace MainApplication.ViewModels
             double actualSpacing = spacing * Zoom;
             bool isShowSubGrid = actualSpacing >= 8; /* ズーム後のピクセル間隔が8px以上なら補助線表示 */
 
-
             /* 垂直線 */
             for (double x = _gridOriginX; x < endX; x += spacing)
             {
-                bool isMajor = ((int)(x / spacing) % 10 == 0);
+                int gridIndex = (int)Math.Round(x / spacing);
+                bool isMajor = (gridIndex % 10 == 0);
+
 
                 if (!isMajor && !isShowSubGrid)
                 {
-                    continue; // ★ 補助線は描画しない
+                    continue;
                 }
 
                 GridLines.Add(new LineViewModel
@@ -342,14 +343,14 @@ namespace MainApplication.ViewModels
                     X2 = x,
                     Y2 = endY,
                     IsMajor = isMajor
-
                 });
             }
 
             /* 水平線 */
             for (double y = _gridOriginY; y < endY; y += spacing)
             {
-                bool isMajor = ((int)(y / spacing) % 10 == 0);
+                int gridIndex = (int)Math.Round(y / spacing);
+                bool isMajor = (gridIndex % 10 == 0);
 
                 if (!isMajor && !isShowSubGrid)
                 {

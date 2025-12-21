@@ -58,9 +58,24 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Line X1="{Binding X1}" Y1="{Binding Y1}"
-                      X2="{Binding X2}" Y2="{Binding Y2}"
-                      Stroke="LightGray" StrokeThickness="0.5"/>
+                                <Line X1="{Binding X1}"
+                                      Y1="{Binding Y1}"
+                                      X2="{Binding X2}"
+                                      Y2="{Binding Y2}">
+                                    <Line.Style>
+                                        <Style TargetType="Line">
+                                            <Setter Property="Stroke" Value="#EEE"/>
+                                            <Setter Property="StrokeThickness" Value="0.5"/>
+
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsMajor}" Value="True">
+                                                    <Setter Property="StrokeThickness" Value="1.5"/>
+                                                    <Setter Property="Stroke" Value="#CCC"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Line.Style>
+                                </Line>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
