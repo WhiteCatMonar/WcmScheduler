@@ -1,5 +1,6 @@
 ﻿using MainApplication.ViewModels;
 using MainApplication.Views.NodeEditorTab.Controls;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -14,9 +15,22 @@ namespace MainApplication.Views.NodeEditorTab
     /// </summary>
     public partial class NodeEditorControl : UserControl
     {
+        private const double MinZoom = 0.2;
+        private const double MaxZoom = 3.0;
+
         public NodeEditorControl()
         {
             InitializeComponent();
+        }
+
+        public double Zoom
+        {
+            get => ZoomTransform.ScaleX;
+            set
+            {
+                ZoomTransform.ScaleX = value;
+                ZoomTransform.ScaleY = value;
+            }
         }
 
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -92,13 +106,13 @@ namespace MainApplication.Views.NodeEditorTab
             {
                 vm.BaseCanvasWidth = e.NewSize.Width;
                 vm.BaseCanvasHeight = e.NewSize.Height;
-                vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / ZoomTransform.ScaleX;
-                vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / ZoomTransform.ScaleY;
+                vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / Zoom;
+                vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
                 vm.Connections.CanvasViewLogicalWidth = vm.ZoomedCanvasWidth;
                 vm.Connections.CanvasViewLogicalHeight = vm.ZoomedCanvasHeight;
                 
                 /* ViewModelにZoom/Panを反映 */
-                vm.Zoom = ZoomTransform.ScaleX;
+                vm.Zoom = Zoom;
                 vm.PanX = PanTransform.X;
                 vm.PanY = PanTransform.Y;
 
@@ -123,9 +137,15 @@ namespace MainApplication.Views.NodeEditorTab
             }
 
             double zoomFactor = e.Delta > 0 ? 1.1 : 0.9;
+            
+            /* ズーム値を計算（制限付き） */
+            double limitedZoom = Zoom * zoomFactor;
+            limitedZoom = Math.Max(MinZoom, Math.Min(MaxZoom, limitedZoom));
 
-            ZoomTransform.ScaleX *= zoomFactor;
-            ZoomTransform.ScaleY *= zoomFactor;
+            /* 実際に適用された倍率（中心補正に必要） */
+            double appliedFactor = limitedZoom / Zoom;
+            
+            Zoom = limitedZoom;
 
             /* ズーム中心をマウス位置に合わせる */
             {
@@ -136,10 +156,8 @@ namespace MainApplication.Views.NodeEditorTab
                 var deltaY = mousePos.Y - PanTransform.Y;
 
                 /* 座標差分から拡縮時にCanvas論理原点が移動する量を算出 */
-                var zoomedDeltaX = deltaX - (deltaX * zoomFactor);
-                var zoomedDeltaY = deltaY - (deltaY * zoomFactor);
-                PanTransform.X = PanTransform.X + zoomedDeltaX;
-                PanTransform.Y = PanTransform.Y + zoomedDeltaY;
+                PanTransform.X += deltaX - (deltaX * appliedFactor);
+                PanTransform.Y += deltaY - (deltaY * appliedFactor);
             }
             
             /* ViewModelにZoom/Panを反映 */
@@ -148,16 +166,16 @@ namespace MainApplication.Views.NodeEditorTab
             vm.PanY = PanTransform.Y;
 
             /* ズーム後サイズを更新 */
-            vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / ZoomTransform.ScaleX;
-            vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / ZoomTransform.ScaleY;
+            vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / Zoom;
+            vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
 
             /* グリッド更新 */
             vm.UpdateGrid(
-                PanTransform.X / ZoomTransform.ScaleX,
-                PanTransform.Y / ZoomTransform.ScaleY,
+                PanTransform.X / Zoom,
+                PanTransform.Y / Zoom,
                 vm.ZoomedCanvasWidth,
                 vm.ZoomedCanvasHeight,
-                vm.GridSpacing * ZoomTransform.ScaleX
+                vm.GridSpacing * Zoom
             );
         }
 
@@ -191,15 +209,15 @@ namespace MainApplication.Views.NodeEditorTab
                 vm.PanX = PanTransform.X;
                 vm.PanY = PanTransform.Y;
 
-                vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / ZoomTransform.ScaleX;
-                vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / ZoomTransform.ScaleY;
+                vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / Zoom;
+                vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
                 /* グリッド更新 */
                 vm.UpdateGrid(
-                    PanTransform.X / ZoomTransform.ScaleX,
-                    PanTransform.Y / ZoomTransform.ScaleY,
+                    PanTransform.X / Zoom,
+                    PanTransform.Y / Zoom,
                     vm.ZoomedCanvasWidth,
                     vm.ZoomedCanvasHeight,
-                    vm.GridSpacing * ZoomTransform.ScaleX
+                    vm.GridSpacing * Zoom
                 );
             }
         }
