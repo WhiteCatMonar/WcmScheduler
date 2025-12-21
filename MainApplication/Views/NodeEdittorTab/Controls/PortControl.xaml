@@ -1,0 +1,17 @@
+﻿<UserControl x:Class="MainApplication.Views.NodeEditorTab.Controls.PortControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:MainApplication.ViewModels.Converters"
+             Width="14" Height="14"
+             MouseLeftButtonDown="Port_MouseLeftButtonDown"
+             MouseMove="Port_MouseMove"
+             MouseLeftButtonUp="Port_MouseLeftButtonUp">
+    <UserControl.Resources>
+        <converters:PortColorConverter x:Key="PortColorConverter"/>
+    </UserControl.Resources>
+
+    <Polygon Points="0,0 0,10 10,5"
+             Fill="{Binding Type, Converter={StaticResource PortColorConverter}}"
+             HorizontalAlignment="Center"
+             VerticalAlignment="Center"/>
+</UserControl>

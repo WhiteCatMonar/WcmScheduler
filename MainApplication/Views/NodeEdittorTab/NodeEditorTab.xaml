@@ -1,0 +1,89 @@
+﻿<UserControl x:Class="MainApplication.Views.NodeEditorTab.NodeEditorTab"     
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:vm="clr-namespace:MainApplication.ViewModels"
+             xmlns:views="clr-namespace:MainApplication.Views.NodeEditorTab"
+             xmlns:controls="clr-namespace:MainApplication.Views.NodeEditorTab.Controls"
+             xmlns:converters="clr-namespace:MainApplication.ViewModels.Converters"
+             PreviewKeyDown="UserControl_PreviewKeyDown"
+             Height="Auto" Width="Auto">
+    <UserControl.Resources>
+        <Style x:Key="VerticalGridSplitter" TargetType="{x:Type GridSplitter}">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Width" Value="5" />
+        </Style>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+        
+        <!-- プレースホルダー用テンプレート -->
+        <DataTemplate x:Key="PlaceholderTemplate">
+            <TextBlock Text="タスクが選択されていません"
+                       Foreground="Gray"
+                       FontStyle="Italic"
+                       Margin="5"/>
+        </DataTemplate>
+
+        <!-- タスク詳細用テンプレート -->
+        <DataTemplate x:Key="NodeDetailTemplate" DataType="{x:Type vm:NodeViewModel}">
+            <views:NodeDetailControl />
+        </DataTemplate>
+
+        <!-- TemplateSelector に渡す -->
+        <views:NodeDetailTemplateSelector
+            x:Key="NodeDetailTemplateSelector"
+            PlaceholderTemplate="{StaticResource PlaceholderTemplate}"
+            NodeDetailTemplate="{StaticResource NodeDetailTemplate}" />
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <!-- サイドパネル -->
+            <ColumnDefinition Width="200"  MinWidth="320"/>
+            <!-- セパレータ -->
+            <ColumnDefinition Width="Auto"/>
+            <!-- ノードエディタ領域 -->
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+         <!-- サイドパネル -->
+        <Grid Grid.Column="0" Background="#EEE" Margin="5">
+            <Grid.RowDefinitions>
+                <!-- 固定UI：タスク操作 -->
+                <RowDefinition Height="Auto"/>
+                <!-- 動的UI：タスク情報 -->
+                <RowDefinition Height="*"/>
+                <!-- 固定UI：履歴操作 -->
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- 固定UI：タスク操作 -->
+            <StackPanel Grid.Row="0" Margin="5">
+                <TextBlock Text="タスク操作"
+                           FontWeight="Bold"
+                           Margin="0,0,0,5"/>
+                <Button Content="タスク追加"
+                        Command="{Binding AddNodeCommand}"
+                        Margin="0,0,0,5"/>
+                <Button Content="選択タスク削除"
+                        Command="{Binding DeleteSelectedNodeCommand}"
+                        Focusable="False"/>
+            </StackPanel>
+
+            <!-- 動的UI：タスク情報 -->
+            <StackPanel Grid.Row="1" Margin="5">
+                <TextBlock Text="タスク情報" FontWeight="Bold" Margin="0,0,0,5"/>
+                <ContentControl Content="{Binding SelectedNode}"
+                            ContentTemplateSelector="{StaticResource NodeDetailTemplateSelector}"
+                            Margin="5"/>
+            </StackPanel>
+            
+            <!-- 固定UI：履歴操作 -->
+            <controls:HistoryControl Grid.Row="2" />
+
+        </Grid>
+
+        <GridSplitter Grid.Column="1" Background="#CCC" Style="{StaticResource VerticalGridSplitter}" />
+        <!-- ノードエディタ領域 -->
+        <views:NodeEditorControl Grid.Column="2" Margin="5"/>
+
+    </Grid>
+</UserControl>
