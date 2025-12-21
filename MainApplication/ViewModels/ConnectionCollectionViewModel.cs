@@ -13,10 +13,12 @@ namespace MainApplication.ViewModels
     public class ConnectionCollectionViewModel : INotifyPropertyChanged
     {
         private readonly UndoRedoManager _undoRedo;
+        private readonly NodeEditorViewModel _editor;
 
-        public ConnectionCollectionViewModel(UndoRedoManager undoRedo)
+        public ConnectionCollectionViewModel(UndoRedoManager undoRedo, NodeEditorViewModel editor)
         {
             _undoRedo = undoRedo ?? throw new ArgumentNullException(nameof(undoRedo));
+            _editor = editor ?? throw new ArgumentNullException(nameof(editor));
 
             SelectConnectionCommand = new RelayCommand<ConnectionViewModel>(SelectConnection);
             DeleteSelectedConnectionCommand = new RelayCommand(DeleteSelectedConnection, () => SelectedConnection != null);
@@ -89,7 +91,7 @@ namespace MainApplication.ViewModels
         {
             if (fromPort == null || toPort == null) return;
 
-            var connection = new ConnectionViewModel(fromPort, toPort);
+            var connection = new ConnectionViewModel(fromPort, toPort, _editor);
             var action = new AddConnectionAction(Connections, connection);
             _undoRedo.Execute(action);
         }
@@ -201,10 +203,16 @@ namespace MainApplication.ViewModels
         /* 論理座標系での Clamp */
         private Point ClampCanvasViewPosition(Point p)
         {
-            return new Point(
-                Math.Max(CanvasViewOriginX, Math.Min(CanvasViewLogicalWidth, p.X)),
-                Math.Max(CanvasViewOriginY, Math.Min(CanvasViewLogicalHeight, p.Y))
-            );
+            double logicalStartX = CanvasViewOriginX;
+            double logicalStartY = CanvasViewOriginY;
+
+            double logicalEndX = CanvasViewOriginX + CanvasViewLogicalWidth;
+            double logicalEndY = CanvasViewOriginY + CanvasViewLogicalHeight;
+
+            double x = Math.Max(logicalStartX, Math.Min(p.X, logicalEndX));
+            double y = Math.Max(logicalStartY, Math.Min(p.Y, logicalEndY));
+
+            return new Point(x, y);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

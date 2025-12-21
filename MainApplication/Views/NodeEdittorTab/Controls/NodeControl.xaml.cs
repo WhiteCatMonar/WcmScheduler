@@ -16,11 +16,31 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         public NodeControl()
         {
             InitializeComponent();
+            Loaded += NodeControl_Loaded;
         }
 
         private void NodeControl_Loaded(object sender, RoutedEventArgs e)
         {
-            UpdatePortPositions();
+            /* 一度だけ実行 */
+            Loaded -= NodeControl_Loaded;
+
+            /* レイアウトが完全に終わってから実行 */
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                /* UI → VM 相対座標更新 */
+                UpdatePortPositions();
+
+                /* VM → 絶対座標更新 */
+                if (DataContext is NodeViewModel node)
+                {
+                    node.UpdateAllPortPositions();
+                }
+
+                // 3. 接続線更新（将来、初期接続がある場合に備えて）
+                var editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
+                editorVM?.Connections.UpdateAllConnections();
+            }),
+            System.Windows.Threading.DispatcherPriority.Loaded);
         }
 
         private void UpdatePortPositions()
@@ -122,8 +142,21 @@ namespace MainApplication.Views.NodeEditorTab.Controls
             {
                 node.Width = Math.Max(node.MinWidth, e.NewSize.Width);
                 node.Height = Math.Max(node.MinHeight, e.NewSize.Height);
-                UpdatePortPositions();
             }
+        }
+
+        private void TaskName_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            /* TaskNameの高さが変わった(ノード形状が変わった)ので、ポート位置を再計算 */
+            UpdatePortPositions();
+
+            if (DataContext is NodeViewModel node)
+            {
+                node.UpdateAllPortPositions();
+            }
+
+            var editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
+            editorVM?.Connections.UpdateAllConnections();
         }
     }
 }

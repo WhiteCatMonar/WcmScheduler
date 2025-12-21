@@ -7,6 +7,49 @@ namespace MainApplication.ViewModels
 {
     public class ConnectionViewModel : INotifyPropertyChanged
     {
+        private readonly NodeEditorViewModel _editor;
+
+        public ConnectionViewModel(PortViewModel from, PortViewModel to, NodeEditorViewModel editor)
+        {
+            FromPort = from;
+            ToPort = to;
+            _editor = editor;
+
+            /* 初期値を設定 */
+            FromPosition = FromPort?.AbsolutePosition ?? new Point(0, 0);
+            ToPosition = ToPort?.AbsolutePosition ?? new Point(0, 0);
+
+            /* 座標更新を監視 */
+            FromPort.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(PortViewModel.AbsolutePosition))
+                {
+                    FromPosition = FromPort.AbsolutePosition;
+                }
+            };
+
+            ToPort.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(PortViewModel.AbsolutePosition))
+                {
+                    ToPosition = ToPort.AbsolutePosition;
+                }
+            };
+        }
+
+        /* 論理座標 → 画面座標変換 */
+        private Point ToScreen(Point logical)
+        {
+            double zoom = _editor.Zoom;
+            double panX = _editor.PanX;
+            double panY = _editor.PanY;
+
+            return new Point(
+                logical.X * zoom + panX,
+                logical.Y * zoom + panY
+            );
+        }
+
         private Geometry _connectionGeometry;
         public Geometry ConnectionGeometry
         {
@@ -23,8 +66,9 @@ namespace MainApplication.ViewModels
 
         public void UpdatePathGeometry()
         {
-            var start = FromPosition;
-            var end = ToPosition;
+            /* 論理座標を画面座標に変換 */
+            var start = ToScreen(FromPosition);
+            var end = ToScreen(ToPosition);
 
             double dx = Math.Abs(end.X - start.X) * 0.5;
 
@@ -92,33 +136,6 @@ namespace MainApplication.ViewModels
                     OnPropertyChanged(nameof(IsSelected));
                 }
             }
-        }
-
-        public ConnectionViewModel(PortViewModel from, PortViewModel to)
-        {
-            FromPort = from;
-            ToPort = to;
-
-            /* 初期値を設定 */
-            FromPosition = FromPort?.AbsolutePosition ?? new Point(0, 0);
-            ToPosition = ToPort?.AbsolutePosition ?? new Point(0, 0);
-
-            /* 座標更新を監視 */
-            FromPort.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(PortViewModel.AbsolutePosition))
-                {
-                    FromPosition = FromPort.AbsolutePosition;
-                }
-            };
-
-            ToPort.PropertyChanged += (s, e) =>
-            {
-                if (e.PropertyName == nameof(PortViewModel.AbsolutePosition))
-                {
-                    ToPosition = ToPort.AbsolutePosition;
-                }
-            };
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

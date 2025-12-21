@@ -19,7 +19,7 @@ namespace MainApplication.ViewModels
 
         public NodeEditorViewModel()
         {
-            Connections = new ConnectionCollectionViewModel(UndoRedo);
+            Connections = new ConnectionCollectionViewModel(UndoRedo, this);
 
             AddNodeCommand = new RelayCommand(AddNode);
             DeleteSelectedNodeCommand = new RelayCommand(DeleteSelectedNode, () => SelectedNode != null);
@@ -169,6 +169,49 @@ namespace MainApplication.ViewModels
         }
 
         /* 座標関係処理 */
+
+        /* ズーム・パン状態（View から更新され、接続線などが利用する） */
+        private double _zoom = 1.0;
+        public double Zoom
+        {
+            get => _zoom;
+            set
+            {
+                if (Math.Abs(_zoom - value) > double.Epsilon)
+                {
+                    _zoom = value;
+                    OnPropertyChanged(nameof(Zoom));
+                }
+            }
+        }
+
+        private double _panX = 0.0;
+        public double PanX
+        {
+            get => _panX;
+            set
+            {
+                if (Math.Abs(_panX - value) > double.Epsilon)
+                {
+                    _panX = value;
+                    OnPropertyChanged(nameof(PanX));
+                }
+            }
+        }
+
+        private double _panY = 0.0;
+        public double PanY
+        {
+            get => _panY;
+            set
+            {
+                if (Math.Abs(_panY - value) > double.Epsilon)
+                {
+                    _panY = value;
+                    OnPropertyChanged(nameof(PanY));
+                }
+            }
+        }
 
         /* NodeEditorArea(表示領域) */
         private double _baseCanvasWidth = 200;

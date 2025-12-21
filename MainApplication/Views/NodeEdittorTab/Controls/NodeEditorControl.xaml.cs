@@ -96,6 +96,11 @@ namespace MainApplication.Views.NodeEditorTab
                 vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / ZoomTransform.ScaleY;
                 vm.Connections.CanvasViewLogicalWidth = vm.ZoomedCanvasWidth;
                 vm.Connections.CanvasViewLogicalHeight = vm.ZoomedCanvasHeight;
+                
+                /* ViewModelにZoom/Panを反映 */
+                vm.Zoom = ZoomTransform.ScaleX;
+                vm.PanX = PanTransform.X;
+                vm.PanY = PanTransform.Y;
 
                 vm.UpdateGrid(
                     PanTransform.X,
@@ -136,6 +141,11 @@ namespace MainApplication.Views.NodeEditorTab
                 PanTransform.X = PanTransform.X + zoomedDeltaX;
                 PanTransform.Y = PanTransform.Y + zoomedDeltaY;
             }
+            
+            /* ViewModelにZoom/Panを反映 */
+            vm.Zoom = ZoomTransform.ScaleX;
+            vm.PanX = PanTransform.X;
+            vm.PanY = PanTransform.Y;
 
             /* ズーム後サイズを更新 */
             vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / ZoomTransform.ScaleX;
@@ -176,6 +186,11 @@ namespace MainApplication.Views.NodeEditorTab
 
                 PanTransform.X += delta.X;
                 PanTransform.Y += delta.Y;
+                
+                /* ViewModelにPanを反映 */
+                vm.PanX = PanTransform.X;
+                vm.PanY = PanTransform.Y;
+
                 vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / ZoomTransform.ScaleX;
                 vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / ZoomTransform.ScaleY;
                 /* グリッド更新 */

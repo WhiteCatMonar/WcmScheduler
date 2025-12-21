@@ -16,47 +16,60 @@
         Background="{Binding IsSelected, Converter={StaticResource SelectionBrushConverter}}"
         BorderBrush="DarkBlue" BorderThickness="2" CornerRadius="5"
         MouseLeftButtonDown="NodeBorder_MouseLeftButtonDown">
-        <StackPanel>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <!-- TaskName -->
+                <RowDefinition Height="Auto"/>
+                <!-- InputPorts -->
+                <RowDefinition Height="Auto"/>
+                <!-- OutputPorts -->
+            </Grid.RowDefinitions>
+
             <!-- タスク名 -->
-            <TextBlock Text="{Binding TaskName}"
+            <TextBlock Grid.Row="0"
+                       Text="{Binding TaskName}"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Top"
                        TextWrapping="Wrap"
-                       TextAlignment="Center"/>
+                       TextAlignment="Center"
+                       SizeChanged="TaskName_SizeChanged"/>
 
             <!-- 入力ポート -->
-            <ItemsControl ItemsSource="{Binding InputPorts}">
+            <ItemsControl Grid.Row="1"
+                          ItemsSource="{Binding InputPorts}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid HorizontalAlignment="Left">
+                        <Grid Margin="0,2,0,2" HorizontalAlignment="Left">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <controls:PortControl Margin="2" Grid.Column="0"/>
-                            <TextBlock Text="{Binding Name}" Margin="0,0,0,5" Grid.Column="1"/>
+                            <controls:PortControl Grid.Column="0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding Name}" Grid.Column="1" Margin="4,0,0,0"/>
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
             <!-- 出力ポート -->
-            <ItemsControl ItemsSource="{Binding OutputPorts}">
+            <ItemsControl Grid.Row="2"
+                          ItemsSource="{Binding OutputPorts}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Grid HorizontalAlignment="Right">
+                        <Grid Margin="0,2,0,2" HorizontalAlignment="Right">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="{Binding Name}" Margin="0,0,0,5" Grid.Column="0"/>
-                            <controls:PortControl Margin="2" Grid.Column="1"/>
+                            <TextBlock Text="{Binding Name}" Grid.Column="0" Margin="0,0,4,0"/>
+                            <controls:PortControl Grid.Column="1" VerticalAlignment="Center"/>
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </StackPanel>
+        </Grid>
     </Border>
 </UserControl>
