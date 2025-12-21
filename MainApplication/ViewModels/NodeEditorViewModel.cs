@@ -320,17 +320,50 @@ namespace MainApplication.ViewModels
             /* 描画範囲(origin から width+origin まで) */
             double endX = _gridOriginX + width + spacing;
             double endY = _gridOriginY + height + spacing;
+            
+            double actualSpacing = spacing * Zoom;
+            bool isShowSubGrid = actualSpacing >= 8; /* ズーム後のピクセル間隔が8px以上なら補助線表示 */
+
 
             /* 垂直線 */
             for (double x = _gridOriginX; x < endX; x += spacing)
             {
-                GridLines.Add(new LineViewModel { X1 = x, Y1 = _gridOriginY, X2 = x, Y2 = endY });
+                bool isMajor = ((int)(x / spacing) % 10 == 0);
+
+                if (!isMajor && !isShowSubGrid)
+                {
+                    continue; // ★ 補助線は描画しない
+                }
+
+                GridLines.Add(new LineViewModel
+                {
+                    X1 = x,
+                    Y1 = _gridOriginY,
+                    X2 = x,
+                    Y2 = endY,
+                    IsMajor = isMajor
+
+                });
             }
 
             /* 水平線 */
             for (double y = _gridOriginY; y < endY; y += spacing)
             {
-                GridLines.Add(new LineViewModel { X1 = _gridOriginX, Y1 = y, X2 = endX, Y2 = y });
+                bool isMajor = ((int)(y / spacing) % 10 == 0);
+
+                if (!isMajor && !isShowSubGrid)
+                {
+                    continue;
+                }
+
+                GridLines.Add(new LineViewModel
+                {
+                    X1 = _gridOriginX,
+                    Y1 = y,
+                    X2 = endX,
+                    Y2 = y,
+                    IsMajor = isMajor
+                });
             }
 
             /* 表示中座標更新 */
