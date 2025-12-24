@@ -308,8 +308,8 @@ namespace MainApplication.ViewModels
             GridLines.Clear();
 
             /* キャンバスの原点位置に対応する論理座標を記録 */
-            _canvasViewOriginX = -originX;
-            _canvasViewOriginY = -originY;
+            _canvasViewOriginX = originX;
+            _canvasViewOriginY = originY;
             Connections.CanvasViewOriginX = _canvasViewOriginX;
             Connections.CanvasViewOriginY = _canvasViewOriginY;
 

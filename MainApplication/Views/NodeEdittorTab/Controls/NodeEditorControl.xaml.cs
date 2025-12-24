@@ -110,17 +110,23 @@ namespace MainApplication.Views.NodeEditorTab
                 vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
                 vm.Connections.CanvasViewLogicalWidth = vm.ZoomedCanvasWidth;
                 vm.Connections.CanvasViewLogicalHeight = vm.ZoomedCanvasHeight;
-                
+
                 /* ViewModelにZoom/Panを反映 */
                 vm.Zoom = Zoom;
                 vm.PanX = PanTransform.X;
                 vm.PanY = PanTransform.Y;
 
+                /* 論理座標に変換 */
+                double viewOriginLogicalX = -PanTransform.X / Zoom;
+                double viewOriginLogicalY = -PanTransform.Y / Zoom;
+                double viewWidthLogical = vm.BaseCanvasWidth / Zoom;
+                double viewHeightLogical = vm.BaseCanvasHeight / Zoom;
+
                 vm.UpdateGrid(
-                    PanTransform.X,
-                    PanTransform.Y,
-                    vm.BaseCanvasWidth,
-                    vm.BaseCanvasHeight,
+                    viewOriginLogicalX,
+                    viewOriginLogicalY,
+                    viewWidthLogical,
+                    viewHeightLogical,
                     vm.GridSpacing
                 );
             }
@@ -137,14 +143,14 @@ namespace MainApplication.Views.NodeEditorTab
             }
 
             double zoomFactor = e.Delta > 0 ? 1.1 : 0.9;
-            
+
             /* ズーム値を計算（制限付き） */
             double limitedZoom = Zoom * zoomFactor;
             limitedZoom = Math.Max(MinZoom, Math.Min(MaxZoom, limitedZoom));
 
             /* 実際に適用された倍率（中心補正に必要） */
             double appliedFactor = limitedZoom / Zoom;
-            
+
             Zoom = limitedZoom;
 
             /* ズーム中心をマウス位置に合わせる */
@@ -159,7 +165,7 @@ namespace MainApplication.Views.NodeEditorTab
                 PanTransform.X += deltaX - (deltaX * appliedFactor);
                 PanTransform.Y += deltaY - (deltaY * appliedFactor);
             }
-            
+
             /* ViewModelにZoom/Panを反映 */
             vm.Zoom = ZoomTransform.ScaleX;
             vm.PanX = PanTransform.X;
@@ -169,13 +175,19 @@ namespace MainApplication.Views.NodeEditorTab
             vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / Zoom;
             vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
 
+            /* 論理座標に変換 */
+            double viewOriginLogicalX = -PanTransform.X / Zoom;
+            double viewOriginLogicalY = -PanTransform.Y / Zoom;
+            double viewWidthLogical = vm.BaseCanvasWidth / Zoom;
+            double viewHeightLogical = vm.BaseCanvasHeight / Zoom;
+
             /* グリッド更新 */
             vm.UpdateGrid(
-                PanTransform.X / Zoom,
-                PanTransform.Y / Zoom,
-                vm.ZoomedCanvasWidth,
-                vm.ZoomedCanvasHeight,
-                vm.GridSpacing * Zoom
+                viewOriginLogicalX,
+                viewOriginLogicalY,
+                viewWidthLogical,
+                viewHeightLogical,
+                vm.GridSpacing
             );
         }
 
@@ -204,20 +216,27 @@ namespace MainApplication.Views.NodeEditorTab
 
                 PanTransform.X += delta.X;
                 PanTransform.Y += delta.Y;
-                
+
                 /* ViewModelにPanを反映 */
                 vm.PanX = PanTransform.X;
                 vm.PanY = PanTransform.Y;
 
                 vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / Zoom;
                 vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
+
+                /* 論理座標に変換 */
+                double viewOriginLogicalX = -PanTransform.X / Zoom;
+                double viewOriginLogicalY = -PanTransform.Y / Zoom;
+                double viewWidthLogical = vm.BaseCanvasWidth / Zoom;
+                double viewHeightLogical = vm.BaseCanvasHeight / Zoom;
+
                 /* グリッド更新 */
                 vm.UpdateGrid(
-                    PanTransform.X / Zoom,
-                    PanTransform.Y / Zoom,
-                    vm.ZoomedCanvasWidth,
-                    vm.ZoomedCanvasHeight,
-                    vm.GridSpacing * Zoom
+                    viewOriginLogicalX,
+                    viewOriginLogicalY,
+                    viewWidthLogical,
+                    viewHeightLogical,
+                    vm.GridSpacing
                 );
             }
         }
