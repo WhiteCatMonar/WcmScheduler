@@ -100,35 +100,45 @@ namespace MainApplication.Views.NodeEditorTab
             return null;
         }
 
+        private void UpdateViewModelStateAndGrid(NodeEditorViewModel vm)
+        {
+            /* ViewModel に Zoom / Pan を反映 */
+            vm.Zoom = Zoom;
+            vm.PanX = PanTransform.X;
+            vm.PanY = PanTransform.Y;
+
+            /* ズーム後の論理サイズ */
+            vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / Zoom;
+            vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
+
+            vm.Connections.CanvasViewLogicalWidth = vm.ZoomedCanvasWidth;
+            vm.Connections.CanvasViewLogicalHeight = vm.ZoomedCanvasHeight;
+
+            /* 表示領域の論理座標 */
+            double viewOriginLogicalX = -PanTransform.X / Zoom;
+            double viewOriginLogicalY = -PanTransform.Y / Zoom;
+
+            double viewWidthLogical = vm.BaseCanvasWidth / Zoom;
+            double viewHeightLogical = vm.BaseCanvasHeight / Zoom;
+
+            /* グリッド更新 */
+            vm.UpdateGrid(
+                viewOriginLogicalX,
+                viewOriginLogicalY,
+                viewWidthLogical,
+                viewHeightLogical,
+                vm.GridSpacing
+            );
+        }
+
         private void NodeEditorArea_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (DataContext is NodeEditorViewModel vm)
             {
                 vm.BaseCanvasWidth = e.NewSize.Width;
                 vm.BaseCanvasHeight = e.NewSize.Height;
-                vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / Zoom;
-                vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
-                vm.Connections.CanvasViewLogicalWidth = vm.ZoomedCanvasWidth;
-                vm.Connections.CanvasViewLogicalHeight = vm.ZoomedCanvasHeight;
 
-                /* ViewModelにZoom/Panを反映 */
-                vm.Zoom = Zoom;
-                vm.PanX = PanTransform.X;
-                vm.PanY = PanTransform.Y;
-
-                /* 論理座標に変換 */
-                double viewOriginLogicalX = -PanTransform.X / Zoom;
-                double viewOriginLogicalY = -PanTransform.Y / Zoom;
-                double viewWidthLogical = vm.BaseCanvasWidth / Zoom;
-                double viewHeightLogical = vm.BaseCanvasHeight / Zoom;
-
-                vm.UpdateGrid(
-                    viewOriginLogicalX,
-                    viewOriginLogicalY,
-                    viewWidthLogical,
-                    viewHeightLogical,
-                    vm.GridSpacing
-                );
+                UpdateViewModelStateAndGrid(vm);
             }
         }
 
@@ -150,7 +160,6 @@ namespace MainApplication.Views.NodeEditorTab
 
             /* 実際に適用された倍率（中心補正に必要） */
             double appliedFactor = limitedZoom / Zoom;
-
             Zoom = limitedZoom;
 
             /* ズーム中心をマウス位置に合わせる */
@@ -166,29 +175,7 @@ namespace MainApplication.Views.NodeEditorTab
                 PanTransform.Y += deltaY - (deltaY * appliedFactor);
             }
 
-            /* ViewModelにZoom/Panを反映 */
-            vm.Zoom = ZoomTransform.ScaleX;
-            vm.PanX = PanTransform.X;
-            vm.PanY = PanTransform.Y;
-
-            /* ズーム後サイズを更新 */
-            vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / Zoom;
-            vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
-
-            /* 論理座標に変換 */
-            double viewOriginLogicalX = -PanTransform.X / Zoom;
-            double viewOriginLogicalY = -PanTransform.Y / Zoom;
-            double viewWidthLogical = vm.BaseCanvasWidth / Zoom;
-            double viewHeightLogical = vm.BaseCanvasHeight / Zoom;
-
-            /* グリッド更新 */
-            vm.UpdateGrid(
-                viewOriginLogicalX,
-                viewOriginLogicalY,
-                viewWidthLogical,
-                viewHeightLogical,
-                vm.GridSpacing
-            );
+            UpdateViewModelStateAndGrid(vm);
         }
 
         private void NodeEditorCanvas_MouseDown(object sender, MouseButtonEventArgs e)
@@ -217,27 +204,7 @@ namespace MainApplication.Views.NodeEditorTab
                 PanTransform.X += delta.X;
                 PanTransform.Y += delta.Y;
 
-                /* ViewModelにPanを反映 */
-                vm.PanX = PanTransform.X;
-                vm.PanY = PanTransform.Y;
-
-                vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / Zoom;
-                vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
-
-                /* 論理座標に変換 */
-                double viewOriginLogicalX = -PanTransform.X / Zoom;
-                double viewOriginLogicalY = -PanTransform.Y / Zoom;
-                double viewWidthLogical = vm.BaseCanvasWidth / Zoom;
-                double viewHeightLogical = vm.BaseCanvasHeight / Zoom;
-
-                /* グリッド更新 */
-                vm.UpdateGrid(
-                    viewOriginLogicalX,
-                    viewOriginLogicalY,
-                    viewWidthLogical,
-                    viewHeightLogical,
-                    vm.GridSpacing
-                );
+                UpdateViewModelStateAndGrid(vm);
             }
         }
 
