@@ -24,8 +24,8 @@
         </DataTemplate>
 
         <!-- タスク詳細用テンプレート -->
-        <DataTemplate x:Key="NodeDetailTemplate" DataType="{x:Type vm:NodeViewModel}">
-            <views:NodeDetailControl />
+        <DataTemplate x:Key="NodeDetailTemplate">
+            <views:NodeDetailControl DataContext="{Binding}" />
         </DataTemplate>
 
         <!-- TemplateSelector に渡す -->
@@ -37,7 +37,7 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <!-- サイドパネル -->
-            <ColumnDefinition Width="200"  MinWidth="320"/>
+            <ColumnDefinition Width="320"  MinWidth="320"/>
             <!-- セパレータ -->
             <ColumnDefinition Width="Auto"/>
             <!-- ノードエディタ領域 -->
@@ -61,19 +61,18 @@
                            FontWeight="Bold"
                            Margin="0,0,0,5"/>
                 <Button Content="タスク追加"
-                        Command="{Binding AddNodeCommand}"
+                        Command="{Binding Nodes.AddNodeCommand}"
                         Margin="0,0,0,5"/>
                 <Button Content="選択タスク削除"
-                        Command="{Binding DeleteSelectedNodeCommand}"
+                        Command="{Binding Nodes.DeleteSelectedNodeCommand}"
                         Focusable="False"/>
             </StackPanel>
 
             <!-- 動的UI：タスク情報 -->
             <StackPanel Grid.Row="1" Margin="5">
                 <TextBlock Text="タスク情報" FontWeight="Bold" Margin="0,0,0,5"/>
-                <ContentControl Content="{Binding SelectedNode}"
-                            ContentTemplateSelector="{StaticResource NodeDetailTemplateSelector}"
-                            Margin="5"/>
+                <ContentControl Content="{Binding Nodes.SelectedNode}"
+                            ContentTemplateSelector="{StaticResource NodeDetailTemplateSelector}"/>
             </StackPanel>
             
             <!-- 固定UI：履歴操作 -->

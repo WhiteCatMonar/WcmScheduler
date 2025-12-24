@@ -20,10 +20,15 @@ namespace MainApplication.ViewModels.Actions
         public void Undo()
         {
             _connections.Add(_connection);
+            _connection.FromPort.ConnectedConnections.Add(_connection);
+            _connection.ToPort.ConnectedConnections.Add(_connection);
+
         }
 
         public void Redo()
         {
+            _connection.ToPort.ConnectedConnections.Remove(_connection);
+            _connection.FromPort.ConnectedConnections.Remove(_connection);
             _connections.Remove(_connection);
         }
     }

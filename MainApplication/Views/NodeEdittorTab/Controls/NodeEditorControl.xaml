@@ -34,6 +34,7 @@
                     Background="White"
                     Width="{Binding BaseCanvasWidth}"
                     Height="{Binding BaseCanvasHeight}"
+                    Focusable="True"
                     PreviewMouseDown="NodeEditorCanvas_PreviewMouseDown"
                     MouseWheel="NodeEditorCanvas_MouseWheel"
                     MouseDown="NodeEditorCanvas_MouseDown"
@@ -41,7 +42,8 @@
                     MouseUp="NodeEditorCanvas_MouseUp">
 
                 <!-- ズーム・パンは ContentRoot にのみ適用 -->
-                <Canvas x:Name="ContentRoot" Background="{x:Null}">
+                <Canvas x:Name="ContentRoot"
+                        Background="{x:Null}">
                     <Canvas.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform x:Name="ZoomTransform" ScaleX="1" ScaleY="1"/>
@@ -53,7 +55,7 @@
                     <ItemsControl ItemsSource="{Binding GridLines}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <Canvas />
+                                <Canvas IsHitTestVisible="False" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
@@ -102,13 +104,17 @@
                     <ItemsControl ItemsSource="{Binding Connections.Connections}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <Canvas />
+                                <Canvas/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:ConnectionViewModel}">
-                                <Path StrokeThickness="2">
+                                <Path StrokeThickness="2"
+                                      SnapsToDevicePixels="True"
+                                      StrokeStartLineCap="Round"
+                                      StrokeEndLineCap="Round"
+                                      IsHitTestVisible="True">
                                     <Path.Style>
                                         <Style TargetType="Path">
                                             <Setter Property="Stroke" Value="Black"/>
@@ -155,7 +161,7 @@
                     </ItemsControl>
 
                     <!-- 仮接続線 -->
-                    <Path Stroke="Gray" StrokeDashArray="2,2" StrokeThickness="2"
+                    <Path Stroke="Gray" StrokeDashArray="2,2" StrokeThickness="2" IsHitTestVisible="False"
                           Visibility="{Binding Connections.IsDraggingConnection, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Path.Data>
                             <PathGeometry>
@@ -169,7 +175,7 @@
                     </Path>
 
                     <!-- ノード -->
-                    <ItemsControl ItemsSource="{Binding Nodes}">
+                    <ItemsControl ItemsSource="{Binding Nodes.Nodes}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <Canvas />

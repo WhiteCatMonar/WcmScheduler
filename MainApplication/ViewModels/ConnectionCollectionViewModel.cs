@@ -3,10 +3,9 @@ using MainApplication.ViewModels.Infrastructure;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Net;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
+using System.Linq;
 
 namespace MainApplication.ViewModels
 {
@@ -26,6 +25,17 @@ namespace MainApplication.ViewModels
 
         /* 接続線一覧 */
         public ObservableCollection<ConnectionViewModel> Connections { get; } = new ObservableCollection<ConnectionViewModel>();
+
+        public void UpdateConnectionsForNode(NodeViewModel node)
+        {
+            foreach (var port in node.AllPorts)
+            {
+                foreach (var conn in port.ConnectedConnections)
+                {
+                    conn.UpdatePathGeometry();
+                }
+            }
+        }
 
         public void UpdateAllConnections()
         {
@@ -89,9 +99,26 @@ namespace MainApplication.ViewModels
         /* 接続線作成 */
         public void CreateConnection(PortViewModel fromPort, PortViewModel toPort)
         {
-            if (fromPort == null || toPort == null) return;
+            if (fromPort == null || toPort == null)
+            {
+                return;
+            }
+
+            if (fromPort == toPort)
+            {
+                return; /* 自己接続禁止 */
+            }
+
+            if (fromPort.ParentNode == toPort.ParentNode)
+            {
+                return; /* 同一ノード内禁止 */
+            }
 
             var connection = new ConnectionViewModel(fromPort, toPort, _editor);
+
+            fromPort.ConnectedConnections.Add(connection);
+            toPort.ConnectedConnections.Add(connection);
+
             var action = new AddConnectionAction(Connections, connection);
             _undoRedo.Execute(action);
         }
@@ -156,6 +183,7 @@ namespace MainApplication.ViewModels
                 if (_canvasViewLogicalWidth != value)
                 {
                     _canvasViewLogicalWidth = value;
+                    OnPropertyChanged(nameof(CanvasViewLogicalWidth));
                 }
             }
         }
@@ -169,6 +197,7 @@ namespace MainApplication.ViewModels
                 if (_canvasViewLogicalHeight != value)
                 {
                     _canvasViewLogicalHeight = value;
+                    OnPropertyChanged(nameof(CanvasViewLogicalHeight));
                 }
             }
         }
@@ -183,6 +212,7 @@ namespace MainApplication.ViewModels
                 if (_canvasViewOriginX != value)
                 {
                     _canvasViewOriginX = value;
+                    OnPropertyChanged(nameof(CanvasViewOriginX));
                 }
             }
         }
@@ -196,6 +226,7 @@ namespace MainApplication.ViewModels
                 if (_canvasViewOriginY != value)
                 {
                     _canvasViewOriginY = value;
+                    OnPropertyChanged(nameof(CanvasViewOriginY));
                 }
             }
         }

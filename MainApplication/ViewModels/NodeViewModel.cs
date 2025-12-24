@@ -2,6 +2,7 @@
 using MainApplication.ViewModels.Infrastructure;
 using MainApplication.Views;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -329,6 +330,7 @@ namespace MainApplication.ViewModels
 
         public ObservableCollection<PortViewModel> InputPorts { get; } = new ObservableCollection<PortViewModel>();
         public ObservableCollection<PortViewModel> OutputPorts { get; } = new ObservableCollection<PortViewModel>();
+        public IEnumerable<PortViewModel> AllPorts => InputPorts.Concat(OutputPorts);
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged(string name) =>

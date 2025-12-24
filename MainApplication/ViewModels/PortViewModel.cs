@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows;
 
 namespace MainApplication.ViewModels
@@ -6,6 +7,7 @@ namespace MainApplication.ViewModels
     public class PortViewModel : INotifyPropertyChanged
     {
         public enum PortType { Input, Output }
+        public List<ConnectionViewModel> ConnectedConnections { get; } = new List<ConnectionViewModel>();
 
         private string _name;
         public string Name

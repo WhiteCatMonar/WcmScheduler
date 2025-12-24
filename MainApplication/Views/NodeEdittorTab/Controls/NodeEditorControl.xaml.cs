@@ -11,7 +11,7 @@ using System.Windows.Shapes;
 namespace MainApplication.Views.NodeEditorTab
 {
     /// <summary>
-    /// NodeEditor.xaml の相互作用ロジック
+    /// NodeEditorControl.xaml の相互作用ロジック
     /// </summary>
     public partial class NodeEditorControl : UserControl
     {
@@ -59,34 +59,27 @@ namespace MainApplication.Views.NodeEditorTab
             }
 
             var node = FindParent<NodeControl>(clickedElement);
-            var port = FindParent<PortControl>(clickedElement);
             var connectionPath = FindParent<Path>(clickedElement);
-
-            if (DataContext is NodeEditorViewModel nevm)
-            {
-                if (node == null)
-                {
-                    nevm.UnselectNode();
-                }
-            }
 
             if (DataContext is NodeEditorViewModel vm)
             {
-                /* 接続線をクリックした場合は UnselectConnection しない */
-                if (connectionPath != null)
+                /* ポートを選択した場合はnodeとconnectionPathの両方がnullになる */
+                
+                /* ノード以外をクリックした場合はノードの選択を解除 */
+                if (node == null)
                 {
-                    return;
+                    vm.Nodes.UnselectNode();
                 }
 
-                /* ポートでも接続線でもない場合だけ解除 */
-                if (port == null)
+                /* 接続線以外をクリックした場合は接続線の選択を解除 */
+                if (connectionPath == null)
                 {
                     vm.Connections.UnselectConnection();
                 }
             }
         }
 
-        private T FindParent<T>(DependencyObject child) where T : DependencyObject
+        private static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             while (child != null)
             {
@@ -178,13 +171,24 @@ namespace MainApplication.Views.NodeEditorTab
             UpdateViewModelStateAndGrid(vm);
         }
 
+        private void StartPanning(Point startPoint)
+        {
+            _isPanning = true;
+            _lastPanPoint = startPoint;
+            NodeEditorCanvas.CaptureMouse();
+        }
+        
+        private void EndPanning()
+        {
+            _isPanning = false;
+            NodeEditorCanvas.ReleaseMouseCapture();
+        }
+
         private void NodeEditorCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.MiddleButton == MouseButtonState.Pressed)
             {
-                _isPanning = true;
-                _lastPanPoint = e.GetPosition(NodeEditorCanvas);
-                NodeEditorCanvas.CaptureMouse();
+                StartPanning(e.GetPosition(NodeEditorCanvas));
             }
         }
 
@@ -210,8 +214,10 @@ namespace MainApplication.Views.NodeEditorTab
 
         private void NodeEditorCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            _isPanning = false;
-            NodeEditorCanvas.ReleaseMouseCapture();
+            if (e.MiddleButton == MouseButtonState.Released)
+            {
+                EndPanning();
+            }
         }
     }
 }
