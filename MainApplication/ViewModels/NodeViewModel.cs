@@ -328,6 +328,26 @@ namespace MainApplication.ViewModels
             }
         }
 
+        public void CommitEdits()
+        {
+            if (OldTaskName != TaskName)
+            {
+                CommitHistory("TaskName", OldTaskName, TaskName);
+                OldTaskName = TaskName;
+            }
+            if (OldPerson != Person)
+            {
+                CommitHistory("Person", OldPerson, Person);
+                OldPerson = Person;
+            }
+            if (OldComment != Comment)
+            {
+                CommitHistory("Comment", OldComment, Comment);
+                OldComment = Comment;
+            }
+        }
+
+
         public ObservableCollection<PortViewModel> InputPorts { get; } = new ObservableCollection<PortViewModel>();
         public ObservableCollection<PortViewModel> OutputPorts { get; } = new ObservableCollection<PortViewModel>();
         public IEnumerable<PortViewModel> AllPorts => InputPorts.Concat(OutputPorts);

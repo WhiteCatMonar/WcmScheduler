@@ -36,6 +36,11 @@ namespace MainApplication.Views.NodeEditorTab
 
         private void NodeEditorCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (DataContext is NodeEditorViewModel editor)
+            {
+                editor.Nodes.SelectedNode?.CommitEdits();
+            }
+
             var clickedElement = e.OriginalSource as DependencyObject;
 
             if (clickedElement is TextBoxBase)

@@ -19,7 +19,7 @@
                        Text="{Binding ., Converter={StaticResource DisplayNameConverter}, ConverterParameter=TaskName}"
                        FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
             <TextBox DockPanel.Dock="Left" Text="{Binding TaskName, UpdateSourceTrigger=propertychanged}" Margin="0,0,0,5"
-                     LostFocus="TextBox_LostFocus" TextChanged="TextBox_TextChanged"
+                     TextChanged="TextBox_TextChanged"
                      AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
                      MaxHeight="100" VerticalAlignment="Top"/>
         </DockPanel>
@@ -28,7 +28,7 @@
                        Text="{Binding ., Converter={StaticResource DisplayNameConverter}, ConverterParameter=Person}"
                        FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
             <TextBox DockPanel.Dock="Left" Text="{Binding Person, UpdateSourceTrigger=propertychanged}" Margin="0,0,0,5"
-                     LostFocus="TextBox_LostFocus" TextChanged="TextBox_TextChanged"/>
+                     TextChanged="TextBox_TextChanged"/>
         </DockPanel>
         <DockPanel LastChildFill="True">
             <Button DockPanel.Dock="Right" Content="編集" Command="{Binding EditStartDateTimeCommand}" Width="40"/>
@@ -55,7 +55,7 @@
                        Text="{Binding ., Converter={StaticResource DisplayNameConverter}, ConverterParameter=Comment}"
                        FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
             <TextBox DockPanel.Dock="Left" Text="{Binding Comment, UpdateSourceTrigger=propertychanged}" Margin="0,0,0,5"
-                     LostFocus="TextBox_LostFocus" TextChanged="TextBox_TextChanged"
+                     TextChanged="TextBox_TextChanged"
                      AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
                      MaxHeight="100" VerticalAlignment="Top"/>
         </DockPanel>

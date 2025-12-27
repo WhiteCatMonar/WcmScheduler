@@ -3,6 +3,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+
 namespace MainApplication.Views.NodeEditorTab
 {
     /// <summary>
@@ -19,29 +20,12 @@ namespace MainApplication.Views.NodeEditorTab
                 Interval = TimeSpan.FromSeconds(5)
             };
             _historyTimer.Tick += HistoryTimer_Tick;
+            this.DataContextChanged += NodeDetailControl_DataContextChanged;
         }
 
-        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        private void NodeDetailControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            if (DataContext is NodeViewModel node)
-            {
-                // 履歴に追加する処理
-                if (node.OldTaskName != node.TaskName)
-                {
-                    node.CommitHistory("TaskName", node.OldTaskName, node.TaskName);
-                    node.OldTaskName = node.TaskName;
-                }
-                if (node.OldPerson != node.Person)
-                {
-                    node.CommitHistory("Person", node.OldPerson, node.Person);
-                    node.OldPerson = node.Person;
-                }
-                if (node.OldComment != node.Comment)
-                {
-                    node.CommitHistory("Comment", node.OldComment, node.Comment);
-                    node.OldComment = node.Comment;
-                }
-            }
+            (e.OldValue as NodeViewModel)?.CommitEdits();
         }
 
         private void TextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -56,24 +40,8 @@ namespace MainApplication.Views.NodeEditorTab
 
             if (DataContext is NodeViewModel node)
             {
-                // 履歴に追加する処理
-                if (node.OldTaskName != node.TaskName)
-                {
-                    node.CommitHistory("TaskName", node.OldTaskName, node.TaskName);
-                    node.OldTaskName = node.TaskName;
-                }
-                if (node.OldPerson != node.Person)
-                {
-                    node.CommitHistory("Person", node.Person, node.Person);
-                    node.OldPerson = node.Person;
-                }
-                if (node.OldComment != node.Comment)
-                {
-                    node.CommitHistory("Comment", node.Comment, node.Comment);
-                    node.OldComment = node.Comment;
-                }
+                node.CommitEdits();
             }
         }
-
     }
 }
