@@ -1,5 +1,4 @@
-﻿using MainApplication.ViewModels.Actions;
-using MainApplication.ViewModels.Infrastructure;
+﻿using MainApplication.ViewModels.Infrastructure;
 using System;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -105,7 +104,12 @@ namespace MainApplication.ViewModels
             Nodes.UpdateAllNodes();
             Connections.UpdateAllConnections();
         }
-        
+
+        public void CommitCurrentNodeEdits()
+        {
+            Nodes.SelectedNode?.CommitEdits();
+        }
+
         /* ---------------------------------------------------------
          * 操作履歴管理
          * --------------------------------------------------------- */

@@ -38,7 +38,7 @@ namespace MainApplication.Views.NodeEditorTab
         {
             if (DataContext is NodeEditorViewModel editor)
             {
-                editor.Nodes.SelectedNode?.CommitEdits();
+                editor.CommitCurrentNodeEdits();
             }
 
             var clickedElement = e.OriginalSource as DependencyObject;
