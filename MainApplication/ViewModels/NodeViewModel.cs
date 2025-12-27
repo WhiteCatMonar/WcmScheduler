@@ -8,12 +8,14 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace MainApplication.ViewModels
 {
     public class NodeViewModel : INotifyPropertyChanged
     {
         private readonly UndoRedoManager _undoRedo;
+        private DispatcherTimer _editTimer;
 
         public NodeViewModel(UndoRedoManager undoRedo)
         {
@@ -21,6 +23,17 @@ namespace MainApplication.ViewModels
             _nodeGuid = Guid.NewGuid();
             EditStartDateTimeCommand = new RelayCommand(() => EditDateTime(true));
             EditEndDateTimeCommand = new RelayCommand(() => EditDateTime(false));
+            NotifyEditedCommand = new RelayCommand(() => NotifyEdited());
+
+            _editTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(5)
+            };
+            _editTimer.Tick += (s, e) =>
+            {
+                _editTimer.Stop();
+                CommitEdits();
+            };
         }
 
         public void CommitHistory(string propertyName, object oldValue, object newValue)
@@ -347,6 +360,12 @@ namespace MainApplication.ViewModels
             }
         }
 
+        public ICommand NotifyEditedCommand { get; }
+        public void NotifyEdited()
+        {
+            _editTimer.Stop();
+            _editTimer.Start();
+        }
 
         public ObservableCollection<PortViewModel> InputPorts { get; } = new ObservableCollection<PortViewModel>();
         public ObservableCollection<PortViewModel> OutputPorts { get; } = new ObservableCollection<PortViewModel>();
