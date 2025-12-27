@@ -17,6 +17,8 @@ namespace MainApplication.ViewModels
         private readonly UndoRedoManager _undoRedo;
         private DispatcherTimer _editTimer;
 
+        private List<EditableField<string>> _editableFields;
+
         public NodeViewModel(UndoRedoManager undoRedo)
         {
             _undoRedo = undoRedo ?? throw new ArgumentNullException(nameof(undoRedo));
@@ -33,6 +35,13 @@ namespace MainApplication.ViewModels
             {
                 _editTimer.Stop();
                 CommitEdits();
+            };
+
+            _editableFields = new List<EditableField<string>>
+            {
+                new EditableField<string>("TaskName", () => TaskName, v => TaskName = v),
+                new EditableField<string>("Person", () => Person, v => Person = v),
+                new EditableField<string>("Comment", () => Comment, v => Comment = v)
             };
         }
 
@@ -165,21 +174,6 @@ namespace MainApplication.ViewModels
             }
         }
 
-        private string _oldTaskName = $"(New Task)";
-        public string OldTaskName
-        {
-            get => _oldTaskName;
-            set
-            {
-                if (_oldTaskName == value)
-                {
-                    return;
-                }
-                _oldTaskName = value;
-                OnPropertyChanged(nameof(OldTaskName));
-            }
-        }
-
         private string _taskName = $"(New Task)";
         [DisplayName("タスク名")]
         public string TaskName
@@ -193,21 +187,6 @@ namespace MainApplication.ViewModels
                 }
                 _taskName = value;
                 OnPropertyChanged(nameof(TaskName));
-            }
-        }
-
-        private string _oldPerson;
-        public string OldPerson
-        {
-            get => _oldPerson;
-            set
-            {
-                if (_oldPerson == value)
-                {
-                    return;
-                }
-                _oldPerson = value;
-                OnPropertyChanged(nameof(OldPerson));
             }
         }
 
@@ -264,21 +243,6 @@ namespace MainApplication.ViewModels
                 }
                 _endDateTime = value;
                 OnPropertyChanged(nameof(EndDateTime));
-            }
-        }
-
-        private string _oldComment;
-        public string OldComment
-        {
-            get => _oldComment;
-            set
-            {
-                if (_oldComment == value)
-                {
-                    return;
-                }
-                _oldComment = value;
-                OnPropertyChanged(nameof(OldComment));
             }
         }
 
@@ -343,20 +307,9 @@ namespace MainApplication.ViewModels
 
         public void CommitEdits()
         {
-            if (OldTaskName != TaskName)
+            foreach (var field in _editableFields)
             {
-                CommitHistory("TaskName", OldTaskName, TaskName);
-                OldTaskName = TaskName;
-            }
-            if (OldPerson != Person)
-            {
-                CommitHistory("Person", OldPerson, Person);
-                OldPerson = Person;
-            }
-            if (OldComment != Comment)
-            {
-                CommitHistory("Comment", OldComment, Comment);
-                OldComment = Comment;
+                field.TryCommit(CommitHistory);
             }
         }
 
