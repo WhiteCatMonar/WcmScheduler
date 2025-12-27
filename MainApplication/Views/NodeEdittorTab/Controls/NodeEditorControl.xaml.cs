@@ -23,29 +23,14 @@ namespace MainApplication.Views.NodeEditorTab
             InitializeComponent();
         }
 
-        public double Zoom
-        {
-            get => ZoomTransform.ScaleX;
-            set
-            {
-                ZoomTransform.ScaleX = value;
-                ZoomTransform.ScaleY = value;
-            }
-        }
-
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             Keyboard.Focus(this);
 
             if (DataContext is NodeEditorViewModel vm)
             {
-                vm.UpdateGrid(
-                    0,
-                    0,
-                    NodeEditorCanvas.ActualWidth,
-                    NodeEditorCanvas.ActualHeight,
-                    vm.GridSpacing
-                );
+                /* 初期状態を GridManager に反映 */
+                vm.UpdateGridState();
             }
         }
 
@@ -93,45 +78,12 @@ namespace MainApplication.Views.NodeEditorTab
             return null;
         }
 
-        private void UpdateViewModelStateAndGrid(NodeEditorViewModel vm)
-        {
-            /* ViewModel に Zoom / Pan を反映 */
-            vm.Zoom = Zoom;
-            vm.PanX = PanTransform.X;
-            vm.PanY = PanTransform.Y;
-
-            /* ズーム後の論理サイズ */
-            vm.ZoomedCanvasWidth = vm.BaseCanvasWidth / Zoom;
-            vm.ZoomedCanvasHeight = vm.BaseCanvasHeight / Zoom;
-
-            vm.Connections.CanvasViewLogicalWidth = vm.ZoomedCanvasWidth;
-            vm.Connections.CanvasViewLogicalHeight = vm.ZoomedCanvasHeight;
-
-            /* 表示領域の論理座標 */
-            double viewOriginLogicalX = -PanTransform.X / Zoom;
-            double viewOriginLogicalY = -PanTransform.Y / Zoom;
-
-            double viewWidthLogical = vm.BaseCanvasWidth / Zoom;
-            double viewHeightLogical = vm.BaseCanvasHeight / Zoom;
-
-            /* グリッド更新 */
-            vm.UpdateGrid(
-                viewOriginLogicalX,
-                viewOriginLogicalY,
-                viewWidthLogical,
-                viewHeightLogical,
-                vm.GridSpacing
-            );
-        }
-
         private void NodeEditorArea_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (DataContext is NodeEditorViewModel vm)
             {
                 vm.BaseCanvasWidth = e.NewSize.Width;
                 vm.BaseCanvasHeight = e.NewSize.Height;
-
-                UpdateViewModelStateAndGrid(vm);
             }
         }
 
@@ -147,28 +99,25 @@ namespace MainApplication.Views.NodeEditorTab
 
             double zoomFactor = e.Delta > 0 ? 1.1 : 0.9;
 
-            /* ズーム値を計算（制限付き） */
-            double limitedZoom = Zoom * zoomFactor;
-            limitedZoom = Math.Max(MinZoom, Math.Min(MaxZoom, limitedZoom));
+            /* ズーム値を計算(制限付き) */
+            double limitedZoom = Math.Max(MinZoom, Math.Min(MaxZoom, vm.Zoom * zoomFactor));
 
-            /* 実際に適用された倍率（中心補正に必要） */
-            double appliedFactor = limitedZoom / Zoom;
-            Zoom = limitedZoom;
+            /* 実際に適用された倍率(中心補正に必要) */
+            double appliedFactor = limitedZoom / vm.Zoom;
+            vm.Zoom = limitedZoom;
 
             /* ズーム中心をマウス位置に合わせる */
             {
                 var mousePos = e.GetPosition(NodeEditorCanvas);
 
                 /* Canvas論理原点とマウス位置の座標差分を算出 */
-                var deltaX = mousePos.X - PanTransform.X;
-                var deltaY = mousePos.Y - PanTransform.Y;
+                var deltaX = mousePos.X - vm.PanX;
+                var deltaY = mousePos.Y - vm.PanY;
 
                 /* 座標差分から拡縮時にCanvas論理原点が移動する量を算出 */
-                PanTransform.X += deltaX - (deltaX * appliedFactor);
-                PanTransform.Y += deltaY - (deltaY * appliedFactor);
+                vm.PanX += deltaX - (deltaX * appliedFactor);
+                vm.PanY += deltaY - (deltaY * appliedFactor);
             }
-
-            UpdateViewModelStateAndGrid(vm);
         }
 
         private void StartPanning(Point startPoint)
@@ -205,10 +154,8 @@ namespace MainApplication.Views.NodeEditorTab
                 var delta = pos - _lastPanPoint;
                 _lastPanPoint = pos;
 
-                PanTransform.X += delta.X;
-                PanTransform.Y += delta.Y;
-
-                UpdateViewModelStateAndGrid(vm);
+                vm.PanX += delta.X;
+                vm.PanY += delta.Y;
             }
         }
 

@@ -79,7 +79,7 @@ namespace MainApplication.ViewModels
         {
             var node = CreateDefaultNode();
 
-            var initial = ClampPosition(20, 20, node);
+            var initial = _editor.Grid.ClampNodePosition(20, 20, node);
             node.X = initial.X;
             node.Y = initial.Y;
 
@@ -134,7 +134,7 @@ namespace MainApplication.ViewModels
                 return;
             }
 
-            var clamped = ClampPosition(newX, newY, node);
+            var clamped = _editor.Grid.ClampNodePosition(newX, newY, node);
             node.X = clamped.X;
             node.Y = clamped.Y;
         }
@@ -146,111 +146,12 @@ namespace MainApplication.ViewModels
                 return;
             }
 
-            var clamped = ClampPosition(newX, newY, node);
+            var clamped = _editor.Grid.ClampNodePosition(newX, newY, node);
             if ((oldX != clamped.X) || (oldY != clamped.Y))
             {
                 var action = new MoveNodeAction(node, oldX, oldY, clamped.X, clamped.Y);
                 _undoRedo.Execute(action);
             }
-        }
-
-        /* ---------------------------------------------------------
-         * グリッドスナップ
-         * --------------------------------------------------------- */
-        private double _gridSize = 1.0;
-        public double GridSize
-        {
-            get => _gridSize;
-            set
-            {
-                if (_gridSize != value)
-                {
-                    _gridSize = value; 
-                    OnPropertyChanged(nameof(GridSize));
-                }
-            }
-        }
-
-        private double RoundToGrid(double value)
-            => Math.Round(value / GridSize) * GridSize;
-
-        /* ---------------------------------------------------------
-         * Canvas 論理座標
-         * --------------------------------------------------------- */
-        private double _canvasViewLogicalWidth;
-        public double CanvasViewLogicalWidth
-        {
-            get => _canvasViewLogicalWidth;
-            set
-            {
-                if (_canvasViewLogicalWidth != value)
-                {
-                    _canvasViewLogicalWidth = value;
-                    OnPropertyChanged(nameof(CanvasViewLogicalWidth));
-                }
-            }
-        }
-
-        private double _canvasViewLogicalHeight;
-        public double CanvasViewLogicalHeight
-        {
-            get => _canvasViewLogicalHeight;
-            set
-            {
-                if (_canvasViewLogicalHeight != value)
-                {
-                    _canvasViewLogicalHeight = value;
-                    OnPropertyChanged(nameof(CanvasViewLogicalHeight));
-                }
-            }
-        }
-
-        private double _canvasViewOriginX;
-        public double CanvasViewOriginX
-        {
-            get => _canvasViewOriginX;
-            set
-            {
-                if (_canvasViewOriginX != value)
-                {
-                    _canvasViewOriginX = value;
-                    OnPropertyChanged(nameof(CanvasViewOriginX));
-                }
-            }
-        }
-
-        private double _canvasViewOriginY;
-        public double CanvasViewOriginY
-        {
-            get => _canvasViewOriginY;
-            set
-            {
-                if (_canvasViewOriginY != value)
-                {
-                    _canvasViewOriginY = value;
-                    OnPropertyChanged(nameof(CanvasViewOriginY));
-                }
-            }
-        }
-
-        /* ---------------------------------------------------------
-         * 座標クランプ
-         * --------------------------------------------------------- */
-        public Point ClampPosition(double x, double y, NodeViewModel node)
-        {
-            double logicalStartX = CanvasViewOriginX;
-            double logicalStartY = CanvasViewOriginY;
-
-            double logicalEndX = CanvasViewOriginX + CanvasViewLogicalWidth;
-            double logicalEndY = CanvasViewOriginY + CanvasViewLogicalHeight;
-
-            double clampedX = Math.Max(logicalStartX, Math.Min(x, logicalEndX - node.Width));
-            double clampedY = Math.Max(logicalStartY, Math.Min(y, logicalEndY - node.Height));
-
-            clampedX = RoundToGrid(clampedX);
-            clampedY = RoundToGrid(clampedY);
-
-            return new Point(clampedX, clampedY);
         }
 
         /* ---------------------------------------------------------

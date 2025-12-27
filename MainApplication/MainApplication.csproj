@@ -115,6 +115,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ViewModels\DateTimeEditorViewModel.cs" />
+    <Compile Include="ViewModels\Infrastructure\GridManager.cs" />
     <Compile Include="ViewModels\Infrastructure\UndoRedoManager.cs" />
     <Compile Include="ViewModels\LineViewModel.cs" />
     <Compile Include="ViewModels\NodeCollectionViewModel.cs" />

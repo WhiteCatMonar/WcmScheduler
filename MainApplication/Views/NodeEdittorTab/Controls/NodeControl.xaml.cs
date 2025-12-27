@@ -68,8 +68,8 @@ namespace MainApplication.Views.NodeEditorTab.Controls
 
                 _isDragging = true;
 
-                /* Canvas 基準のマウス位置(ズーム・パンの影響を受けない) */
-                _lastMousePos = e.GetPosition(_editor.NodeEditorCanvas);
+                /* Canvas配置エリア基準のマウス位置(ズーム・パンの影響を受けない) */
+                _lastMousePos = e.GetPosition(_editor.NodeEditorArea);
 
                 /* Undo/Redo 用に開始位置を記録 */
                 _startX = node.X;
@@ -91,15 +91,15 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 _lastMousePos = current;
 
                 /* ズーム倍率を考慮して論理座標系に変換 */
-                double logicalDeltaX = screenDelta.X / _editor.ZoomTransform.ScaleX;
-                double logicalDeltaY = screenDelta.Y / _editor.ZoomTransform.ScaleY;
+                double logicalDeltaX = screenDelta.X / _editorVM.Zoom;
+                double logicalDeltaY = screenDelta.Y / _editorVM.Zoom;
 
                 /* ノードの座標を更新(差分加算) */
                 double newX = node.X + logicalDeltaX;
                 double newY = node.Y + logicalDeltaY;
 
                 /* キャンバス内に制限 */
-                var clamped = _editorVM.Nodes.ClampPosition(newX, newY, node);
+                var clamped = _editorVM.Grid.ClampNodePosition(newX, newY, node);
 
                 node.X = clamped.X;
                 node.Y = clamped.Y;

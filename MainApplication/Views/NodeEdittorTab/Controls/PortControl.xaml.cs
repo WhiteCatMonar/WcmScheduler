@@ -55,8 +55,8 @@ namespace MainApplication.Views.NodeEditorTab.Controls
 
             /* 論理座標に変換 */
             var logicalPos = new Point(
-                (screenPos.X - editor.PanTransform.X) / editor.ZoomTransform.ScaleX,
-                (screenPos.Y - editor.PanTransform.Y) / editor.ZoomTransform.ScaleY
+                (screenPos.X - editorVM.PanX) / editorVM.Zoom,
+                (screenPos.Y - editorVM.PanY) / editorVM.Zoom
             );
 
             editorVM.Connections.DraggingToPoint = logicalPos;
@@ -99,43 +99,33 @@ namespace MainApplication.Views.NodeEditorTab.Controls
 
             var nodeControl = VisualTreeUtils.FindAncestor<NodeControl>(this);
             var editor = VisualTreeUtils.FindAncestor<NodeEditorControl>(this);
+            var editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
 
-            if ((nodeControl == null) || (editor == null))
+            if ((nodeControl == null) || (editor == null) || (editorVM == null))
             {
                 return;
             }
 
-            /* NodeEditorCanvas基準でPortControlの中心を取得(ズーム・パン後の見た目座標) */
-            GeneralTransform gtPort = this.TransformToVisual(editor.NodeEditorCanvas);
-            Point portOnCanvas = gtPort.Transform(new Point(ActualWidth / 2, ActualHeight / 2));
+            /* Port の中心(画面座標) */
+            var portScreen = this.TransformToVisual(editor.NodeEditorArea).Transform(new Point(ActualWidth / 2, ActualHeight / 2));
 
-            /* NodeEditorCanvas基準でNodeControlの左上を取得 */
-            GeneralTransform gtNode = nodeControl.TransformToVisual(editor.NodeEditorCanvas);
-            Point nodeOnCanvas = gtNode.Transform(new Point(0, 0));
+            /* Node の左上(画面座標) */
+            var nodeScreen = nodeControl.TransformToVisual(editor.NodeEditorArea).Transform(new Point(0, 0));
 
-            /* Canvas の RenderTransform（ズーム・パン）を逆変換して論理座標へ */
-            double zoom = editor.ZoomTransform.ScaleX;
-            double panX = editor.PanTransform.X;
-            double panY = editor.PanTransform.Y;
-
-            Point portLogical = new Point(
-                (portOnCanvas.X - panX) / zoom,
-                (portOnCanvas.Y - panY) / zoom
+            /* 論理座標に変換 */
+            var portLogical = new Point(
+                (portScreen.X - editorVM.PanX) / editorVM.Zoom,
+                (portScreen.Y - editorVM.PanY) / editorVM.Zoom
             );
 
-            Point nodeLogical = new Point(
-                (nodeOnCanvas.X - panX) / zoom,
-                (nodeOnCanvas.Y - panY) / zoom
+            var nodeLogical = new Point(
+                (nodeScreen.X - editorVM.PanX) / editorVM.Zoom,
+                (nodeScreen.Y - editorVM.PanY) / editorVM.Zoom
             );
 
             /* Node 内の相対座標 */
-            Point posInNode = new Point(
-                portLogical.X - nodeLogical.X,
-                portLogical.Y - nodeLogical.Y
-            );
-
-            port.RelativeX = posInNode.X;
-            port.RelativeY = posInNode.Y;
+            port.RelativeX = portLogical.X - nodeLogical.X;
+            port.RelativeY = portLogical.Y - nodeLogical.Y;
 
             port.UpdateAbsolutePosition();
         }

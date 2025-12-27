@@ -1,273 +1,182 @@
 ﻿using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Infrastructure;
 using System;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows;
 using System.Windows.Input;
 
 namespace MainApplication.ViewModels
 {
     public class NodeEditorViewModel : INotifyPropertyChanged
     {
-        public UndoRedoManager UndoRedo { get; } = new UndoRedoManager();
+        /* ---------------------------------------------------------
+         * 基本プロパティ(UI の表示状態)
+         * --------------------------------------------------------- */
 
-        public ICommand UndoCommand { get; }
-        public ICommand RedoCommand { get; }
-        public ICommand MoveToHistoryCommand { get; }
-        public NodeCollectionViewModel Nodes { get; }
-        public ConnectionCollectionViewModel Connections { get; }
-
-        public NodeEditorViewModel()
+        private double _baseCanvasWidth;
+        public double BaseCanvasWidth
         {
-            Nodes = new NodeCollectionViewModel(UndoRedo, this);
-            Connections = new ConnectionCollectionViewModel(UndoRedo, this);
-
-            UndoCommand = new RelayCommand(() =>
+            get => _baseCanvasWidth;
+            set
             {
-                UndoRedo.Undo();
+                if (_baseCanvasWidth != value)
+                {
+                    _baseCanvasWidth = value;
+                    OnPropertyChanged(nameof(BaseCanvasWidth));
+                    UpdateGridState();
+                }
+            }
+        }
 
-                /* Undo後に整合性を取る */
-                RefreshNodeAndConnectionPositions();
-
-            }, () => UndoRedo.CanUndo);
-
-            RedoCommand = new RelayCommand(() =>
+        private double _baseCanvasHeight;
+        public double BaseCanvasHeight
+        {
+            get => _baseCanvasHeight;
+            set
             {
-                UndoRedo.Redo();
-
-                /* Redo後に整合性を取る */
-                RefreshNodeAndConnectionPositions();
-
-            }, () => UndoRedo.CanRedo);
-            MoveToHistoryCommand = new RelayCommand<UndoRedoManager.HistoryItem>(item => UndoRedo.MoveToHistory(item));
-
-            UndoRedo.CurrentHistoryChanged += OnCurrentHistoryChanged;
+                if (_baseCanvasHeight != value)
+                {
+                    _baseCanvasHeight = value;
+                    OnPropertyChanged(nameof(BaseCanvasHeight));
+                    UpdateGridState();
+                }
+            }
         }
 
-        private void RefreshNodeAndConnectionPositions()
-        {
-            /* 全ノードのポート座標を更新 */
-            Nodes.UpdateAllNodes();
-
-            /* 全接続線のジオメトリを更新 */
-            Connections.UpdateAllConnections();
-        }
-
-        private void OnCurrentHistoryChanged(object sender, UndoRedoManager.HistoryItem e)
-        {
-            CurrentHistoryChanged?.Invoke(this, e);
-            RefreshNodeAndConnectionPositions();
-        }
-        public event EventHandler<UndoRedoManager.HistoryItem> CurrentHistoryChanged;
-        
-        /* 座標関係処理 */
-
-        /* ズーム・パン状態（View から更新され、接続線などが利用する） */
         private double _zoom = 1.0;
         public double Zoom
         {
             get => _zoom;
             set
             {
-                if (Math.Abs(_zoom - value) > double.Epsilon)
+                if (_zoom != value)
                 {
                     _zoom = value;
                     OnPropertyChanged(nameof(Zoom));
+                    UpdateGridState();
                 }
             }
         }
 
-        private double _panX = 0.0;
+        private double _panX;
         public double PanX
         {
             get => _panX;
             set
             {
-                if (Math.Abs(_panX - value) > double.Epsilon)
+                if (_panX != value)
                 {
                     _panX = value;
                     OnPropertyChanged(nameof(PanX));
+                    UpdateGridState();
                 }
             }
         }
 
-        private double _panY = 0.0;
+        private double _panY;
         public double PanY
         {
             get => _panY;
             set
             {
-                if (Math.Abs(_panY - value) > double.Epsilon)
+                if (_panY != value)
                 {
                     _panY = value;
                     OnPropertyChanged(nameof(PanY));
+                    UpdateGridState();
                 }
             }
         }
 
-        /* NodeEditorArea(表示領域) */
-        private double _baseCanvasWidth = 200;
-        public double BaseCanvasWidth
+        /* ---------------------------------------------------------
+         * GridManager(論理座標系の中枢)
+         * --------------------------------------------------------- */
+
+        public GridManager Grid { get; }
+
+        /* ---------------------------------------------------------
+         * ノード・接続線管理
+         * --------------------------------------------------------- */
+
+        public NodeCollectionViewModel Nodes { get; }
+        public ConnectionCollectionViewModel Connections { get; }
+
+        private void RefreshNodeAndConnectionPositions()
         {
-            get => _baseCanvasWidth;
-            set { _baseCanvasWidth = value; OnPropertyChanged(nameof(BaseCanvasWidth)); }
+            Nodes.UpdateAllNodes();
+            Connections.UpdateAllConnections();
+        }
+        
+        /* ---------------------------------------------------------
+         * 操作履歴管理
+         * --------------------------------------------------------- */
+
+        public UndoRedoManager UndoRedo { get; } = new UndoRedoManager();
+        public ICommand UndoCommand { get; }
+        public ICommand RedoCommand { get; }
+        public ICommand MoveToHistoryCommand { get; }
+        public event EventHandler<UndoRedoManager.HistoryItem> CurrentHistoryChanged;
+
+        private void OnCurrentHistoryChanged(object sender, UndoRedoManager.HistoryItem e)
+        {
+            CurrentHistoryChanged?.Invoke(this, e);
+            RefreshNodeAndConnectionPositions();
         }
 
-        private double _baseCanvasHeight = 200;
-        public double BaseCanvasHeight
-        {
-            get => _baseCanvasHeight;
-            set { _baseCanvasHeight = value; OnPropertyChanged(nameof(BaseCanvasHeight)); }
-        }
+        /* ---------------------------------------------------------
+         * コンストラクタ
+         * --------------------------------------------------------- */
 
-        /* NodeEditerCanvas(ズーム後の論理Canvas) */
-        private double _zoomedCanvasWidth = 200;
-        public double ZoomedCanvasWidth
+        public NodeEditorViewModel()
         {
-            get => _zoomedCanvasWidth;
-            set {
-                _zoomedCanvasWidth = value;
-                Nodes.CanvasViewLogicalWidth = value;
-                Connections.CanvasViewLogicalWidth = value;
-                OnPropertyChanged(nameof(ZoomedCanvasWidth));
-                OnPropertyChanged(nameof(ZoomedCanvasAreaEndX));
-                OnPropertyChanged(nameof(Nodes.CanvasViewLogicalWidth));
-                OnPropertyChanged(nameof(Connections.CanvasViewLogicalWidth));
-            }
-        }
+            Nodes = new NodeCollectionViewModel(UndoRedo, this);
+            Connections = new ConnectionCollectionViewModel(UndoRedo, this);
+            Grid = new GridManager();
 
-        private double _zoomedCanvasHeight = 200;
-        public double ZoomedCanvasHeight
-        {
-            get => _zoomedCanvasHeight;
-            set {
-                _zoomedCanvasHeight = value;
-                Nodes.CanvasViewLogicalHeight = value;
-                Connections.CanvasViewLogicalHeight = value;
-                OnPropertyChanged(nameof(ZoomedCanvasHeight));
-                OnPropertyChanged(nameof(ZoomedCanvasAreaEndY));
-                OnPropertyChanged(nameof(Nodes.CanvasViewLogicalHeight));
-                OnPropertyChanged(nameof(Connections.CanvasViewLogicalHeight));
-            }
-        }
-
-        /* グリッド関連 */
-
-        private double _gridSpacing = 20;
-        public double GridSpacing
-        {
-            get => _gridSpacing;
-            set
+            UndoCommand = new RelayCommand(() =>
             {
-                if (_gridSpacing != value)
-                {
-                    _gridSpacing = value;
-                    OnPropertyChanged(nameof(GridSpacing));
+                UndoRedo.Undo();
+                RefreshNodeAndConnectionPositions();
+            }, () => UndoRedo.CanUndo);
 
-                    UpdateGrid(_gridOriginX, _gridOriginY, ZoomedCanvasWidth, ZoomedCanvasHeight, _gridSpacing);
-                }
-            }
+            RedoCommand = new RelayCommand(() =>
+            {
+                UndoRedo.Redo();
+                RefreshNodeAndConnectionPositions();
+            }, () => UndoRedo.CanRedo);
+            MoveToHistoryCommand = new RelayCommand<UndoRedoManager.HistoryItem>(item => UndoRedo.MoveToHistory(item));
+
+            UndoRedo.CurrentHistoryChanged += OnCurrentHistoryChanged;
         }
 
-        public ObservableCollection<LineViewModel> GridLines { get; } = new ObservableCollection<LineViewModel>();
+        /* ---------------------------------------------------------
+         * GridManagerにUI状態を反映
+         * --------------------------------------------------------- */
 
-        private double _gridOriginX = 0;
-        private double _gridOriginY = 0;
-
-        private double _canvasViewOriginX = 0;
-        private double _canvasViewOriginY = 0;
-
-        private const double GridSize = 1;
-
-        /* 表示中の四隅の座標 */
-        public double ZoomedCanvasAreaStartX => _canvasViewOriginX;
-        public double ZoomedCanvasAreaStartY => _canvasViewOriginY;
-        public double ZoomedCanvasAreaEndX => _canvasViewOriginX + ZoomedCanvasWidth;
-        public double ZoomedCanvasAreaEndY => _canvasViewOriginY + ZoomedCanvasHeight;
-
-        public void UpdateGrid(double originX, double originY, double width, double height, double spacing)
+        public void UpdateGridState()
         {
-            GridLines.Clear();
+            /* ズーム・パン */
+            Grid.Zoom = Zoom;
+            Grid.PanX = PanX;
+            Grid.PanY = PanY;
 
-            Nodes.GridSize = GridSize;
+            /* 論理座標系のサイズ */
+            Grid.CanvasViewLogicalWidth = BaseCanvasWidth / Zoom;
+            Grid.CanvasViewLogicalHeight = BaseCanvasHeight / Zoom;
 
-            /* キャンバスの原点位置に対応する論理座標を記録 */
-            _canvasViewOriginX = originX;
-            _canvasViewOriginY = originY;
-            Nodes.CanvasViewOriginX = _canvasViewOriginX;
-            Nodes.CanvasViewOriginY = _canvasViewOriginY;
-            Connections.CanvasViewOriginX = _canvasViewOriginX;
-            Connections.CanvasViewOriginY = _canvasViewOriginY;
+            /* 論理原点 */
+            Grid.CanvasViewOriginX = -PanX / Zoom;
+            Grid.CanvasViewOriginY = -PanY / Zoom;
 
-            /* パンによる原点移動を考慮(Floor で揺れ防止) */
-            _gridOriginX = Math.Floor(_canvasViewOriginX / spacing) * spacing;
-            _gridOriginY = Math.Floor(_canvasViewOriginY / spacing) * spacing;
-
-            /* 描画範囲(origin から width+origin まで) */
-            double endX = _gridOriginX + width + spacing;
-            double endY = _gridOriginY + height + spacing;
-            
-            double actualSpacing = spacing * Zoom;
-            bool isShowSubGrid = actualSpacing >= 8; /* ズーム後のピクセル間隔が8px以上なら補助線表示 */
-
-            /* 垂直線 */
-            for (double x = _gridOriginX; x < endX; x += spacing)
-            {
-                int gridIndex = (int)Math.Round(x / spacing);
-                bool isMajor = (gridIndex % 10 == 0);
-
-
-                if (!isMajor && !isShowSubGrid)
-                {
-                    continue;
-                }
-
-                GridLines.Add(new LineViewModel
-                {
-                    X1 = x,
-                    Y1 = _gridOriginY,
-                    X2 = x,
-                    Y2 = endY,
-                    IsMajor = isMajor
-                });
-            }
-
-            /* 水平線 */
-            for (double y = _gridOriginY; y < endY; y += spacing)
-            {
-                int gridIndex = (int)Math.Round(y / spacing);
-                bool isMajor = (gridIndex % 10 == 0);
-
-                if (!isMajor && !isShowSubGrid)
-                {
-                    continue;
-                }
-
-                GridLines.Add(new LineViewModel
-                {
-                    X1 = _gridOriginX,
-                    Y1 = y,
-                    X2 = endX,
-                    Y2 = y,
-                    IsMajor = isMajor
-                });
-            }
-
-            /* 表示中座標更新 */
-            OnPropertyChanged(nameof(ZoomedCanvasAreaStartX));
-            OnPropertyChanged(nameof(ZoomedCanvasAreaStartY));
-            OnPropertyChanged(nameof(ZoomedCanvasAreaEndX));
-            OnPropertyChanged(nameof(ZoomedCanvasAreaEndY));
-            OnPropertyChanged(nameof(Nodes.CanvasViewOriginX));
-            OnPropertyChanged(nameof(Nodes.CanvasViewOriginY));
-            OnPropertyChanged(nameof(Connections.CanvasViewOriginX));
-            OnPropertyChanged(nameof(Connections.CanvasViewOriginY));
+            /* グリッド線更新 */
+            Grid.UpdateGrid();
         }
 
-        /* イベント関係処理 */
+        /* ---------------------------------------------------------
+         * INotifyPropertyChanged
+         * --------------------------------------------------------- */
+
         public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        private void OnPropertyChanged(string name)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

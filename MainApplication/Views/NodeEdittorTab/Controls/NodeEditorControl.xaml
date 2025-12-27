@@ -46,13 +46,15 @@
                         Background="{x:Null}">
                     <Canvas.RenderTransform>
                         <TransformGroup>
-                            <ScaleTransform x:Name="ZoomTransform" ScaleX="1" ScaleY="1"/>
-                            <TranslateTransform x:Name="PanTransform" X="0" Y="0"/>
+                            <ScaleTransform ScaleX="{Binding Zoom}"
+                                            ScaleY="{Binding Zoom}"/>
+                            <TranslateTransform X="{Binding PanX}"
+                                                Y="{Binding PanY}"/>
                         </TransformGroup>
                     </Canvas.RenderTransform>
 
                     <!-- グリッド線 -->
-                    <ItemsControl ItemsSource="{Binding GridLines}">
+                    <ItemsControl ItemsSource="{Binding Grid.GridLines}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <Canvas IsHitTestVisible="False" />
@@ -84,8 +86,9 @@
 
                     <!-- 原点軸(X軸) -->
                     <Line x:Name="OriginAxisX"
-                          X1="{Binding ZoomedCanvasAreaStartX}" Y1="0"
-                          X2="{Binding ZoomedCanvasAreaEndX}"
+                          X1="{Binding Grid.CanvasViewAreaStartX}"
+                          Y1="0"
+                          X2="{Binding Grid.CanvasViewAreaEndX}"
                           Y2="0"
                           Stroke="Red"
                           StrokeThickness="2"
@@ -93,9 +96,10 @@
 
                     <!-- 原点軸(Y軸) -->
                     <Line x:Name="OriginAxisY"
-                          X1="0" Y1="{Binding ZoomedCanvasAreaStartY}"
+                          X1="0"
+                          Y1="{Binding Grid.CanvasViewAreaStartY}"
                           X2="0"
-                          Y2="{Binding ZoomedCanvasAreaEndY}"
+                          Y2="{Binding Grid.CanvasViewAreaEndY}"
                           Stroke="Blue"
                           StrokeThickness="2"
                           SnapsToDevicePixels="True" />

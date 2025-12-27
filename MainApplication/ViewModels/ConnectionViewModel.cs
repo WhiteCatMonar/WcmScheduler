@@ -37,19 +37,6 @@ namespace MainApplication.ViewModels
             };
         }
 
-        /* 論理座標 → 画面座標変換 */
-        private Point ToScreen(Point logical)
-        {
-            double zoom = _editor.Zoom;
-            double panX = _editor.PanX;
-            double panY = _editor.PanY;
-
-            return new Point(
-                logical.X * zoom + panX,
-                logical.Y * zoom + panY
-            );
-        }
-
         private Geometry _connectionGeometry;
         public Geometry ConnectionGeometry
         {
@@ -66,9 +53,8 @@ namespace MainApplication.ViewModels
 
         public void UpdatePathGeometry()
         {
-            /* 論理座標を画面座標に変換 */
-            var start = ToScreen(FromPosition);
-            var end = ToScreen(ToPosition);
+            var start = FromPosition;
+            var end = ToPosition;
 
             double dx = Math.Abs(end.X - start.X) * 0.5;
 
@@ -78,7 +64,9 @@ namespace MainApplication.ViewModels
             var figure = new PathFigure
             {
                 StartPoint = start,
-                Segments = new PathSegmentCollection { new BezierSegment(p1, p2, end, true) },
+                Segments = new PathSegmentCollection {
+                    new BezierSegment(p1, p2, end, true)
+                },
                 IsClosed = false
             };
 

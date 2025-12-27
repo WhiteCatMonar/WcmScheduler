@@ -80,7 +80,7 @@ namespace MainApplication.ViewModels
             get => _draggingToPoint;
             set
             {
-                var clamped = ClampCanvasViewPosition(value);
+                var clamped = _editor.Grid.ClampPoint(value);
                 if (_draggingToPoint != clamped)
                 {
                     _draggingToPoint = clamped;
@@ -171,79 +171,6 @@ namespace MainApplication.ViewModels
                 _undoRedo.Execute(action);
                 SelectedConnection = null;
             }
-        }
-
-        /* Canvas の論理サイズ */
-        private double _canvasViewLogicalWidth = 0.0;
-        public double CanvasViewLogicalWidth
-        {
-            get => _canvasViewLogicalWidth;
-            set
-            {
-                if (_canvasViewLogicalWidth != value)
-                {
-                    _canvasViewLogicalWidth = value;
-                    OnPropertyChanged(nameof(CanvasViewLogicalWidth));
-                }
-            }
-        }
-
-        private double _canvasViewLogicalHeight = 0.0;
-        public double CanvasViewLogicalHeight
-        {
-            get => _canvasViewLogicalHeight;
-            set
-            {
-                if (_canvasViewLogicalHeight != value)
-                {
-                    _canvasViewLogicalHeight = value;
-                    OnPropertyChanged(nameof(CanvasViewLogicalHeight));
-                }
-            }
-        }
-
-        /* Canvas の表示原点(論理原点からのオフセット) */
-        private double _canvasViewOriginX = 0.0;
-        public double CanvasViewOriginX
-        {
-            get => _canvasViewOriginX;
-            set
-            {
-                if (_canvasViewOriginX != value)
-                {
-                    _canvasViewOriginX = value;
-                    OnPropertyChanged(nameof(CanvasViewOriginX));
-                }
-            }
-        }
-
-        private double _canvasViewOriginY = 0.0;
-        public double CanvasViewOriginY
-        {
-            get => _canvasViewOriginY;
-            set
-            {
-                if (_canvasViewOriginY != value)
-                {
-                    _canvasViewOriginY = value;
-                    OnPropertyChanged(nameof(CanvasViewOriginY));
-                }
-            }
-        }
-
-        /* 論理座標系での Clamp */
-        private Point ClampCanvasViewPosition(Point p)
-        {
-            double logicalStartX = CanvasViewOriginX;
-            double logicalStartY = CanvasViewOriginY;
-
-            double logicalEndX = CanvasViewOriginX + CanvasViewLogicalWidth;
-            double logicalEndY = CanvasViewOriginY + CanvasViewLogicalHeight;
-
-            double x = Math.Max(logicalStartX, Math.Min(p.X, logicalEndX));
-            double y = Math.Max(logicalStartY, Math.Min(p.Y, logicalEndY));
-
-            return new Point(x, y);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
