@@ -1,21 +1,23 @@
-﻿using System;
+﻿using MainApplication.ViewModels.Actions;
+using MainApplication.ViewModels.Infrastructure;
+using MainApplication.ViewModels.Service;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows;
 using System.Windows.Input;
-using MainApplication.ViewModels.Infrastructure;
-using MainApplication.ViewModels.Actions;
 
 namespace MainApplication.ViewModels
 {
     public class NodeCollectionViewModel : INotifyPropertyChanged
     {
         private readonly UndoRedoManager _undoRedo;
+        private readonly IDateTimeEditorService _dateTimeEditor;
         private readonly NodeEditorViewModel _editor;
 
-        public NodeCollectionViewModel(UndoRedoManager undoRedo, NodeEditorViewModel editor)
+        public NodeCollectionViewModel(UndoRedoManager undoRedo, IDateTimeEditorService dateTimeEditor, NodeEditorViewModel editor)
         {
             _undoRedo = undoRedo ?? throw new ArgumentNullException(nameof(undoRedo));
+            _dateTimeEditor = dateTimeEditor ?? throw new ArgumentNullException(nameof(dateTimeEditor));
             _editor = editor ?? throw new ArgumentNullException(nameof(editor));
 
             AddNodeCommand = new RelayCommand(AddNode);
@@ -41,19 +43,22 @@ namespace MainApplication.ViewModels
             get => _selectedNode;
             set
             {
-                if (_selectedNode != value)
+                if (_selectedNode == value)
                 {
-                    if (_selectedNode != null)
-                    {
-                        _selectedNode.IsSelected = false;
-                    }
-                    _selectedNode = value;
-                    if (_selectedNode != null)
-                    {
-                        _selectedNode.IsSelected = true;
-                    }
-                    OnPropertyChanged(nameof(SelectedNode));
+                    return;
                 }
+
+                if (_selectedNode != null)
+                {
+                    _selectedNode.IsSelected = false;
+                }
+                _selectedNode = value;
+                if (_selectedNode != null)
+                {
+                    _selectedNode.IsSelected = true;
+                }
+
+                OnPropertyChanged(nameof(SelectedNode));
             }
         }
 
@@ -91,7 +96,7 @@ namespace MainApplication.ViewModels
 
         private NodeViewModel CreateDefaultNode()
         {
-            var node = new NodeViewModel(_undoRedo)
+            var node = new NodeViewModel(_undoRedo, _dateTimeEditor)
             {
                 NodeGuid = Guid.NewGuid()
             };

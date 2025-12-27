@@ -123,6 +123,8 @@
     <Compile Include="ViewModels\NodeViewModel.cs" />
     <Compile Include="ViewModels\PortViewModel.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
+    <Compile Include="ViewModels\Service\DateTimeEditorService.cs" />
+    <Compile Include="ViewModels\Service\IDateTimeEditorService.cs" />
     <Compile Include="Views\Behaviors\ListBoxAutoScrollBehavior.cs" />
     <Compile Include="Views\Behaviors\ListBoxItemDoubleClickBehavior.cs" />
     <Compile Include="Views\BindingProxy.cs" />

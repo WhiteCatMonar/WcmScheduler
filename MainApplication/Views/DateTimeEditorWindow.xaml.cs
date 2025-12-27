@@ -10,35 +10,44 @@ namespace MainApplication.Views
     /// </summary>
     public partial class DateTimeEditorWindow : Window
     {
-        public DateTimeEditorWindow(DateTime? initial)
+        private readonly Func<DateTime?, bool> _validate;
+
+        public DateTimeEditorWindow(DateTime? initial, Func<DateTime?, bool> validate = null)
         {
             InitializeComponent();
             DataContext = new DateTimeEditorViewModel(initial);
+            _validate = validate;
         }
 
-        private void Ok_Click(object sender, RoutedEventArgs e)
+        protected override void OnContentRendered(EventArgs e)
         {
+            base.OnContentRendered(e);
+
             if (DataContext is DateTimeEditorViewModel vm)
             {
-                // ConfirmCommandでResultをセット済み
-                if (vm.Composed.HasValue)
+                vm.PropertyChanged += (s, ev) =>
                 {
-                    vm.ConfirmCommand.Execute(null);
-                    DialogResult = true;
-                }
+                    if (ev.PropertyName == nameof(DateTimeEditorViewModel.Result))
+                    {
+                        if (_validate != null && !_validate(vm.Result))
+                        {
+                            MessageBox.Show("開始日時と終了日時の関係が不正です");
+                            return;
+                        }
+
+                        DialogResult = true;
+                    }
+                };
             }
         }
 
-        private void Clear_Click(object sender, RoutedEventArgs e)
+        private void Cancel_Click(object sender, RoutedEventArgs e)
         {
-            if (DataContext is DateTimeEditorViewModel vm)
-            {
-                vm.ClearCommand.Execute(null);
-                DialogResult = true; // 呼び出し元に「OK扱い」で返す
-            }
+            /* Result を変更しない */
+            DialogResult = false;
         }
 
-        // 数字のみ許可
+        /* 数字のみ許可 */
         private void DigitsOnly(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
             e.Handled = !e.Text.All(char.IsDigit);

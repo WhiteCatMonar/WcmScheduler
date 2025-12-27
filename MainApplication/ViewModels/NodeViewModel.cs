@@ -1,12 +1,11 @@
 ﻿using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Infrastructure;
-using MainApplication.Views;
+using MainApplication.ViewModels.Service;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -15,13 +14,14 @@ namespace MainApplication.ViewModels
     public class NodeViewModel : INotifyPropertyChanged
     {
         private readonly UndoRedoManager _undoRedo;
+        private readonly IDateTimeEditorService _dateTimeEditor;
         private DispatcherTimer _editTimer;
-
         private List<EditableField<string>> _editableFields;
 
-        public NodeViewModel(UndoRedoManager undoRedo)
+        public NodeViewModel(UndoRedoManager undoRedo, IDateTimeEditorService dateTimeEditor)
         {
             _undoRedo = undoRedo ?? throw new ArgumentNullException(nameof(undoRedo));
+            _dateTimeEditor = dateTimeEditor;
             _nodeGuid = Guid.NewGuid();
             EditStartDateTimeCommand = new RelayCommand(() => EditDateTime(true));
             EditEndDateTimeCommand = new RelayCommand(() => EditDateTime(false));
@@ -59,57 +59,59 @@ namespace MainApplication.ViewModels
         private void EditDateTime(bool isStart)
         {
             var initial = isStart ? StartDateTime : EndDateTime;
-            var window = new DateTimeEditorWindow(initial)
-            {
-                Owner = Application.Current.Windows.OfType<Window>().FirstOrDefault(w => w.IsActive)
-            };
+            var picked = _dateTimeEditor.EditDateTime(
+                initial,
+                isStart ? (Func<DateTime?, bool>)CanSetStartDateTime : CanSetEndDateTime
+            );
 
-            if (window.ShowDialog() == true && window.DataContext is DateTimeEditorViewModel vm)
+            if (picked == initial)
             {
-                var picked = vm.Result ?? vm.Composed;
+                return;
+            }
 
-                if (isStart)
+            if (isStart)
+            {
+                if (!CanSetStartDateTime(picked))
                 {
-                    if (picked.HasValue)
-                    {
-                        // Start更新時、Endが設定済みなら整合性チェック
-                        if (EndDateTime.HasValue && picked.Value > EndDateTime.Value)
-                        {
-                            // ユーザー通知(例：MessageBox)かValidationへ
-                            MessageBox.Show("開始が終了より後です。終了時刻も合わせて見直してください。");
-                        }
-                        StartDateTime = picked.Value;
-                    }
-                    else
-                    {
-                        StartDateTime = null;
-                    }
+                    return;
                 }
-                else
+                StartDateTime = picked;
+            }
+            else
+            {
+                if (!CanSetEndDateTime(picked))
                 {
-                    if (picked.HasValue)
-                    {
-                        if (StartDateTime.HasValue && picked.Value < StartDateTime.Value)
-                        {
-                            MessageBox.Show("終了が開始より前です。開始時刻より後の時刻を選んでください。");
-                        }
-                        EndDateTime = picked.Value;
-                    }
-                    else
-                    {
-                        EndDateTime = null;
-                    }
+                    return;
                 }
+                EndDateTime = picked;
             }
         }
 
-        public const double _minWidth = 100;
+        public bool CanSetStartDateTime(DateTime? newStartDateTime)
+        {
+            if ((newStartDateTime == null) || (EndDateTime == null))
+            {
+                return true;
+            }
+            return newStartDateTime <= EndDateTime;
+        }
+
+        public bool CanSetEndDateTime(DateTime? newEndDateTime)
+        {
+            if ((newEndDateTime == null) || (StartDateTime == null))
+            {
+                return true;
+            }
+            return StartDateTime <= newEndDateTime;
+        }
+
+        public static readonly double _minWidth = 100;
         public double MinWidth
         {
             get => _minWidth;
         }
 
-        public const double _minHeight = 60;
+        public static readonly double _minHeight = 60;
         public double MinHeight
         {
             get => _minHeight;

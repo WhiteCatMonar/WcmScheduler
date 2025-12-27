@@ -1,4 +1,5 @@
 ﻿using MainApplication.ViewModels.Infrastructure;
+using MainApplication.ViewModels.Service;
 using System;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -127,12 +128,17 @@ namespace MainApplication.ViewModels
         }
 
         /* ---------------------------------------------------------
+         * DateTimeEditorService(日時編集用サービス)
+         * --------------------------------------------------------- */
+        public IDateTimeEditorService DateTimeEditor { get; } = new DateTimeEditorService();
+
+        /* ---------------------------------------------------------
          * コンストラクタ
          * --------------------------------------------------------- */
 
         public NodeEditorViewModel()
         {
-            Nodes = new NodeCollectionViewModel(UndoRedo, this);
+            Nodes = new NodeCollectionViewModel(UndoRedo, DateTimeEditor, this);
             Connections = new ConnectionCollectionViewModel(UndoRedo, this);
             Grid = new GridManager();
 
