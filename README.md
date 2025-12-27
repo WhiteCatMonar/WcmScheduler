@@ -95,7 +95,7 @@ block
     %% ============================
     block:views:7
         columns 7
-        DateTimeEditorWindowView
+        DateTimeEditorWindow_View["DateTimeEditorWindow(View)"]
         NodeControl
         PortControl
         NodeDetailControl
@@ -143,7 +143,7 @@ block
 
     space:7
 
-    DateTimeEditorWindow
+    DateTimeEditorWindow_Class["DateTimeEditorWindow(Class)"]
     EditableField
     PortViewModel
     space
@@ -178,8 +178,8 @@ block
     ConnectionViewModel --> PortViewModel
     ConnectionViewModel --> LineViewModel
 
-    DateTimeEditorService --> DateTimeEditorWindow
-    DateTimeEditorWindow --> DateTimeEditorViewModel
+    DateTimeEditorService --> DateTimeEditorWindow_Class
+    DateTimeEditorWindow_Class --> DateTimeEditorViewModel
 
     %% ============================
     %% Dependencies (View → ViewModel)
@@ -190,5 +190,36 @@ block
     NodeDetailControl --> NodeViewModel
     HistoryControl --> UndoRedoManager
     NodeEditorTab --> NodeEditorViewModel
-    DateTimeEditorWindowView --> DateTimeEditorViewModel
+    DateTimeEditorWindow_View --> DateTimeEditorViewModel
+
+    
+    %% ============================
+    %% Coloring
+    %% ============================
+
+    %% Views (blue)
+    style DateTimeEditorWindow_View fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style NodeControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style PortControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style NodeDetailControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style HistoryControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style NodeEditorControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style NodeEditorTab fill:#D0E8FF,stroke:#4A90E2,color:#000000
+
+    %% ViewModels (green)
+    style NodeEditorViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style NodeCollectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style ConnectionCollectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style NodeViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style ConnectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style DateTimeEditorViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+
+    %% Infrastructure / Managers (gray)
+    style EditableField fill:#F0F0F0,stroke:#999,color:#000000
+    style PortViewModel fill:#F0F0F0,stroke:#999,color:#000000
+    style UndoRedoManager fill:#F0F0F0,stroke:#999,color:#000000
+    style GridManager fill:#F0F0F0,stroke:#999,color:#000000
+    style LineViewModel fill:#F0F0F0,stroke:#999,color:#000000
+    style DateTimeEditorService fill:#F0F0F0,stroke:#999,color:#000000
+    style DateTimeEditorWindow_Class fill:#F0F0F0,stroke:#999,color:#000000
 ```
