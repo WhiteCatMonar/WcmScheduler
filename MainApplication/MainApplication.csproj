@@ -101,13 +101,13 @@
     <Compile Include="Infrastructure\IFileService.cs" />
     <Compile Include="Infrastructure\IJsonSerializerService.cs" />
     <Compile Include="Infrastructure\JsonSerializerService.cs" />
-    <Compile Include="Model\SaveData\ConnectionDataModel.cs" />
-    <Compile Include="Model\SaveData\NodeDataModel.cs" />
-    <Compile Include="Model\SaveData\NodeDetailsDataModel.cs" />
-    <Compile Include="Model\SaveData\PortDataModel.cs" />
-    <Compile Include="Model\SaveData\PositionDataModel.cs" />
-    <Compile Include="Model\SaveData\RootSaveData.cs" />
-    <Compile Include="Model\SaveData\TaskEditorSaveData.cs" />
+    <Compile Include="Models\SaveData\ConnectionDataModel.cs" />
+    <Compile Include="Models\SaveData\NodeDataModel.cs" />
+    <Compile Include="Models\SaveData\NodeDetailsDataModel.cs" />
+    <Compile Include="Models\SaveData\PortDataModel.cs" />
+    <Compile Include="Models\SaveData\PositionDataModel.cs" />
+    <Compile Include="Models\SaveData\RootSaveData.cs" />
+    <Compile Include="Models\SaveData\TaskEditorSaveData.cs" />
     <Compile Include="ViewModels\Actions\AddConnectionAction.cs" />
     <Compile Include="ViewModels\Actions\AddNodeAction.cs" />
     <Compile Include="ViewModels\Actions\DeleteConnectionAction.cs" />
@@ -129,27 +129,27 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\NodeEdittorTab\Controls\HistoryControl.xaml">
+    <Page Include="Views\NodeEditorTab\Controls\HistoryControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\NodeEdittorTab\Controls\NodeControl.xaml">
+    <Page Include="Views\NodeEditorTab\Controls\NodeControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\NodeEdittorTab\Controls\PortControl.xaml">
+    <Page Include="Views\NodeEditorTab\Controls\PortControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\NodeEdittorTab\Controls\NodeDetailControl.xaml">
+    <Page Include="Views\NodeEditorTab\Controls\NodeDetailControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\NodeEdittorTab\Controls\NodeEditorControl.xaml">
+    <Page Include="Views\NodeEditorTab\Controls\NodeEditorControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\NodeEdittorTab\NodeEditorTab.xaml">
+    <Page Include="Views\NodeEditorTab\NodeEditorTab.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -172,24 +172,24 @@
     <Compile Include="Views\DateTimeEditorWindow.xaml.cs">
       <DependentUpon>DateTimeEditorWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\NodeEdittorTab\Controls\HistoryControl.xaml.cs">
+    <Compile Include="Views\NodeEditorTab\Controls\HistoryControl.xaml.cs">
       <DependentUpon>HistoryControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\NodeEdittorTab\Controls\NodeControl.xaml.cs">
+    <Compile Include="Views\NodeEditorTab\Controls\NodeControl.xaml.cs">
       <DependentUpon>NodeControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\NodeEditorViewModel.cs" />
-    <Compile Include="Views\NodeEdittorTab\Controls\PortControl.xaml.cs">
+    <Compile Include="Views\NodeEditorTab\Controls\PortControl.xaml.cs">
       <DependentUpon>PortControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\NodeEdittorTab\Controls\NodeDetailControl.xaml.cs">
+    <Compile Include="Views\NodeEditorTab\Controls\NodeDetailControl.xaml.cs">
       <DependentUpon>NodeDetailControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\NodeEdittorTab\Controls\NodeEditorControl.xaml.cs">
+    <Compile Include="Views\NodeEditorTab\Controls\NodeEditorControl.xaml.cs">
       <DependentUpon>NodeEditorControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\NodeEdittorTab\NodeDetailTemplateSelector.cs" />
-    <Compile Include="Views\NodeEdittorTab\NodeEditorTab.xaml.cs">
+    <Compile Include="Views\NodeEditorTab\NodeDetailTemplateSelector.cs" />
+    <Compile Include="Views\NodeEditorTab\NodeEditorTab.xaml.cs">
       <DependentUpon>NodeEditorTab.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">

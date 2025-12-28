@@ -1,4 +1,4 @@
-﻿namespace MainApplication.Model.SaveData
+﻿namespace MainApplication.Models.SaveData
 {
     public class RootSaveData
     {

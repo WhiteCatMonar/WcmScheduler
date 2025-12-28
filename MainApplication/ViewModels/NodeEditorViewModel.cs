@@ -1,5 +1,5 @@
 ﻿using MainApplication.Infrastructure;
-using MainApplication.Model.SaveData;
+using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using System;

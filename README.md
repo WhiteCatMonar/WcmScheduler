@@ -9,6 +9,22 @@
 ├── 📂 Helpers
 │   └── 📄 VisualTreeUtils.cs                # WPF の VisualTree を探索・操作するユーティリティ
 │
+├── 📂 Infrastructure
+│   ├── 📄 FileService.cs                    # ファイル読込・保存
+│   ├── 📄 IFileService.cs                   # ファイル読込・保存のインターフェース
+│   ├── 📄 IJsonSerializerService.cs         # JSONのシリアライザのインターフェース
+│   └── 📄 JsonSerializerService.cs          # JSONのシリアライザ（シリアライズ/デシリアライズ）
+│
+├── 📂 Models
+│   └── 📂 SaveData                          # 保存するデータのモデル
+│       ├── 📄 ConnectionDataModel.cs        # 接続線管理用情報
+│       ├── 📄 NodeDataModel.cs              # ノード管理用情報
+│       ├── 📄 NodeDetailsDataModel.cs       # ノードごとの詳細情報
+│       ├── 📄 PortDataModel.cs              # ノード内ポート管理用情報
+│       ├── 📄 PositionDataModel.cs          # 座標管理用情報
+│       ├── 📄 RootSaveData.cs               # 保存するデータのルート情報
+│       └── 📄 TaskEditorSaveData.cs         # タスク編集機能についての情報
+│
 ├── 📂 Properties
 │   ├── 📄 AssemblyInfo.cs                   # アセンブリメタ情報
 │   ├── 📄 Resources.Designer.cs             # リソースの自動生成コード

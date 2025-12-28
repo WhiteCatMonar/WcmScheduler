@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MainApplication.Model.SaveData
+namespace MainApplication.Models.SaveData
 {
     public class NodeDataModel
     {
