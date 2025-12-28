@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using MainApplication.ViewModels;
+using System.Windows;
 
 namespace MainApplication
 {
@@ -7,40 +8,35 @@ namespace MainApplication
     /// </summary>
     public partial class MainWindow : Window
     {
+        public NodeEditorViewModel EditorViewModel { get; }
+
         public MainWindow()
         {
             InitializeComponent();
 
+            EditorViewModel = new NodeEditorViewModel();
+            DataContext = EditorViewModel;
+
+            Loaded += MainWindow_Loaded;
         }
 
-        private void New_Click(object sender, RoutedEventArgs e)
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            MessageBox.Show("新規作成がクリックされました");
+            EditorViewModel.RequestSaveAs += OnRequestSaveAs;
         }
 
-        private void Open_Click(object sender, RoutedEventArgs e)
+        private void OnRequestSaveAs()
         {
-            MessageBox.Show("開くがクリックされました");
-        }
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "JSON ファイル (*.json)|*.json"
+            };
 
-        private void Exit_Click(object sender, RoutedEventArgs e)
-        {
-            Application.Current.Shutdown();
-        }
-
-        private void Copy_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("コピーがクリックされました");
-        }
-
-        private void Paste_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("貼り付けがクリックされました");
-        }
-
-        private void About_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("このアプリはWPFで作成されています");
+            if (dialog.ShowDialog() == true)
+            {
+                var vm = DataContext as NodeEditorViewModel;
+                vm.SaveAs(dialog.FileName);
+            }
         }
     }
 }

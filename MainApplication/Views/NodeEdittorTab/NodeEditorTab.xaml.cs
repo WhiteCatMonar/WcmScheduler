@@ -13,9 +13,6 @@ namespace MainApplication.Views.NodeEditorTab
         public NodeEditorTab()
         {
             InitializeComponent();
-
-            /* ViewModelを生成してDataContextに設定 */
-            this.DataContext = new NodeEditorViewModel();
         }
 
         private void UserControl_PreviewKeyDown(object sender, KeyEventArgs e)

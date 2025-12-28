@@ -103,6 +103,7 @@ namespace MainApplication.ViewModels
 
             node.InputPorts.Add(new PortViewModel
             {
+                PortGuid = Guid.NewGuid(),
                 Name = "Input",
                 Type = PortViewModel.PortType.Input,
                 ParentNode = node
@@ -110,6 +111,7 @@ namespace MainApplication.ViewModels
 
             node.OutputPorts.Add(new PortViewModel
             {
+                PortGuid = Guid.NewGuid(),
                 Name = "Output",
                 Type = PortViewModel.PortType.Output,
                 ParentNode = node

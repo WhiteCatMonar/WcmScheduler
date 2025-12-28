@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 
@@ -8,6 +9,21 @@ namespace MainApplication.ViewModels
     {
         public enum PortType { Input, Output }
         public List<ConnectionViewModel> ConnectedConnections { get; } = new List<ConnectionViewModel>();
+
+        private Guid _portGuid;
+        public Guid PortGuid
+        {
+            get => _portGuid;
+            set
+            {
+                if (_portGuid == value)
+                {
+                    return;
+                }
+                _portGuid = value;
+                OnPropertyChanged(nameof(PortGuid));
+            }
+        }
 
         private string _name;
         public string Name

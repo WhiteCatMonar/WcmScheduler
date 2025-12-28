@@ -11,17 +11,8 @@
         <!-- メニューバー -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_ファイル">
-                <MenuItem Header="_新規作成" Click="New_Click"/>
-                <MenuItem Header="_開く" Click="Open_Click"/>
-                <Separator/>
-                <MenuItem Header="_終了" Click="Exit_Click"/>
-            </MenuItem>
-            <MenuItem Header="_編集">
-                <MenuItem Header="_コピー" Click="Copy_Click"/>
-                <MenuItem Header="_貼り付け" Click="Paste_Click"/>
-            </MenuItem>
-            <MenuItem Header="_ヘルプ">
-                <MenuItem Header="_バージョン情報" Click="About_Click"/>
+                <MenuItem Header="保存" Command="{Binding SaveCommand}" />
+                <MenuItem Header="名前を付けて保存" Command="{Binding SaveAsCommand}" />
             </MenuItem>
         </Menu>
         <!-- タブウィンドウ -->
@@ -30,7 +21,5 @@
                 <views_ne_tab:NodeEditorTab />
             </TabItem>
         </TabControl>
-
     </DockPanel>
-
 </Window>

@@ -9,8 +9,24 @@ namespace MainApplication.ViewModels
     {
         private readonly NodeEditorViewModel _editor;
 
+        private Guid _connectionGuid;
+        public Guid ConnectionGuid
+        {
+            get => _connectionGuid;
+            set
+            {
+                if (_connectionGuid == value)
+                {
+                    return;
+                }
+                _connectionGuid = value;
+                OnPropertyChanged(nameof(ConnectionGuid));
+            }
+        }
+
         public ConnectionViewModel(PortViewModel from, PortViewModel to, NodeEditorViewModel editor)
         {
+            ConnectionGuid = Guid.NewGuid();
             FromPort = from;
             ToPort = to;
             _editor = editor;

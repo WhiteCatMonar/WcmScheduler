@@ -45,6 +45,9 @@ namespace MainApplication.ViewModels
             };
         }
 
+        private readonly string _nodeType = "TaskNode";
+        public string NodeType => _nodeType;
+
         public void CommitHistory(string propertyName, object oldValue, object newValue)
         {
             if (!_undoRedo.IsApplyingHistory)

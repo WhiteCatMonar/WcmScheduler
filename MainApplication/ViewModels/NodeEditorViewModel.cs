@@ -1,7 +1,11 @@
-﻿using MainApplication.ViewModels.Core;
+﻿using MainApplication.Infrastructure;
+using MainApplication.Model.SaveData;
+using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using System;
 using System.ComponentModel;
+using System.Linq;
+using System.Text.Json;
 using System.Windows.Input;
 
 namespace MainApplication.ViewModels
@@ -130,7 +134,125 @@ namespace MainApplication.ViewModels
         /* ---------------------------------------------------------
          * DateTimeEditorService(日時編集用サービス)
          * --------------------------------------------------------- */
+
         public IDateTimeEditorService DateTimeEditor { get; } = new DateTimeEditorService();
+
+        /* ---------------------------------------------------------
+         * データ保存関連
+         * --------------------------------------------------------- */
+
+        /* ノード情報変換 */
+        private NodeDataModel ToDataModel(NodeViewModel vm)
+        {
+            return new NodeDataModel
+            {
+                Id = vm.NodeGuid.ToString(),
+                Type = vm.NodeType,
+
+                Position = new PositionDataModel
+                {
+                    X = vm.X,
+                    Y = vm.Y
+                },
+
+                Details = new NodeDetailsDataModel
+                {
+                    TaskName = vm.TaskName,
+                    Person = vm.Person,
+                    StartDateTime = vm.StartDateTime,
+                    EndDateTime = vm.EndDateTime,
+                    Comment = vm.Comment
+                },
+
+                Ports = vm.AllPorts.ToList().Select(p => new PortDataModel
+                {
+                    Id = p.PortGuid.ToString(),
+                    Name = p.Name,
+                    Type = p.Type.ToString()
+                }).ToList()
+            };
+        }
+
+        /* 接続線情報変換 */
+        private ConnectionDataModel ToDataModel(ConnectionViewModel vm)
+        {
+            return new ConnectionDataModel
+            {
+                Id = vm.ConnectionGuid.ToString(),
+                FromPortId = vm.FromPort.PortGuid.ToString(),
+                ToPortId = vm.ToPort.PortGuid.ToString()
+            };
+        }
+
+        /* タスク依存関係情報構築 */
+        private TaskEditorSaveData ToTaskEditorDataModel()
+        {
+            return new TaskEditorSaveData
+            {
+                Nodes = Nodes.Nodes
+                    .Select(n => ToDataModel(n))
+                    .ToList(),
+
+                Connections = Connections.Connections
+                    .Select(c => ToDataModel(c))
+                    .ToList()
+            };
+        }
+
+        /* セーブデータ構築 */
+        private RootSaveData ToRootDataModel()
+        {
+            return new RootSaveData
+            {
+                TaskEditor = ToTaskEditorDataModel()
+            };
+        }
+
+        /* JSONシリアライズ */
+        private readonly IJsonSerializerService _jsonSerializer;
+        public string Serialize()
+        {
+            var root = ToRootDataModel();
+            return _jsonSerializer.Serialize(root);
+        }
+
+        /* ファイル保存 */
+        private readonly IFileService _fileService;
+        public void SaveToFile(string path)
+        {
+            var json = Serialize();
+            _fileService.SaveText(path, json);
+        }
+
+        /* 保存用コマンド(既存ファイル) */
+        private string _currentFilePath;
+        public ICommand SaveCommand { get; }
+        public void Save()
+        {
+            if (string.IsNullOrEmpty(_currentFilePath))
+            {
+                RequestSaveAs?.Invoke();
+                return;
+            }
+
+            SaveToFile(_currentFilePath);
+        }
+
+        /* 保存用コマンド(新規ファイル) */
+        public ICommand SaveAsCommand { get; }
+        public void SaveAs(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
+            SaveToFile(path);
+            _currentFilePath = path;
+        }
+
+        /* Viewに新規保存イベントが発生したことを通知するAction */
+        public event Action RequestSaveAs;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -141,6 +263,9 @@ namespace MainApplication.ViewModels
             Nodes = new NodeCollectionViewModel(UndoRedo, DateTimeEditor, this);
             Connections = new ConnectionCollectionViewModel(UndoRedo, this);
             Grid = new GridManager();
+
+            _jsonSerializer = new JsonSerializerService();
+            _fileService = new FileService();
 
             UndoCommand = new RelayCommand(() =>
             {
@@ -154,6 +279,8 @@ namespace MainApplication.ViewModels
                 RefreshNodeAndConnectionPositions();
             }, () => UndoRedo.CanRedo);
             MoveToHistoryCommand = new RelayCommand<UndoRedoManager.HistoryItem>(item => UndoRedo.MoveToHistory(item));
+            SaveCommand = new RelayCommand(() => Save());
+            SaveAsCommand = new RelayCommand(() => RequestSaveAs?.Invoke());
 
             UndoRedo.CurrentHistoryChanged += OnCurrentHistoryChanged;
         }
