@@ -32,7 +32,7 @@
 │   │   ├── 📄 PortColorConverter.cs         # ポート種別 → 色
 │   │   └── 📄 SelectionBrushConverter.cs    # 選択状態 → ブラシ
 │   │
-│   ├── 📂 Infrastructure                    # 基盤ロジック（UI 非依存）
+│   ├── 📂 Core                              # 基盤ロジック（UI 非依存）
 │   │   ├── 📄 EditableField.cs              # 編集フィールドの共通ロジック（遅延コミット）
 │   │   ├── 📄 GridManager.cs                # 論理座標系・ズーム・パン管理
 │   │   └── 📄 UndoRedoManager.cs            # Undo/Redo の中枢
@@ -214,7 +214,7 @@ block
     style ConnectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style DateTimeEditorViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
 
-    %% Infrastructure / Managers (gray)
+    %% Core / Managers (gray)
     style EditableField fill:#F0F0F0,stroke:#999,color:#000000
     style PortViewModel fill:#F0F0F0,stroke:#999,color:#000000
     style UndoRedoManager fill:#F0F0F0,stroke:#999,color:#000000

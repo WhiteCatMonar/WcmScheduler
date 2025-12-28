@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels.Infrastructure;
+﻿using MainApplication.ViewModels.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;

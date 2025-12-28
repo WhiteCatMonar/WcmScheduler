@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels.Infrastructure;
+﻿using MainApplication.ViewModels.Core;
 
 namespace MainApplication.ViewModels.Actions
 {

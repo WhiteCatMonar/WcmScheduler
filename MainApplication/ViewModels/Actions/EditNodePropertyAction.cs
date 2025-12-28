@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels.Infrastructure;
+﻿using MainApplication.ViewModels.Core;
 using System.ComponentModel;
 using System.Reflection;
 

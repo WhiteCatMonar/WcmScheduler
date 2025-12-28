@@ -1,5 +1,5 @@
 ﻿using MainApplication.ViewModels.Actions;
-using MainApplication.ViewModels.Infrastructure;
+using MainApplication.ViewModels.Core;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;

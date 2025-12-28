@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 
-namespace MainApplication.ViewModels.Infrastructure
+namespace MainApplication.ViewModels.Core
 {
     public class GridManager : INotifyPropertyChanged
     {

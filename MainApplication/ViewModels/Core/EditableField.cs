@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 
-namespace MainApplication.ViewModels.Infrastructure
+namespace MainApplication.ViewModels.Core
 {
     public class EditableField<T>
     {
