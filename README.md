@@ -56,7 +56,7 @@
 │   │   ├── 📄 ListBoxAutoScrollBehavior.cs  # ListBox の自動スクロール
 │   │   └── 📄 ListBoxItemDoubleClickBehavior.cs # ダブルクリック動作
 │   │
-│   ├── 📂 NodeEdittorTab                    # ノードエディタ UI 一式
+│   ├── 📂 NodeEditorTab                    # ノードエディタ UI 一式
 │   │   ├── 📂 Controls
 │   │   │   ├── 📄 HistoryControl.xaml       # Undo/Redo 履歴表示
 │   │   │   ├── 📄 HistoryControl.xaml.cs
