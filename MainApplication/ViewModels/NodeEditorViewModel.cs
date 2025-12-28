@@ -152,6 +152,33 @@ namespace MainApplication.ViewModels
         public IDateTimeEditorService DateTimeEditor { get; } = new DateTimeEditorService();
 
         /* ---------------------------------------------------------
+         * データ読み込み関連
+         * --------------------------------------------------------- */
+        public void LoadFromTaskEditorDataModel(TaskEditorSaveData data)
+        {
+            /* 既存データをクリア */
+            Nodes.Nodes.Clear();
+            Connections.Connections.Clear();
+
+            /* ノードを復元 */
+            foreach (var nodeData in data.Nodes)
+            {
+                var nodeVM = NodeViewModel.FromDataModel(nodeData, this);
+                Nodes.Nodes.Add(nodeVM);
+            }
+
+            /* 接続線を復元 */
+            foreach (var connData in data.Connections)
+            {
+                var connVM = ConnectionViewModel.FromDataModel(connData, this);
+                Connections.Connections.Add(connVM);
+            }
+
+            RefreshNodeAndConnectionPositions();
+        }
+
+
+        /* ---------------------------------------------------------
          * データ保存関連
          * --------------------------------------------------------- */
 

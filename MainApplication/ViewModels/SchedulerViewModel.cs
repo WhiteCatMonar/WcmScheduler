@@ -45,6 +45,7 @@ namespace MainApplication
         private readonly IJsonSerializerService _jsonSerializer;
         private readonly IFileService _fileService;
 
+        public ICommand LoadCommand { get; }
         public ICommand SaveCommand { get; }
         public ICommand SaveAsCommand { get; }
 
@@ -73,8 +74,39 @@ namespace MainApplication
             SelectedTab = NodeEditor;
 
             /* コマンド */
+            LoadCommand = new RelayCommand(() => RequestLoad?.Invoke());
             SaveCommand = new RelayCommand(() => Save());
             SaveAsCommand = new RelayCommand(() => RequestSaveAs?.Invoke());
+        }
+
+        /* ---------------------------------------------------------
+         * 読み込み処理
+         * --------------------------------------------------------- */
+
+        public void LoadFromFile(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return;
+
+            var json = _fileService.LoadText(path);
+            var root = _jsonSerializer.Deserialize<RootSaveData>(json);
+
+            if (root == null)
+                return;
+
+            ApplyRootDataModel(root);
+
+            _currentFilePath = path;
+        }
+
+        private void ApplyRootDataModel(RootSaveData root)
+        {
+            if (root.TaskEditor != null)
+            {
+                NodeEditor.LoadFromTaskEditorDataModel(root.TaskEditor);
+
+                /* TODO:タブごとの機能追加  */
+            }
         }
 
         /* ---------------------------------------------------------
@@ -109,7 +141,7 @@ namespace MainApplication
         }
 
         /* ---------------------------------------------------------
-         * RootSaveData の構築
+         * RootSaveDataの構築
          * --------------------------------------------------------- */
 
         private RootSaveData ToRootDataModel()
@@ -122,9 +154,10 @@ namespace MainApplication
         }
 
         /* ---------------------------------------------------------
-         * View へ SaveAs を依頼するイベント
+         * ViewModelからViewへ依頼するためのイベント
          * --------------------------------------------------------- */
 
+        public event Action RequestLoad;
         public event Action RequestSaveAs;
 
         /* ---------------------------------------------------------

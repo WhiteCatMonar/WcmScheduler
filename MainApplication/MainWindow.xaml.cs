@@ -25,7 +25,21 @@ namespace MainApplication
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            SchedulerVM.RequestLoad += OnRequestLoad;
             SchedulerVM.RequestSaveAs += OnRequestSaveAs;
+        }
+
+        private void OnRequestLoad()
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "JSON ファイル (*.json)|*.json"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                SchedulerVM.LoadFromFile(dialog.FileName);
+            }
         }
 
         private void OnRequestSaveAs()

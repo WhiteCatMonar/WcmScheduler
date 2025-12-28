@@ -1,7 +1,9 @@
-﻿using System;
+﻿using MainApplication.Models.SaveData;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
+using static MainApplication.ViewModels.PortViewModel;
 
 namespace MainApplication.ViewModels
 {
@@ -140,6 +142,34 @@ namespace MainApplication.ViewModels
                     OnPropertyChanged(nameof(IsSelected));
                 }
             }
+        }
+
+        public static ConnectionViewModel FromDataModel(ConnectionDataModel data, NodeEditorViewModel editor)
+        {
+            PortViewModel from = null;
+            PortViewModel to = null;
+
+            foreach (NodeViewModel node in editor.Nodes.Nodes)
+            {
+                foreach (PortViewModel port in node.AllPorts)
+                {
+                    if (port.PortGuid.ToString() == data.FromPortId)
+                    {
+                        from = port;
+                    }
+                    if (port.PortGuid.ToString() == data.ToPortId)
+                    {
+                        to = port;
+                    }
+                }
+            }
+            if ((from == null) || (to == null))
+            {
+                return null;
+            }
+            ConnectionViewModel loadedConnection = new ConnectionViewModel(from, to, editor);
+            loadedConnection.ConnectionGuid = Guid.Parse(data.Id);
+            return loadedConnection;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

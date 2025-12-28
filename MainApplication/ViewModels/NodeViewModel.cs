@@ -1,4 +1,5 @@
-﻿using MainApplication.ViewModels.Actions;
+﻿using MainApplication.Models.SaveData;
+using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using System;
@@ -8,6 +9,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Threading;
+using System.Xml.Linq;
+using static MainApplication.ViewModels.PortViewModel;
 
 namespace MainApplication.ViewModels
 {
@@ -45,8 +48,20 @@ namespace MainApplication.ViewModels
             };
         }
 
-        private readonly string _nodeType = "TaskNode";
-        public string NodeType => _nodeType;
+        private string _nodeType = "TaskNode";
+        public string NodeType
+        {
+            get => _nodeType;
+            set
+            {
+                if (_nodeType == value)
+                {
+                    return;
+                }
+                _nodeType = value;
+                OnPropertyChanged(nameof(NodeType));
+            }
+        }
 
         public void CommitHistory(string propertyName, object oldValue, object newValue)
         {
@@ -316,6 +331,47 @@ namespace MainApplication.ViewModels
             {
                 field.TryCommit(CommitHistory);
             }
+        }
+
+        public static NodeViewModel FromDataModel(NodeDataModel data, NodeEditorViewModel editor)
+        {
+            NodeViewModel loadedNode = new NodeViewModel(editor.UndoRedo, editor.DateTimeEditor)
+            {
+                NodeGuid = Guid.Parse(data.Id),
+                NodeType = data.Type,
+                X = data.Position.X,
+                Y = data.Position.Y,
+                TaskName = data.Details.TaskName,
+                Person = data.Details.Person,
+                StartDateTime = data.Details.StartDateTime,
+                EndDateTime = data.Details.EndDateTime,
+                Comment = data.Details.Comment
+            };
+            foreach (var port in data.Ports)
+            {
+                switch ((PortType)Enum.Parse(typeof(PortType), port.Type))
+                {
+                    case PortViewModel.PortType.Input:
+                        loadedNode.InputPorts.Add(new PortViewModel
+                        {
+                            PortGuid = Guid.Parse(port.Id),
+                            Name = port.Name,
+                            Type = PortViewModel.PortType.Input,
+                            ParentNode = loadedNode
+                        });
+                        break;
+                    case PortViewModel.PortType.Output:
+                        loadedNode.OutputPorts.Add(new PortViewModel
+                        {
+                            PortGuid = Guid.Parse(port.Id),
+                            Name = port.Name,
+                            Type = PortViewModel.PortType.Output,
+                            ParentNode = loadedNode
+                        });
+                        break;
+                }
+            }
+            return loadedNode;
         }
 
         public ICommand NotifyEditedCommand { get; }

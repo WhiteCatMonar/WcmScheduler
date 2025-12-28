@@ -15,6 +15,7 @@
         <!-- メニューバー -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_ファイル">
+                <MenuItem Header="読み込み" Command="{Binding LoadCommand}" />
                 <MenuItem Header="保存" Command="{Binding SaveCommand}" />
                 <MenuItem Header="名前を付けて保存" Command="{Binding SaveAsCommand}" />
             </MenuItem>
