@@ -5,7 +5,6 @@
              xmlns:vm="clr-namespace:MainApplication.ViewModels"
              xmlns:views="clr-namespace:MainApplication.Views.NodeEditorTab"
              xmlns:controls="clr-namespace:MainApplication.Views.NodeEditorTab.Controls"
-             xmlns:converters="clr-namespace:MainApplication.ViewModels.Converters"
              PreviewKeyDown="UserControl_PreviewKeyDown"
              Height="Auto" Width="Auto">
     <UserControl.Resources>
@@ -13,8 +12,7 @@
             <Setter Property="HorizontalAlignment" Value="Stretch" />
             <Setter Property="Width" Value="5" />
         </Style>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        
+
         <!-- プレースホルダー用テンプレート -->
         <DataTemplate x:Key="PlaceholderTemplate">
             <TextBlock Text="タスクが選択されていません"
@@ -72,7 +70,7 @@
             <StackPanel Grid.Row="1" Margin="5">
                 <TextBlock Text="タスク情報" FontWeight="Bold" Margin="0,0,0,5"/>
                 <ContentControl Content="{Binding Nodes.SelectedNode}"
-                            ContentTemplateSelector="{StaticResource NodeDetailTemplateSelector}"/>
+                                ContentTemplateSelector="{StaticResource NodeDetailTemplateSelector}"/>
             </StackPanel>
             
             <!-- 固定UI：履歴操作 -->

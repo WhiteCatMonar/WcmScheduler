@@ -16,6 +16,20 @@ namespace MainApplication.ViewModels
          * 基本プロパティ(UI の表示状態)
          * --------------------------------------------------------- */
 
+        private string _modelName;
+        public string ModelName
+        {
+            get => _modelName;
+            set
+            {
+                if (_modelName != value)
+                {
+                    _modelName = value;
+                    OnPropertyChanged(nameof(ModelName));
+                }
+            }
+        }
+
         private double _baseCanvasWidth;
         public double BaseCanvasWidth
         {
@@ -185,7 +199,7 @@ namespace MainApplication.ViewModels
         }
 
         /* タスク依存関係情報構築 */
-        private TaskEditorSaveData ToTaskEditorDataModel()
+        public TaskEditorSaveData ToTaskEditorDataModel()
         {
             return new TaskEditorSaveData
             {
@@ -199,73 +213,17 @@ namespace MainApplication.ViewModels
             };
         }
 
-        /* セーブデータ構築 */
-        private RootSaveData ToRootDataModel()
-        {
-            return new RootSaveData
-            {
-                TaskEditor = ToTaskEditorDataModel()
-            };
-        }
-
-        /* JSONシリアライズ */
-        private readonly IJsonSerializerService _jsonSerializer;
-        public string Serialize()
-        {
-            var root = ToRootDataModel();
-            return _jsonSerializer.Serialize(root);
-        }
-
-        /* ファイル保存 */
-        private readonly IFileService _fileService;
-        public void SaveToFile(string path)
-        {
-            var json = Serialize();
-            _fileService.SaveText(path, json);
-        }
-
-        /* 保存用コマンド(既存ファイル) */
-        private string _currentFilePath;
-        public ICommand SaveCommand { get; }
-        public void Save()
-        {
-            if (string.IsNullOrEmpty(_currentFilePath))
-            {
-                RequestSaveAs?.Invoke();
-                return;
-            }
-
-            SaveToFile(_currentFilePath);
-        }
-
-        /* 保存用コマンド(新規ファイル) */
-        public ICommand SaveAsCommand { get; }
-        public void SaveAs(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                return;
-            }
-
-            SaveToFile(path);
-            _currentFilePath = path;
-        }
-
-        /* Viewに新規保存イベントが発生したことを通知するAction */
-        public event Action RequestSaveAs;
-
         /* ---------------------------------------------------------
          * コンストラクタ
          * --------------------------------------------------------- */
 
-        public NodeEditorViewModel()
+        public NodeEditorViewModel(string modelName)
         {
+            ModelName = modelName;
+
             Nodes = new NodeCollectionViewModel(UndoRedo, DateTimeEditor, this);
             Connections = new ConnectionCollectionViewModel(UndoRedo, this);
             Grid = new GridManager();
-
-            _jsonSerializer = new JsonSerializerService();
-            _fileService = new FileService();
 
             UndoCommand = new RelayCommand(() =>
             {
@@ -279,8 +237,6 @@ namespace MainApplication.ViewModels
                 RefreshNodeAndConnectionPositions();
             }, () => UndoRedo.CanRedo);
             MoveToHistoryCommand = new RelayCommand<UndoRedoManager.HistoryItem>(item => UndoRedo.MoveToHistory(item));
-            SaveCommand = new RelayCommand(() => Save());
-            SaveAsCommand = new RelayCommand(() => RequestSaveAs?.Invoke());
 
             UndoRedo.CurrentHistoryChanged += OnCurrentHistoryChanged;
         }

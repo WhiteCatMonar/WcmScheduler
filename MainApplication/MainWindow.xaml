@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MainApplication"
         xmlns:views_ne_tab="clr-namespace:MainApplication.Views.NodeEditorTab"
+        xmlns:converters="clr-namespace:MainApplication.ViewModels.Converters"
         mc:Ignorable="d"
         Title="WcmScheduler" Height="720" Width="1280">
+    <Window.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
     <DockPanel>
         <!-- メニューバー -->
         <Menu DockPanel.Dock="Top">
@@ -16,10 +20,23 @@
             </MenuItem>
         </Menu>
         <!-- タブウィンドウ -->
-        <TabControl x:Name="NodeEditorTab" DockPanel.Dock="Top">
-            <TabItem Header="タスク編集">
-                <views_ne_tab:NodeEditorTab />
-            </TabItem>
+        <TabControl ItemsSource="{Binding Tabs}"
+                    SelectedItem="{Binding SelectedTab}">
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding ModelName}" />
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <views_ne_tab:NodeEditorTab
+                        Visibility="{Binding DataContext.IsNodeEditor,
+                                     RelativeSource={RelativeSource AncestorType=Window}, 
+                                     Converter={StaticResource BoolToVisibilityConverter}
+                        }"/>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
         </TabControl>
     </DockPanel>
 </Window>

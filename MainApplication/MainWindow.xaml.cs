@@ -1,4 +1,5 @@
 ﻿using MainApplication.ViewModels;
+using System.Collections.Generic;
 using System.Windows;
 
 namespace MainApplication
@@ -8,21 +9,23 @@ namespace MainApplication
     /// </summary>
     public partial class MainWindow : Window
     {
-        public NodeEditorViewModel EditorViewModel { get; }
+        public SchedulerViewModel SchedulerVM { get; }
 
         public MainWindow()
         {
             InitializeComponent();
 
-            EditorViewModel = new NodeEditorViewModel();
-            DataContext = EditorViewModel;
+            SchedulerVM = new SchedulerViewModel(new Dictionary<string, string>(){
+                { "NodeEditor", "タスク編集" }
+            });
+            DataContext = SchedulerVM;
 
             Loaded += MainWindow_Loaded;
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            EditorViewModel.RequestSaveAs += OnRequestSaveAs;
+            SchedulerVM.RequestSaveAs += OnRequestSaveAs;
         }
 
         private void OnRequestSaveAs()
@@ -34,8 +37,7 @@ namespace MainApplication
 
             if (dialog.ShowDialog() == true)
             {
-                var vm = DataContext as NodeEditorViewModel;
-                vm.SaveAs(dialog.FileName);
+                SchedulerVM.SaveAs(dialog.FileName);
             }
         }
     }

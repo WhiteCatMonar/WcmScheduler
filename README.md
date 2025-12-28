@@ -58,14 +58,15 @@
 │   │   └── 📄 IDateTimeEditorService.cs     # 日時編集サービスのインターフェース
 │   │
 │   ├── 📄 ConnectionCollectionViewModel.cs  # 接続線の一覧管理
-│   ├── 📄 ConnectionViewModel.cs            # 接続線 1 本の状態
+│   ├── 📄 ConnectionViewModel.cs            # 接続線1本の状態
 │   ├── 📄 DateTimeEditorViewModel.cs        # 日時編集ダイアログの ViewModel（UI 入力ロジック）
 │   ├── 📄 LineViewModel.cs                  # 線分の描画情報（接続線の補助）
 │   ├── 📄 NodeCollectionViewModel.cs        # ノード一覧管理（生成・削除・選択）
-│   ├── 📄 NodeEditorViewModel.cs            # エディタ全体の状態管理（ズーム・パン・Undo/Redo）
-│   ├── 📄 NodeViewModel.cs                  # ノード 1 個の状態・編集ロジック
+│   ├── 📄 NodeEditorViewModel.cs            # ノードエディタ全体の状態管理（ズーム・パン・Undo/Redo）
+│   ├── 📄 NodeViewModel.cs                  # ノード1個の状態・編集ロジック
 │   ├── 📄 PortViewModel.cs                  # ポート（入出力端子）の状態
-│   └── 📄 RelayCommand.cs                   # ICommand 実装（MVVM の基本）
+│   ├── 📄 RelayCommand.cs                   # ICommand 実装（MVVM の基本）
+│   └── 📄 SchedulerViewModel.cs             # アプリケーション全体の状態管理
 │
 ├── 📂 Views
 │   ├── 📂 Behaviors                         # XAML の動作拡張
@@ -107,29 +108,42 @@ block
     columns 7
 
     %% ============================
-    %% Views
+    %% Layouts (Views / ViewModels)
     %% ============================
-    block:views:7
-        columns 7
-        DateTimeEditorWindow_View["DateTimeEditorWindow(View)"]
-        NodeControl
-        PortControl
-        NodeDetailControl
-        HistoryControl
-        NodeEditorControl
-        NodeEditorTab
-    end
+    DateTimeEditorWindow_View["DateTimeEditorWindow(View)"]
+    MainWindow:6
 
     space:7
 
-    %% ============================
-    %% Class (ViewModels / Core)
-    %% ============================
+    space
+    NodeEditorTab:4
+    SchedulerViewModel:2
+    
+    space:7
+    
+    space
+    NodeEditorControl
+    space:2
+    space
+    space:2
+    
+    space:7
+    
+    space
+    NodeControl
+    space:5
+
+    space:7
+
+    space
+    PortControl
+    space:5
+
     space
     space
     space
     space
-    space
+    NodeDetailControl
     NodeEditorViewModel:2
 
     space:7
@@ -137,7 +151,7 @@ block
     space
     space
     space
-    NodeCollectionViewModel
+    space
     space
     space
     ConnectionCollectionViewModel
@@ -146,7 +160,9 @@ block
 
     space
     NodeViewModel
-    space:3
+    space
+    NodeCollectionViewModel
+    HistoryControl
     space
     ConnectionViewModel
     
@@ -173,8 +189,32 @@ block
     space:6
 
     %% ============================
+    %% Dependencies (View)
+    %% ============================
+    MainWindow --> NodeEditorTab
+    NodeEditorTab --> NodeEditorControl
+    NodeEditorTab --> NodeDetailControl
+    NodeDetailControl --> HistoryControl
+    NodeEditorControl --> NodeControl
+    NodeControl --> PortControl
+
+    %% ============================
+    %% Dependencies (View → ViewModel)
+    %% ============================
+    MainWindow --> SchedulerViewModel
+    NodeEditorControl --> NodeEditorViewModel
+    NodeControl --> NodeViewModel
+    PortControl --> PortViewModel
+    NodeDetailControl --> NodeViewModel
+    HistoryControl --> UndoRedoManager
+    NodeEditorTab --> NodeEditorViewModel
+    DateTimeEditorWindow_View --> DateTimeEditorViewModel
+
+    %% ============================
     %% Dependencies (ViewModel)
     %% ============================
+    SchedulerViewModel --> NodeEditorViewModel
+
     NodeEditorViewModel --> NodeCollectionViewModel
     NodeEditorViewModel --> ConnectionCollectionViewModel
     NodeEditorViewModel --> GridManager
@@ -197,23 +237,13 @@ block
     DateTimeEditorService --> DateTimeEditorWindow_Class
     DateTimeEditorWindow_Class --> DateTimeEditorViewModel
 
-    %% ============================
-    %% Dependencies (View → ViewModel)
-    %% ============================
-    NodeEditorControl --> NodeEditorViewModel
-    NodeControl --> NodeViewModel
-    PortControl --> PortViewModel
-    NodeDetailControl --> NodeViewModel
-    HistoryControl --> UndoRedoManager
-    NodeEditorTab --> NodeEditorViewModel
-    DateTimeEditorWindow_View --> DateTimeEditorViewModel
-
     
     %% ============================
     %% Coloring
     %% ============================
 
     %% Views (blue)
+    style MainWindow fill:#D0E8FF,stroke:#4A90E2,color:#000000
     style DateTimeEditorWindow_View fill:#D0E8FF,stroke:#4A90E2,color:#000000
     style NodeControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
     style PortControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
@@ -223,6 +253,7 @@ block
     style NodeEditorTab fill:#D0E8FF,stroke:#4A90E2,color:#000000
 
     %% ViewModels (green)
+    style SchedulerViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style NodeEditorViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style NodeCollectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style ConnectionCollectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
