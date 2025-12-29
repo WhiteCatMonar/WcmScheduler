@@ -45,7 +45,7 @@ namespace MainApplication.Mappers
             {
                 return null;
             }
-            ConnectionViewModel loadedConnection = new ConnectionViewModel(from, to, editor);
+            ConnectionViewModel loadedConnection = new ConnectionViewModel(from, to);
             loadedConnection.ConnectionGuid = Guid.Parse(data.Id);
             return loadedConnection;
         }

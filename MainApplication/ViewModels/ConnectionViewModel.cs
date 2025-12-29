@@ -7,7 +7,6 @@ namespace MainApplication.ViewModels
 {
     public class ConnectionViewModel : INotifyPropertyChanged
     {
-        private readonly NodeEditorViewModel _editor;
 
         private Guid _connectionGuid;
         public Guid ConnectionGuid
@@ -24,12 +23,11 @@ namespace MainApplication.ViewModels
             }
         }
 
-        public ConnectionViewModel(PortViewModel from, PortViewModel to, NodeEditorViewModel editor)
+        public ConnectionViewModel(PortViewModel from, PortViewModel to)
         {
             ConnectionGuid = Guid.NewGuid();
             FromPort = from;
             ToPort = to;
-            _editor = editor;
 
             /* 初期値を設定 */
             FromPosition = FromPort?.AbsolutePosition ?? new Point(0, 0);

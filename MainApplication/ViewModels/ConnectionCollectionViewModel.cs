@@ -113,7 +113,7 @@ namespace MainApplication.ViewModels
                 return; /* 同一ノード内禁止 */
             }
 
-            var connection = new ConnectionViewModel(fromPort, toPort, _editor);
+            var connection = new ConnectionViewModel(fromPort, toPort);
 
             fromPort.ConnectedConnections.Add(connection);
             toPort.ConnectedConnections.Add(connection);
