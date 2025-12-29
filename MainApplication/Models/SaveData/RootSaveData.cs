@@ -2,6 +2,6 @@
 {
     public class RootSaveData
     {
-        public TaskEditorSaveData TaskEditor { get; set; }
+        public TaskEditorDataModel TaskEditor { get; set; }
     }
 }

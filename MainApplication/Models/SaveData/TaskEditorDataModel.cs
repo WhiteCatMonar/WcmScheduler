@@ -2,7 +2,7 @@
 
 namespace MainApplication.Models.SaveData
 {
-    public class TaskEditorSaveData
+    public class TaskEditorDataModel
     {
         public List<NodeDataModel> Nodes { get; set; } = new List<NodeDataModel>();
         public List<ConnectionDataModel> Connections { get; set; } = new List<ConnectionDataModel>();

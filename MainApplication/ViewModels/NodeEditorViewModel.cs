@@ -154,7 +154,7 @@ namespace MainApplication.ViewModels
         /* ---------------------------------------------------------
          * データ読み込み関連
          * --------------------------------------------------------- */
-        public void LoadFromTaskEditorDataModel(TaskEditorSaveData data)
+        public void LoadFromTaskEditorDataModel(TaskEditorDataModel data)
         {
             /* 既存データをクリア */
             Nodes.Nodes.Clear();
@@ -226,9 +226,9 @@ namespace MainApplication.ViewModels
         }
 
         /* タスク依存関係情報構築 */
-        public TaskEditorSaveData ToTaskEditorDataModel()
+        public TaskEditorDataModel ToTaskEditorDataModel()
         {
-            return new TaskEditorSaveData
+            return new TaskEditorDataModel
             {
                 Nodes = Nodes.Nodes
                     .Select(n => ToDataModel(n))

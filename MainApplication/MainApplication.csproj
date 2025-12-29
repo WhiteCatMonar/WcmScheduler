@@ -107,7 +107,7 @@
     <Compile Include="Models\SaveData\PortDataModel.cs" />
     <Compile Include="Models\SaveData\PositionDataModel.cs" />
     <Compile Include="Models\SaveData\RootSaveData.cs" />
-    <Compile Include="Models\SaveData\TaskEditorSaveData.cs" />
+    <Compile Include="Models\SaveData\TaskEditorDataModel.cs" />
     <Compile Include="ViewModels\Actions\AddConnectionAction.cs" />
     <Compile Include="ViewModels\Actions\AddNodeAction.cs" />
     <Compile Include="ViewModels\Actions\DeleteConnectionAction.cs" />
