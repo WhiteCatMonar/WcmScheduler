@@ -30,7 +30,6 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 editorVM.Connections.DraggingFromPort = port;
 
 
-                Debug.WriteLine($"IsDraggingConnection: {editorVM.Connections.IsDraggingConnection}");
 
                 _isDragging = true;
                 CaptureMouse();
