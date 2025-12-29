@@ -1,9 +1,7 @@
-﻿using MainApplication.Models.SaveData;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
-using static MainApplication.ViewModels.PortViewModel;
 
 namespace MainApplication.ViewModels
 {

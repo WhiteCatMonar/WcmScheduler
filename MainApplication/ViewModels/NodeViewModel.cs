@@ -1,5 +1,4 @@
-﻿using MainApplication.Models.SaveData;
-using MainApplication.ViewModels.Actions;
+﻿using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using System;
@@ -9,8 +8,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
 using System.Windows.Threading;
-using System.Xml.Linq;
-using static MainApplication.ViewModels.PortViewModel;
 
 namespace MainApplication.ViewModels
 {

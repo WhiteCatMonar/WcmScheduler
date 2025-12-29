@@ -1,5 +1,4 @@
-﻿using MainApplication.ViewModels;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Windows;
 
 namespace MainApplication
