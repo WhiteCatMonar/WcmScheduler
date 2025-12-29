@@ -131,7 +131,7 @@ namespace MainApplication.ViewModels
          * 操作履歴管理
          * --------------------------------------------------------- */
 
-        static UndoRedoManager _undoredo = new UndoRedoManager();
+        private UndoRedoManager _undoredo = new UndoRedoManager();
         public UndoRedoManager UndoRedo
         {
             get => _undoredo;
@@ -160,7 +160,7 @@ namespace MainApplication.ViewModels
          * DateTimeEditorService(日時編集用サービス)
          * --------------------------------------------------------- */
 
-        static IDateTimeEditorService _dateTimeEditor = new DateTimeEditorService();
+        private IDateTimeEditorService _dateTimeEditor = new DateTimeEditorService();
         public IDateTimeEditorService DateTimeEditor
         {
             get => _dateTimeEditor;
