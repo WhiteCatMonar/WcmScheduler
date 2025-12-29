@@ -11,18 +11,38 @@ using System.Windows.Shapes;
 namespace MainApplication.Views.NodeEditorTab
 {
     /// <summary>
-    /// NodeEditorControl.xaml の相互作用ロジック
+    /// ノードエディタ全体のUI操作(ズーム・パン・選択解除など)を担当するUserControl。
+    /// NodeEditorCanvas上でのユーザー操作をViewModelに橋渡しする。
     /// </summary>
     public partial class NodeEditorControl : UserControl
     {
+        /* ---------------------------------------------------------
+         * 定数(ズーム制限)
+         * --------------------------------------------------------- */
+
         private const double MinZoom = 0.2;
         private const double MaxZoom = 3.0;
 
+        /* ---------------------------------------------------------
+         * コンストラクタ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// NodeEditorControlを初期化する。
+        /// </summary>
         public NodeEditorControl()
         {
             InitializeComponent();
         }
 
+        /* ---------------------------------------------------------
+         * Loaded(初期化処理)
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 初回ロード時にフォーカスを設定し、
+        /// ViewModelのGridManagerにUI状態を反映する。
+        /// </summary>
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             Keyboard.Focus(this);
@@ -34,20 +54,31 @@ namespace MainApplication.Views.NodeEditorTab
             }
         }
 
+        /* ---------------------------------------------------------
+         * キャンバスクリック処理(選択解除など)
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// キャンバス上でクリックされたとき、
+        /// ノードや接続線以外をクリックした場合は選択解除を行う。
+        /// </summary>
         private void NodeEditorCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (DataContext is NodeEditorViewModel editor)
             {
+                /* 他ノードの編集内容を確定 */
                 editor.CommitCurrentNodeEdits();
             }
 
             var clickedElement = e.OriginalSource as DependencyObject;
 
+            /* TextBoxをクリックした場合は選択解除しない */
             if (clickedElement is TextBoxBase)
             {
                 return;
             }
 
+            /* クリック位置のノードor接続線を探索 */
             var node = FindParent<NodeControl>(clickedElement);
             var connectionPath = FindParent<Path>(clickedElement);
 
@@ -69,6 +100,9 @@ namespace MainApplication.Views.NodeEditorTab
             }
         }
 
+        /// <summary>
+        /// VisualTreeを遡って指定型の親要素を探す。
+        /// </summary>
         private static T FindParent<T>(DependencyObject child) where T : DependencyObject
         {
             while (child != null)
@@ -83,6 +117,13 @@ namespace MainApplication.Views.NodeEditorTab
             return null;
         }
 
+        /* ---------------------------------------------------------
+         * キャンバスサイズ変更(論理座標系の更新)
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// キャンバスの表示領域が変わったら、GridManagerに反映する。
+        /// </summary>
         private void NodeEditorArea_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (DataContext is NodeEditorViewModel vm)
@@ -92,9 +133,16 @@ namespace MainApplication.Views.NodeEditorTab
             }
         }
 
+        /* ---------------------------------------------------------
+         * ズーム処理(マウスホイール)
+         * --------------------------------------------------------- */
+
         private Point _lastPanPoint;
         private bool _isPanning;
 
+        /// <summary>
+        /// マウスホイールでズームし、ズーム中心をマウス位置に合わせる。
+        /// </summary>
         private void NodeEditorCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (!(DataContext is NodeEditorViewModel vm))
@@ -124,6 +172,10 @@ namespace MainApplication.Views.NodeEditorTab
                 vm.PanY += deltaY - (deltaY * appliedFactor);
             }
         }
+
+        /* ---------------------------------------------------------
+         * パン処理(中クリックドラッグ)
+         * --------------------------------------------------------- */
 
         private void StartPanning(Point startPoint)
         {
@@ -173,3 +225,5 @@ namespace MainApplication.Views.NodeEditorTab
         }
     }
 }
+
+/* --- End of file --- */

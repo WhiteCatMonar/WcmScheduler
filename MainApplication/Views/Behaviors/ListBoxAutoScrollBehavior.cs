@@ -9,8 +9,24 @@ using System.Windows.Controls;
 
 namespace MainApplication.Views.Behaviors
 {
+    /// <summary>
+    /// ListBoxに対して「現在の項目(IsCurrent = true)へ自動スクロールする」
+    /// という動作を付与する添付ビヘイビア。
+    /// 
+    /// Undo/Redoの履歴ビューなど、
+    /// 「現在位置が変わったら自動でスクロールしてほしい」ケースで使用する。
+    /// </summary>
     public static class ListBoxAutoScrollBehavior
     {
+        /* ---------------------------------------------------------
+         * AutoScroll添付プロパティ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// AutoScrollを有効にするかどうかを示す添付プロパティ。
+        /// trueにすると、ListBoxのItemsSourceと各項目を監視し、
+        /// IsCurrent = trueの項目へ自動スクロールする。
+        /// </summary>
         public static readonly DependencyProperty AutoScrollProperty =
             DependencyProperty.RegisterAttached(
                 "AutoScroll", typeof(bool), typeof(ListBoxAutoScrollBehavior),
@@ -18,8 +34,13 @@ namespace MainApplication.Views.Behaviors
 
         public static void SetAutoScroll(DependencyObject obj, bool value) =>
             obj.SetValue(AutoScrollProperty, value);
+
         public static bool GetAutoScroll(DependencyObject obj) =>
             (bool)obj.GetValue(AutoScrollProperty);
+
+        /* ---------------------------------------------------------
+         * AutoScroll有効化／無効化時の処理
+         * --------------------------------------------------------- */
 
         private static void OnAutoScrollChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
@@ -41,6 +62,14 @@ namespace MainApplication.Views.Behaviors
             }
         }
 
+        /* ---------------------------------------------------------
+         * 購読解除処理
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// ListBoxからすべてのイベント購読を解除し、
+        /// 内部で保持しているハンドラも破棄する。
+        /// </summary>
         private static void Detach(ListBox listBox)
         {
             try
@@ -70,6 +99,10 @@ namespace MainApplication.Views.Behaviors
             }
         }
 
+        /* ---------------------------------------------------------
+         * ListBoxイベント
+         * --------------------------------------------------------- */
+
         private static void ListBox_Loaded(object sender, RoutedEventArgs e)
         {
             if (sender is ListBox listBox)
@@ -95,23 +128,34 @@ namespace MainApplication.Views.Behaviors
             }
         }
 
+        /* ---------------------------------------------------------
+         * ItemsSourceのCollectionChangedを管理
+         * --------------------------------------------------------- */
+
         private static readonly Dictionary<ListBox, NotifyCollectionChangedEventHandler> _collectionHandlers
             = new Dictionary<ListBox, NotifyCollectionChangedEventHandler>();
+
+        /// <summary>
+        /// ListBox の ItemsSource を監視し、HistoryItem の追加時に購読を行う。
+        /// </summary>
         private static void TryAttach(ListBox listBox)
         {
             try
             {
                 if (listBox.ItemsSource is INotifyCollectionChanged collection)
                 {
+                    /* 既存ハンドラを解除 */
                     if (_collectionHandlers.TryGetValue(listBox, out var existing))
                     {
                         collection.CollectionChanged -= existing;
                     }
 
+                    /* 新しいハンドラを登録 */
                     NotifyCollectionChangedEventHandler handler = (s, args) => OnCollectionChanged(s, args, listBox);
                     _collectionHandlers[listBox] = handler;
                     collection.CollectionChanged += handler;
 
+                    /* 既存の項目にも購読を付与 */
                     foreach (var obj in listBox.Items.OfType<UndoRedoManager.HistoryItem>())
                     {
                         Subscribe(listBox, obj);
@@ -123,6 +167,10 @@ namespace MainApplication.Views.Behaviors
                 System.Diagnostics.Debug.WriteLine($"[ListBoxAutoScrollBehavior] TryAttach error: {ex}");
             }
         }
+
+        /* ---------------------------------------------------------
+         * CollectionChanged(項目追加時)
+         * --------------------------------------------------------- */
 
         private static void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs args, ListBox listBox)
         {
@@ -146,20 +194,31 @@ namespace MainApplication.Views.Behaviors
             }
         }
 
+        /* ---------------------------------------------------------
+         * HistoryItemのPropertyChangedを監視し、
+         * IsCurrent = trueになったら自動スクロールする
+         * --------------------------------------------------------- */
+
         private static readonly Dictionary<(ListBox listBox, UndoRedoManager.HistoryItem item), PropertyChangedEventHandler> _handlers
             = new Dictionary<(ListBox, UndoRedoManager.HistoryItem), PropertyChangedEventHandler>();
 
+        /// <summary>
+        /// HistoryItemのIsCurrentプロパティを監視し、
+        /// trueになったらScrollIntoViewで自動スクロールする。
+        /// </summary>
         private static void Subscribe(ListBox listBox, UndoRedoManager.HistoryItem item)
         {
             try
             {
                 var key = (listBox, item);
 
+                /* 既存ハンドラを解除 */
                 if (_handlers.TryGetValue(key, out var existing))
                 {
                     item.PropertyChanged -= existing;
                 }
 
+                /* 新しいハンドラ */
                 PropertyChangedEventHandler handler = (sender, ev) =>
                 {
                     if (ev.PropertyName == nameof(UndoRedoManager.HistoryItem.IsCurrent))
@@ -190,3 +249,5 @@ namespace MainApplication.Views.Behaviors
         }
     }
 }
+
+/* --- End of file --- */

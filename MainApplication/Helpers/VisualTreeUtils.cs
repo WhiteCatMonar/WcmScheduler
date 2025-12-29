@@ -6,6 +6,10 @@ namespace MainApplication.Helpers
 {
     public static class VisualTreeUtils
     {
+        /* ---------------------------------------------------------
+         * 親要素探索(Ancestor)
+         * --------------------------------------------------------- */
+
         /// <summary>
         /// VisualTreeとLogicalTreeの両方を辿って
         /// 指定した型の親要素を探すユーティリティ
@@ -50,6 +54,10 @@ namespace MainApplication.Helpers
 
             return null;
         }
+
+        /* ---------------------------------------------------------
+         * 親要素探索(ViewModel)
+         * --------------------------------------------------------- */
 
         /// <summary>
         /// VisualTreeとLogicalTreeの両方を辿って
@@ -96,6 +104,10 @@ namespace MainApplication.Helpers
             return null;
         }
 
+        /* ---------------------------------------------------------
+         * 子要素探索(Children)
+         * --------------------------------------------------------- */
+
         /// <summary>
         /// VisualTreeを辿って
         /// 指定したViewModelを持つ子要素を探す
@@ -120,3 +132,5 @@ namespace MainApplication.Helpers
         }
     }
 }
+
+/* --- End of file --- */

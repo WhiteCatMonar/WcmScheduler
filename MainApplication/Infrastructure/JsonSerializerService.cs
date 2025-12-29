@@ -4,7 +4,15 @@ namespace MainApplication.Infrastructure
 {
     public class JsonSerializerService : IJsonSerializerService
     {
+        /* ---------------------------------------------------------
+         * JSONシリアライズ設定
+         * --------------------------------------------------------- */
+
         private readonly JsonSerializerOptions _options;
+
+        /* ---------------------------------------------------------
+         * コンストラクタ
+         * --------------------------------------------------------- */
 
         public JsonSerializerService()
         {
@@ -16,10 +24,18 @@ namespace MainApplication.Infrastructure
             };
         }
 
+        /* ---------------------------------------------------------
+         * シリアライズ(オブジェクト → JSON)
+         * --------------------------------------------------------- */
+
         public string Serialize<T>(T obj)
         {
             return JsonSerializer.Serialize(obj, _options);
         }
+
+        /* ---------------------------------------------------------
+         * デシリアライズ(JSON → オブジェクト)
+         * --------------------------------------------------------- */
 
         public T Deserialize<T>(string json)
         {
@@ -27,3 +43,5 @@ namespace MainApplication.Infrastructure
         }
     }
 }
+
+/* --- End of file --- */

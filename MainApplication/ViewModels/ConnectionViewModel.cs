@@ -5,10 +5,22 @@ using System.Windows.Media;
 
 namespace MainApplication.ViewModels
 {
+    /// <summary>
+    /// 2つのポート間を結ぶ接続線を表すViewModel。
+    /// ポート座標の変化に追従し、ベジェ曲線のジオメトリを更新する。
+    /// </summary>
+
     public class ConnectionViewModel : INotifyPropertyChanged
     {
+        /* ---------------------------------------------------------
+         * 接続線の識別子
+         * --------------------------------------------------------- */
 
         private Guid _connectionGuid;
+
+        /// <summary>
+        /// 接続線を一意に識別するGUID
+        /// </summary>
         public Guid ConnectionGuid
         {
             get => _connectionGuid;
@@ -23,17 +35,25 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /* ---------------------------------------------------------
+         * コンストラクタ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 接続線ViewModelを生成する。
+        /// ポート座標の変化を監視し、線を自動更新する。
+        /// </summary>
         public ConnectionViewModel(PortViewModel from, PortViewModel to)
         {
             ConnectionGuid = Guid.NewGuid();
             FromPort = from;
             ToPort = to;
 
-            /* 初期値を設定 */
+            /* 初期座標を設定 */
             FromPosition = FromPort?.AbsolutePosition ?? new Point(0, 0);
             ToPosition = ToPort?.AbsolutePosition ?? new Point(0, 0);
 
-            /* 座標更新を監視 */
+            /* ポート座標の更新を監視 */
             FromPort.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(PortViewModel.AbsolutePosition))
@@ -51,7 +71,15 @@ namespace MainApplication.ViewModels
             };
         }
 
+        /* ---------------------------------------------------------
+         * 接続線ジオメトリ
+         * --------------------------------------------------------- */
+
         private Geometry _connectionGeometry;
+
+        /// <summary>
+        /// 描画用のベジェ曲線ジオメトリ
+        /// </summary>
         public Geometry ConnectionGeometry
         {
             get => _connectionGeometry;
@@ -65,6 +93,9 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /// <summary>
+        /// ベジェ曲線のジオメトリを再計算する。
+        /// </summary>
         public void UpdatePathGeometry()
         {
             var start = FromPosition;
@@ -87,11 +118,21 @@ namespace MainApplication.ViewModels
             ConnectionGeometry = new PathGeometry(new[] { figure });
         }
 
+        /* ---------------------------------------------------------
+         * ポートと座標
+         * --------------------------------------------------------- */
 
+        /// <summary>接続元ポート</summary>
         public PortViewModel FromPort { get; set; }
+
+        /// <summary>接続先ポート</summary>
         public PortViewModel ToPort { get; set; }
 
         private Point _fromPosition = new Point(0, 0);
+
+        /// <summary>
+        /// 接続元ポートの現在位置(論理座標)
+        /// </summary>
         public Point FromPosition
         {
             get => _fromPosition;
@@ -108,6 +149,10 @@ namespace MainApplication.ViewModels
         }
 
         private Point _toPosition = new Point(0, 0);
+
+        /// <summary>
+        /// 接続先ポートの現在位置(論理座標)
+        /// </summary>
         public Point ToPosition
         {
             get => _toPosition;
@@ -123,10 +168,25 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /// <summary>
+        /// 接続元側のベジェ制御点
+        /// </summary>
         public Point FromBezierControlPoint => new Point(FromPosition.X + 50, FromPosition.Y);
+        
+        /// <summary>
+        /// 接続先側のベジェ制御点
+        /// </summary>
         public Point ToBezierControlPoint => new Point(ToPosition.X - 50, ToPosition.Y);
 
+        /* ---------------------------------------------------------
+         * 選択状態
+         * --------------------------------------------------------- */
+
         private bool _isSelected;
+
+        /// <summary>
+        /// 接続線が選択されているかどうか
+        /// </summary>
         public bool IsSelected
         {
             get => _isSelected;
@@ -140,8 +200,18 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /* ---------------------------------------------------------
+         * INotifyPropertyChanged
+         * --------------------------------------------------------- */
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// プロパティ変更通知を発行する
+        /// </summary>
         protected void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
+
+/* --- End of file --- */

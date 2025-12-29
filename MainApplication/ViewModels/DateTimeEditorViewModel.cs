@@ -4,24 +4,43 @@ using System.Windows.Input;
 
 namespace MainApplication.ViewModels
 {
+    /// <summary>
+    /// 日付・時刻を編集するための ViewModel。
+    /// モーダルダイアログから使用され、編集結果を Result に格納する。
+    /// </summary>
     public class DateTimeEditorViewModel : INotifyPropertyChanged
     {
+        /* ---------------------------------------------------------
+         * フィールド
+         * --------------------------------------------------------- */
+
         private DateTime? _selectedDate;
         private int _hour;
         private int _minute;
 
+        /* ---------------------------------------------------------
+         * コンストラクタ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 日時編集ViewModelを生成する。
+        /// 初期値がnullの場合は現在日時を基準にする。
+        /// </summary>
         public DateTimeEditorViewModel(DateTime? initial)
         {
-            /* 初期値がなければ今日の0:00 */
+            /* 初期値がなければ今日の0:00を基準にする */
             DateTime baseDateTime = initial ?? DateTime.Now;
             SelectedDate = baseDateTime.Date;
             Hour = baseDateTime.Hour;
             Minute = baseDateTime.Minute;
 
+            /* OK(確定) */
             ConfirmCommand = new RelayCommand(
                 () => Result = Composed,    /* 結果を確定する */
                 () => SelectedDate.HasValue /* 確定可能かどうか */
             );
+
+            /* クリア(null に戻す) */
             ClearCommand = new RelayCommand(
                 () => {
                     SelectedDate = null;
@@ -30,12 +49,21 @@ namespace MainApplication.ViewModels
                     Result = null;
                 }
             );
+
+            /* 時刻増減 */
             IncreaseHourCommand = new RelayCommand(() => Hour = (Hour + 1) % 24);
             DecreaseHourCommand = new RelayCommand(() => Hour = (Hour + 23) % 24);
             IncreaseMinuteCommand = new RelayCommand(() => Minute = (Minute + 1) % 60);
             DecreaseMinuteCommand = new RelayCommand(() => Minute = (Minute + 59) % 60);
         }
 
+        /* ---------------------------------------------------------
+         * 日付・時刻プロパティ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 選択された日付(null の場合は未選択)
+        /// </summary>
         public DateTime? SelectedDate
         {
             get => _selectedDate;
@@ -47,6 +75,9 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /// <summary>
+        /// 時(0〜23)
+        /// </summary>
         public int Hour
         {
             get => _hour;
@@ -58,6 +89,9 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /// <summary>
+        /// 分(0〜59)
+        /// </summary>
         public int Minute
         {
             get => _minute;
@@ -69,23 +103,49 @@ namespace MainApplication.ViewModels
             }
         }
 
-        /* 現在の入力から合成された日時(プレビュー等に使える) */
+        /* ---------------------------------------------------------
+         * 合成日時(プレビュー用)
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 選択された日付・時刻から合成された日時。
+        /// 日付が未選択の場合は null。
+        /// </summary>
         public DateTime? Composed => SelectedDate.HasValue
             ? SelectedDate.Value.Date.AddHours(Hour).AddMinutes(Minute)
             : (DateTime?)null;
 
+        /* ---------------------------------------------------------
+         * コマンド
+         * --------------------------------------------------------- */
+
+        /// <summary>日時を確定するコマンド</summary>
         public ICommand ConfirmCommand { get; }
+
+        /// <summary>時をインクリメント(+1)する</summary>
         public ICommand IncreaseHourCommand { get; }
+
+        /// <summary>時をデクリメント(-1)する</summary>
         public ICommand DecreaseHourCommand { get; }
+
+        /// <summary>分をインクリメント(+1)する</summary>
         public ICommand IncreaseMinuteCommand { get; }
+
+        /// <summary>分をデクリメント(-1)する</summary>
         public ICommand DecreaseMinuteCommand { get; }
+        
+        /// <summary>入力内容をクリアする</summary>
         public ICommand ClearCommand { get; }
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-        /* Window側で拾うための結果 */
+        /* ---------------------------------------------------------
+         * 結果値(Window 側で取得)
+         * --------------------------------------------------------- */
         private DateTime? _result;
+
+        /// <summary>
+        /// ダイアログの結果として返される日時。
+        /// ConfirmCommand 実行時に設定される。
+        /// </summary>
         public DateTime? Result {
             get => _result;
             private set
@@ -94,5 +154,19 @@ namespace MainApplication.ViewModels
                 OnPropertyChanged(nameof(Result));
             }
         }
+
+        /* ---------------------------------------------------------
+         * INotifyPropertyChanged
+         * --------------------------------------------------------- */
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// プロパティ変更通知を発行する
+        /// </summary>
+        private void OnPropertyChanged(string name) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
+
+/* --- End of file --- */

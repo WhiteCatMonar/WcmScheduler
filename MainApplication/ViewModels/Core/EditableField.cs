@@ -2,14 +2,46 @@
 
 namespace MainApplication.ViewModels.Core
 {
+    /// <summary>
+    /// 編集可能なフィールドを表すクラス。
+    /// Getter/Setterを通じて値を取得・設定し、
+    /// 値が変更された場合は履歴記録処理を呼び出す。
+    /// </summary>
     public class EditableField<T>
     {
+        /* ---------------------------------------------------------
+         * プロパティ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// フィールド名(履歴記録時の識別用)
+        /// </summary>
         public string Name { get; }
+
+        /// <summary>
+        /// 現在の値を取得するためのデリゲート
+        /// </summary>
         public Func<T> Getter { get; }
+
+        /// <summary>
+        /// 新しい値を設定するためのデリゲート
+        /// </summary>
         public Action<T> Setter { get; }
+
+        /* ---------------------------------------------------------
+         * フィールド
+         * --------------------------------------------------------- */
 
         private T _oldValue;
 
+        /* ---------------------------------------------------------
+         * コンストラクタ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 編集可能フィールドを生成する。
+        /// 初期値はGetterにより取得され、変更検知の基準となる。
+        /// </summary>
         public EditableField(string name, Func<T> getter, Action<T> setter)
         {
             Name = name;
@@ -18,6 +50,19 @@ namespace MainApplication.ViewModels.Core
             _oldValue = getter();
         }
 
+        /* ---------------------------------------------------------
+         * 変更確定処理
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 現在値と前回値を比較し、変更があれば履歴記録処理を実行する。
+        /// </summary>
+        /// <param name="commitHistory">
+        /// 履歴記録処理(フィールド名・旧値・新値を受け取る)
+        /// </param>
+        /// <returns>
+        /// 値が変更されて履歴が記録された場合はtrue、変更がなければfalse。
+        /// </returns>
         public bool TryCommit(Action<string, T, T> commitHistory)
         {
             var newValue = Getter();
@@ -32,3 +77,5 @@ namespace MainApplication.ViewModels.Core
 
     }
 }
+
+/* --- End of file --- */

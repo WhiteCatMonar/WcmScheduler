@@ -8,12 +8,27 @@ using System.Windows.Input;
 
 namespace MainApplication.ViewModels
 {
+    /// <summary>
+    /// ノード一覧の管理、選択状態、追加・削除・移動操作、
+    /// Undo/Redo連携を担当するViewModel。
+    /// </summary>
     public class NodeCollectionViewModel : INotifyPropertyChanged
     {
+        /* ---------------------------------------------------------
+         * フィールド
+         * --------------------------------------------------------- */
+
         private readonly UndoRedoManager _undoRedo;
         private readonly IDateTimeEditorService _dateTimeEditor;
         private readonly NodeEditorViewModel _editor;
 
+        /* ---------------------------------------------------------
+         * コンストラクタ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// ノード管理ViewModelを生成する。
+        /// </summary>
         public NodeCollectionViewModel(UndoRedoManager undoRedo, IDateTimeEditorService dateTimeEditor, NodeEditorViewModel editor)
         {
             _undoRedo = undoRedo ?? throw new ArgumentNullException(nameof(undoRedo));
@@ -24,8 +39,18 @@ namespace MainApplication.ViewModels
             DeleteSelectedNodeCommand = new RelayCommand(DeleteSelectedNode, () => SelectedNode != null);
         }
 
+        /* ---------------------------------------------------------
+         * ノード一覧
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// すべてのノードを保持するコレクション。
+        /// </summary>
         public ObservableCollection<NodeViewModel> Nodes { get; } = new ObservableCollection<NodeViewModel>();
-        
+
+        /// <summary>
+        /// すべてのノードのポート位置を更新する。
+        /// </summary>
         public void UpdateAllNodes()
         {
             foreach (var n in Nodes)
@@ -37,7 +62,12 @@ namespace MainApplication.ViewModels
         /* ---------------------------------------------------------
          * 選択管理
          * --------------------------------------------------------- */
+
         private NodeViewModel _selectedNode;
+        
+        /// <summary>
+        /// 現在選択されているノード。
+        /// </summary>
         public NodeViewModel SelectedNode
         {
             get => _selectedNode;
@@ -62,11 +92,17 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /// <summary>
+        /// ノードを選択する。
+        /// </summary>
         public void SelectNode(NodeViewModel node)
         {
             SelectedNode = node;
         }
 
+        /// <summary>
+        /// 選択状態を解除する。
+        /// </summary>
         public void UnselectNode()
         {
             SelectedNode = null;
@@ -79,11 +115,18 @@ namespace MainApplication.ViewModels
         /* ---------------------------------------------------------
          * ノード追加・削除
          * --------------------------------------------------------- */
+
+        /// <summary>ノード追加コマンド</summary>
         public ICommand AddNodeCommand { get; }
+
+        /// <summary>
+        /// 新しいノードを作成し、初期位置に配置して追加する。
+        /// </summary>
         public void AddNode()
         {
             var node = CreateDefaultNode();
 
+            /* 初期位置をクランプして配置 */
             var initial = _editor.Grid.ClampNodePosition(20, 20, node);
             node.X = initial.X;
             node.Y = initial.Y;
@@ -94,6 +137,10 @@ namespace MainApplication.ViewModels
             SelectedNode = node;
         }
 
+        /// <summary>
+        /// デフォルト構成のノードを生成する。
+        /// 入出力ポートを1つずつ持つ。
+        /// </summary>
         private NodeViewModel CreateDefaultNode()
         {
             var node = new NodeViewModel(_undoRedo, _dateTimeEditor)
@@ -120,7 +167,12 @@ namespace MainApplication.ViewModels
             return node;
         }
 
+        /// <summary>選択中ノード削除コマンド</summary>
         public ICommand DeleteSelectedNodeCommand { get; }
+
+        /// <summary>
+        /// 選択中のノードを削除する。
+        /// </summary>
         private void DeleteSelectedNode()
         {
             if (SelectedNode != null)
@@ -134,6 +186,10 @@ namespace MainApplication.ViewModels
         /* ---------------------------------------------------------
          * ノード移動
          * --------------------------------------------------------- */
+
+        /// <summary>
+        /// ノードの位置を更新する(Undo/Redoなし)。
+        /// </summary>
         public void UpdateNodePosition(NodeViewModel node, double newX, double newY)
         {
             if (node == null)
@@ -146,6 +202,9 @@ namespace MainApplication.ViewModels
             node.Y = clamped.Y;
         }
 
+        /// <summary>
+        /// ノードを移動し、Undo/Redo対応のアクションとして記録する。
+        /// </summary>
         public void MoveNode(NodeViewModel node, double oldX, double oldY, double newX, double newY)
         {
             if (node == null)
@@ -164,8 +223,15 @@ namespace MainApplication.ViewModels
         /* ---------------------------------------------------------
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// プロパティ変更通知を発行する。
+        /// </summary>
         private void OnPropertyChanged(string name = null)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
+
+/* --- End of file --- */

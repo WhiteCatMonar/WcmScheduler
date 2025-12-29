@@ -8,11 +8,26 @@ using System.Windows.Input;
 
 namespace MainApplication.ViewModels
 {
+    /// <summary>
+    /// 接続線(ConnectionViewModel)の管理、選択、ドラッグ操作、
+    /// Undo/Redo連携を担当するViewModel。
+    /// </summary>
     public class ConnectionCollectionViewModel : INotifyPropertyChanged
     {
+        /* ---------------------------------------------------------
+         * フィールド
+         * --------------------------------------------------------- */
+
         private readonly UndoRedoManager _undoRedo;
         private readonly NodeEditorViewModel _editor;
 
+        /* ---------------------------------------------------------
+         * コンストラクタ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 接続線管理ViewModelを生成する。
+        /// </summary>
         public ConnectionCollectionViewModel(UndoRedoManager undoRedo, NodeEditorViewModel editor)
         {
             _undoRedo = undoRedo ?? throw new ArgumentNullException(nameof(undoRedo));
@@ -22,9 +37,18 @@ namespace MainApplication.ViewModels
             DeleteSelectedConnectionCommand = new RelayCommand(DeleteSelectedConnection, () => SelectedConnection != null);
         }
 
-        /* 接続線一覧 */
+        /* ---------------------------------------------------------
+         * 接続線一覧
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// すべての接続線を保持するコレクション。
+        /// </summary>
         public ObservableCollection<ConnectionViewModel> Connections { get; } = new ObservableCollection<ConnectionViewModel>();
 
+        /// <summary>
+        /// 指定ノードに関連する接続線のジオメトリを更新する。
+        /// </summary>
         public void UpdateConnectionsForNode(NodeViewModel node)
         {
             foreach (var port in node.AllPorts)
@@ -36,6 +60,9 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /// <summary>
+        /// すべての接続線のジオメトリを更新する。
+        /// </summary>
         public void UpdateAllConnections()
         {
             foreach (var c in Connections)
@@ -44,8 +71,15 @@ namespace MainApplication.ViewModels
             }
         }
 
-        /* ドラッグ中の接続開始ポート */
+        /* ---------------------------------------------------------
+         * ドラッグ中の接続線(始点)
+         * --------------------------------------------------------- */
+
         private PortViewModel _draggingFromPort;
+
+        /// <summary>
+        /// 接続線ドラッグ開始ポート(nullならドラッグ中ではない)
+        /// </summary>
         public PortViewModel DraggingFromPort
         {
             get => _draggingFromPort;
@@ -62,18 +96,30 @@ namespace MainApplication.ViewModels
             }
         }
 
-        /* 始点(論理座標) */
+        /// <summary>
+        /// ドラッグ開始位置(論理座標)
+        /// </summary>
         public Point DraggingFromPoint =>
             DraggingFromPort == null ? new Point(0, 0) : DraggingFromPort.AbsolutePosition;
 
-        /* 始点側のベジェ制御点(論理座標) */
+        /// <summary>
+        /// 始点側のベジェ制御点(論理座標)
+        /// </summary>
         public Point DraggingFromPortBezierControlPoint =>
             DraggingFromPort == null
                 ? new Point(0, 0)
-                : new Point(DraggingFromPort.AbsolutePosition.X + 50, DraggingFromPort.AbsolutePosition.Y);
+                : new Point(DraggingFromPort.AbsolutePosition.X + 50,
+                            DraggingFromPort.AbsolutePosition.Y);
 
-        /* ドラッグ中の終点(論理座標) */
+        /* ---------------------------------------------------------
+         * ドラッグ中の接続線(終点)
+         * --------------------------------------------------------- */
+
         private Point _draggingToPoint;
+
+        /// <summary>
+        /// ドラッグ中の終点(論理座標)
+        /// </summary>
         public Point DraggingToPoint
         {
             get => _draggingToPoint;
@@ -89,13 +135,24 @@ namespace MainApplication.ViewModels
             }
         }
 
-        /* 終点側のベジェ制御点(論理座標) */
+        /// <summary>
+        /// 終点側のベジェ制御点(論理座標)
+        /// </summary>
         public Point DraggingToPointBezierControl =>
             new Point(DraggingToPoint.X - 50, DraggingToPoint.Y);
 
+        /// <summary>
+        /// 現在接続線をドラッグ中かどうか
+        /// </summary>
         public bool IsDraggingConnection => _draggingFromPort != null;
 
-        /* 接続線作成 */
+        /* ---------------------------------------------------------
+         * 接続線作成
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 2つのポート間に接続線を作成する。
+        /// </summary>
         public void CreateConnection(PortViewModel fromPort, PortViewModel toPort)
         {
             if (fromPort == null || toPort == null)
@@ -122,8 +179,15 @@ namespace MainApplication.ViewModels
             _undoRedo.Execute(action);
         }
 
-        /* 選択管理 */
+        /* ---------------------------------------------------------
+         * 選択管理
+         * --------------------------------------------------------- */
+
         private ConnectionViewModel _selectedConnection;
+
+        /// <summary>
+        /// 現在選択されている接続線
+        /// </summary>
         public ConnectionViewModel SelectedConnection
         {
             get => _selectedConnection;
@@ -146,12 +210,19 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /// <summary>
+        /// 接続線を選択するコマンド
+        /// </summary>
         public ICommand SelectConnectionCommand { get; }
+
         private void SelectConnection(ConnectionViewModel connection)
         {
             SelectedConnection = connection;
         }
 
+        /// <summary>
+        /// 選択状態を解除する
+        /// </summary>
         public void UnselectConnection()
         {
             SelectedConnection = null;
@@ -161,7 +232,11 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /// <summary>
+        /// 選択中の接続線を削除するコマンド
+        /// </summary>
         public ICommand DeleteSelectedConnectionCommand { get; }
+
         private void DeleteSelectedConnection()
         {
             if (SelectedConnection != null)
@@ -172,8 +247,18 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /* ---------------------------------------------------------
+         * INotifyPropertyChanged
+         * --------------------------------------------------------- */
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// プロパティ変更通知を発行する
+        /// </summary>
         private void OnPropertyChanged(string name) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
+
+/* --- End of file --- */

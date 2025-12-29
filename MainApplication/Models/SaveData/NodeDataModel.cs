@@ -5,12 +5,35 @@ namespace MainApplication.Models.SaveData
 {
     public class NodeDataModel
     {
+        /* ---------------------------------------------------------
+         * データプロパティ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// ノードの一意識別子
+        /// </summary>
         public string Id { get; set; } = Guid.NewGuid().ToString();
+        
+        /// <summary>
+        /// ノードの種類(例：TaskNode)
+        /// </summary>
         public string Type { get; set; } = "TaskNode";
 
+        /// <summary>
+        /// ノードの座標情報
+        /// </summary>
         public PositionDataModel Position { get; set; } = new PositionDataModel();
+
+        /// <summary>
+        /// ノードの詳細情報(タスク名・担当者・日時など)
+        /// </summary>
         public NodeDetailsDataModel Details { get; set; } = new NodeDetailsDataModel();
 
+        /// <summary>
+        /// ノードが持つポート一覧(入出力端子)
+        /// </summary>
         public List<PortDataModel> Ports { get; set; } = new List<PortDataModel>();
     }
 }
+
+/* --- End of file --- */

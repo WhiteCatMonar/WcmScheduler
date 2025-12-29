@@ -5,12 +5,35 @@ using System.Windows;
 
 namespace MainApplication.ViewModels
 {
+    /// <summary>
+    /// ノードの入出力ポートを表すViewModel。
+    /// ノード内の相対座標・キャンバス上の絶対座標・接続線一覧などを管理する。
+    /// </summary>
     public class PortViewModel : INotifyPropertyChanged
     {
+        /* ---------------------------------------------------------
+         * ポート種別
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// ポートの種類(入力 or 出力)
+        /// </summary>
         public enum PortType { Input, Output }
+
+        /// <summary>
+        /// このポートに接続されている接続線一覧
+        /// </summary>
         public List<ConnectionViewModel> ConnectedConnections { get; } = new List<ConnectionViewModel>();
 
+        /* ---------------------------------------------------------
+         * 識別子・基本情報
+         * --------------------------------------------------------- */
+
         private Guid _portGuid;
+
+        /// <summary>
+        /// ポートを一意に識別するGUID
+        /// </summary>
         public Guid PortGuid
         {
             get => _portGuid;
@@ -26,6 +49,10 @@ namespace MainApplication.ViewModels
         }
 
         private string _name;
+
+        /// <summary>
+        /// ポート名(UI表示用)
+        /// </summary>
         public string Name
         {
             get => _name;
@@ -33,14 +60,25 @@ namespace MainApplication.ViewModels
         }
 
         private PortType _type;
+
+        /// <summary>
+        /// ポートの種類(入力 or 出力)
+        /// </summary>
         public PortType Type
         {
             get => _type;
             set { _type = value; OnPropertyChanged(nameof(Type)); }
         }
 
-        /* ノード内の相対座標(Canvas論理座標) */
+        /* ---------------------------------------------------------
+         * ノード内の相対座標(論理座標)
+         * --------------------------------------------------------- */
+
         private double _relativeX;
+
+        /// <summary>
+        /// ノード左上からの相対X座標(論理座標)
+        /// </summary>
         public double RelativeX
         {
             get => _relativeX;
@@ -48,14 +86,25 @@ namespace MainApplication.ViewModels
         }
 
         private double _relativeY;
+
+        /// <summary>
+        /// ノード左上からの相対Y座標(論理座標)
+        /// </summary>
         public double RelativeY
         {
             get => _relativeY;
             set { _relativeY = value; OnPropertyChanged(nameof(RelativeY)); }
         }
 
-        /* 絶対座標(Canvas論理座標) */
+        /* ---------------------------------------------------------
+         * キャンバス上の絶対座標(論理座標)
+         * --------------------------------------------------------- */
+
         private Point _absolutePosition;
+        
+        /// <summary>
+        /// キャンバス上の絶対座標(論理座標)
+        /// </summary>
         public Point AbsolutePosition
         {
             get => _absolutePosition;
@@ -69,8 +118,15 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /* ---------------------------------------------------------
+         * 親ノード
+         * --------------------------------------------------------- */
 
         public NodeViewModel _parentNode;
+
+        /// <summary>
+        /// このポートが属するノード
+        /// </summary>
         public NodeViewModel ParentNode
         {
             get => _parentNode;
@@ -84,6 +140,14 @@ namespace MainApplication.ViewModels
             }
         }
 
+        /* ---------------------------------------------------------
+         * 座標更新
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 親ノードの位置と相対座標から絶対座標を再計算する。
+        /// ノード移動時に呼び出される。
+        /// </summary>
         public void UpdateAbsolutePosition()
         {
             if (ParentNode == null)
@@ -97,8 +161,18 @@ namespace MainApplication.ViewModels
             );
         }
 
+        /* ---------------------------------------------------------
+         * INotifyPropertyChanged
+         * --------------------------------------------------------- */
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// プロパティ変更通知を発行する
+        /// </summary>
         protected void OnPropertyChanged(string name) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
+
+/* --- End of file --- */

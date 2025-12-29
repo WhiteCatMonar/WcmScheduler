@@ -6,47 +6,73 @@ using System.Windows.Input;
 namespace MainApplication.Views.NodeEditorTab
 {
     /// <summary>
-    /// NodeEditorTab.xaml の相互作用ロジック
+    /// ノードエディタタブのUIロジック。
+    /// キーボードショートカット(Undo/Redo/Delete)を処理し、
+    /// ViewModelのコマンドへ橋渡しする役割を持つ。
     /// </summary>
     public partial class NodeEditorTab : UserControl
     {
+        /* ---------------------------------------------------------
+         * コンストラクタ
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// NodeEditorTabを初期化する。
+        /// </summary>
         public NodeEditorTab()
         {
             InitializeComponent();
         }
 
+        /* ---------------------------------------------------------
+         * キーボードショートカット処理
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// Ctrl+Z / Ctrl+Y / Deleteなどのショートカットを処理する。
+        /// TextBoxにフォーカスがある場合は通常の文字入力を優先し、
+        /// それ以外の場合のみショートカットを有効にする。
+        /// </summary>
         private void UserControl_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (!(Keyboard.FocusedElement is TextBoxBase))
+            /* テキスト入力中はショートカットを無効化 */
+            if (Keyboard.FocusedElement is TextBoxBase)
             {
-                if (DataContext is NodeEditorViewModel nevm)
+                return;
+            }
+
+            if (DataContext is NodeEditorViewModel nevm)
+            {
+                /* Undo(Ctrl+Z) */
+                if (e.Key == Key.Z && Keyboard.Modifiers == ModifierKeys.Control)
                 {
-                    if (e.Key == Key.Z && Keyboard.Modifiers == ModifierKeys.Control)
+                    if (nevm.UndoCommand.CanExecute(null))
                     {
-                        if (nevm.UndoCommand.CanExecute(null))
-                        {
-                            nevm.UndoCommand.Execute(null);
-                        }
-                        e.Handled = true;
+                        nevm.UndoCommand.Execute(null);
                     }
-                    else if (e.Key == Key.Y && Keyboard.Modifiers == ModifierKeys.Control)
+                    e.Handled = true;
+                }
+                /* Redo(Ctrl+Y) */
+                else if (e.Key == Key.Y && Keyboard.Modifiers == ModifierKeys.Control)
+                {
+                    if (nevm.RedoCommand.CanExecute(null))
                     {
-                        if (nevm.RedoCommand.CanExecute(null))
-                        {
-                            nevm.RedoCommand.Execute(null);
-                        }
-                        e.Handled = true;
+                        nevm.RedoCommand.Execute(null);
                     }
-                    if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
+                    e.Handled = true;
+                }
+                /* 接続線削除(Delete) */
+                if (e.Key == Key.Delete && Keyboard.Modifiers == ModifierKeys.None)
+                {
+                    if (nevm.Connections.DeleteSelectedConnectionCommand.CanExecute(null))
                     {
-                        if (nevm.Connections.DeleteSelectedConnectionCommand.CanExecute(null))
-                        {
-                            nevm.Connections.DeleteSelectedConnectionCommand.Execute(null);
-                        }
-                        e.Handled = true;
+                        nevm.Connections.DeleteSelectedConnectionCommand.Execute(null);
                     }
+                    e.Handled = true;
                 }
             }
         }
     }
 }
+
+/* --- End of file --- */
