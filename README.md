@@ -27,7 +27,7 @@
 │       ├── 📄 NodeDetailsDataModel.cs           # ノードごとの詳細情報
 │       ├── 📄 PortDataModel.cs                  # ノード内ポート管理用情報
 │       ├── 📄 PositionDataModel.cs              # 座標管理用情報
-│       ├── 📄 RootSaveData.cs                   # 保存するデータのルート情報
+│       ├── 📄 RootSaveDataModel.cs              # 保存するデータのルート情報
 │       └── 📄 TaskEditorDataModel.cs            # タスク編集機能についての情報
 │
 ├── 📂 Properties

@@ -89,7 +89,7 @@ namespace MainApplication
                 return;
 
             var json = _fileService.LoadText(path);
-            var root = _jsonSerializer.Deserialize<RootSaveData>(json);
+            var root = _jsonSerializer.Deserialize<RootSaveDataModel>(json);
 
             if (root == null)
                 return;
@@ -99,7 +99,7 @@ namespace MainApplication
             _currentFilePath = path;
         }
 
-        private void ApplyRootDataModel(RootSaveData root)
+        private void ApplyRootDataModel(RootSaveDataModel root)
         {
             if (root.TaskEditor != null)
             {
@@ -144,9 +144,9 @@ namespace MainApplication
          * RootSaveDataの構築
          * --------------------------------------------------------- */
 
-        private RootSaveData ToRootDataModel()
+        private RootSaveDataModel ToRootDataModel()
         {
-            RootSaveData save_data = new RootSaveData();
+            RootSaveDataModel save_data = new RootSaveDataModel();
             /* ユーザー：タスク、開発者：ノードという呼称にするため、名称をここで変更 */
             NodeEditor.SaveToTaskEditorDataModel(out TaskEditorDataModel TaskEditor);
             save_data.TaskEditor = TaskEditor;
