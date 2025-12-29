@@ -1,11 +1,9 @@
-﻿using MainApplication.Infrastructure;
-using MainApplication.Models.SaveData;
+﻿using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
+using MainApplication.Mappers;
 using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Text.Json;
 using System.Windows.Input;
 
 namespace MainApplication.ViewModels
@@ -133,7 +131,20 @@ namespace MainApplication.ViewModels
          * 操作履歴管理
          * --------------------------------------------------------- */
 
-        public UndoRedoManager UndoRedo { get; } = new UndoRedoManager();
+        static UndoRedoManager _undoredo = new UndoRedoManager();
+        public UndoRedoManager UndoRedo
+        {
+            get => _undoredo;
+            set
+            {
+                if (_undoredo != value)
+                {
+                    _undoredo = value;
+                    OnPropertyChanged(nameof(UndoRedo));
+                }
+            }
+        }
+
         public ICommand UndoCommand { get; }
         public ICommand RedoCommand { get; }
         public ICommand MoveToHistoryCommand { get; }
@@ -149,95 +160,53 @@ namespace MainApplication.ViewModels
          * DateTimeEditorService(日時編集用サービス)
          * --------------------------------------------------------- */
 
-        public IDateTimeEditorService DateTimeEditor { get; } = new DateTimeEditorService();
+        static IDateTimeEditorService _dateTimeEditor = new DateTimeEditorService();
+        public IDateTimeEditorService DateTimeEditor
+        {
+            get => _dateTimeEditor;
+            set
+            {
+                if (_dateTimeEditor != value)
+                {
+                    _dateTimeEditor = value;
+                    OnPropertyChanged(nameof(DateTimeEditor));
+                }
+            }
+        }
 
         /* ---------------------------------------------------------
          * データ読み込み関連
          * --------------------------------------------------------- */
+
+        /* 読み込みデータ適用処理 */
         public void LoadFromTaskEditorDataModel(TaskEditorDataModel data)
         {
-            /* 既存データをクリア */
             Nodes.Nodes.Clear();
             Connections.Connections.Clear();
+            NodeEditorViewModel loadedData = NodeEditorMapper.ToViewModel(data, this);
 
-            /* ノードを復元 */
-            foreach (var nodeData in data.Nodes)
+
+            foreach (var loadedNodes in loadedData.Nodes.Nodes)
             {
-                var nodeVM = NodeViewModel.FromDataModel(nodeData, this);
-                Nodes.Nodes.Add(nodeVM);
+                Nodes.Nodes.Add(loadedNodes);
             }
 
-            /* 接続線を復元 */
-            foreach (var connData in data.Connections)
+            foreach (var loadedConnections in loadedData.Connections.Connections)
             {
-                var connVM = ConnectionViewModel.FromDataModel(connData, this);
-                Connections.Connections.Add(connVM);
+                Connections.Connections.Add(loadedConnections);
             }
 
             RefreshNodeAndConnectionPositions();
         }
 
-
         /* ---------------------------------------------------------
          * データ保存関連
          * --------------------------------------------------------- */
 
-        /* ノード情報変換 */
-        private NodeDataModel ToDataModel(NodeViewModel vm)
+        /* 保存用データ構築処理 */
+        public void SaveToTaskEditorDataModel(out TaskEditorDataModel data)
         {
-            return new NodeDataModel
-            {
-                Id = vm.NodeGuid.ToString(),
-                Type = vm.NodeType,
-
-                Position = new PositionDataModel
-                {
-                    X = vm.X,
-                    Y = vm.Y
-                },
-
-                Details = new NodeDetailsDataModel
-                {
-                    TaskName = vm.TaskName,
-                    Person = vm.Person,
-                    StartDateTime = vm.StartDateTime,
-                    EndDateTime = vm.EndDateTime,
-                    Comment = vm.Comment
-                },
-
-                Ports = vm.AllPorts.ToList().Select(p => new PortDataModel
-                {
-                    Id = p.PortGuid.ToString(),
-                    Name = p.Name,
-                    Type = p.Type.ToString()
-                }).ToList()
-            };
-        }
-
-        /* 接続線情報変換 */
-        private ConnectionDataModel ToDataModel(ConnectionViewModel vm)
-        {
-            return new ConnectionDataModel
-            {
-                Id = vm.ConnectionGuid.ToString(),
-                FromPortId = vm.FromPort.PortGuid.ToString(),
-                ToPortId = vm.ToPort.PortGuid.ToString()
-            };
-        }
-
-        /* タスク依存関係情報構築 */
-        public TaskEditorDataModel ToTaskEditorDataModel()
-        {
-            return new TaskEditorDataModel
-            {
-                Nodes = Nodes.Nodes
-                    .Select(n => ToDataModel(n))
-                    .ToList(),
-
-                Connections = Connections.Connections
-                    .Select(c => ToDataModel(c))
-                    .ToList()
-            };
+            data = NodeEditorMapper.ToDataModel(this);
         }
 
         /* ---------------------------------------------------------

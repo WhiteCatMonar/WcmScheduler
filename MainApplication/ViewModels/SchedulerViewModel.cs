@@ -146,11 +146,14 @@ namespace MainApplication
 
         private RootSaveData ToRootDataModel()
         {
-            return new RootSaveData
-            {
-                TaskEditor = NodeEditor.ToTaskEditorDataModel() /* ユーザー：タスク、開発者：ノードという呼称にするため、名称をここで変更 */
-                /* TODO:タブごとの機能追加 */
-            };
+            RootSaveData save_data = new RootSaveData();
+            /* ユーザー：タスク、開発者：ノードという呼称にするため、名称をここで変更 */
+            NodeEditor.SaveToTaskEditorDataModel(out TaskEditorDataModel TaskEditor);
+            save_data.TaskEditor = TaskEditor;
+
+            /* TODO:タブごとの機能追加 */
+
+            return save_data;
         }
 
         /* ---------------------------------------------------------

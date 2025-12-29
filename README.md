@@ -15,6 +15,11 @@
 │   ├── 📄 IJsonSerializerService.cs         # JSONのシリアライザのインターフェース
 │   └── 📄 JsonSerializerService.cs          # JSONのシリアライザ（シリアライズ/デシリアライズ）
 │
+├── 📂 Mapper
+│   ├── 📄 ConnectionMapper.cs               # 接続線情報のViewModel⇔Model相互変換
+│   ├── 📄 NodeEditorMapper.cs               # タスク編集機能(NodeEditor/TaskEditor)のViewModel⇔Model相互変換
+│   └── 📄 NodeMapper.cs          　　　　　　# ノード情報のViewModel⇔Model相互変換
+│
 ├── 📂 Models
 │   └── 📂 SaveData                          # 保存するデータのモデル
 │       ├── 📄 ConnectionDataModel.cs        # 接続線管理用情報

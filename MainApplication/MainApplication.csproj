@@ -101,6 +101,9 @@
     <Compile Include="Infrastructure\IFileService.cs" />
     <Compile Include="Infrastructure\IJsonSerializerService.cs" />
     <Compile Include="Infrastructure\JsonSerializerService.cs" />
+    <Compile Include="Mappers\ConnectionMapper.cs" />
+    <Compile Include="Mappers\NodeEditorMapper.cs" />
+    <Compile Include="Mappers\NodeMapper.cs" />
     <Compile Include="Models\SaveData\ConnectionDataModel.cs" />
     <Compile Include="Models\SaveData\NodeDataModel.cs" />
     <Compile Include="Models\SaveData\NodeDetailsDataModel.cs" />
