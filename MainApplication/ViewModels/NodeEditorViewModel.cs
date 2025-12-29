@@ -197,6 +197,8 @@ namespace MainApplication.ViewModels
             }
 
             RefreshNodeAndConnectionPositions();
+
+            UndoRedo.Clear();
         }
 
         /* ---------------------------------------------------------

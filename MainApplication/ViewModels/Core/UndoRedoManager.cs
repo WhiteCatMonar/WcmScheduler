@@ -160,5 +160,11 @@ namespace MainApplication.ViewModels.Core
             }
         }
 
+        public void Clear()
+        {
+            _undoStack.Clear();
+            _redoStack.Clear();
+            History.Clear();
+        }
     }
 }

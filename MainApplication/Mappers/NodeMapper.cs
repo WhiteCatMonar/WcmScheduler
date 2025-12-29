@@ -59,6 +59,7 @@ namespace MainApplication.Mappers
                 EndDateTime = data.Details.EndDateTime,
                 Comment = data.Details.Comment
             };
+            loadedNode.CommitEdits();
             foreach (var port in data.Ports)
             {
                 switch ((PortType)Enum.Parse(typeof(PortType), port.Type))
