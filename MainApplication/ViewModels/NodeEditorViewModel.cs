@@ -198,6 +198,13 @@ namespace MainApplication.ViewModels
 
             RefreshNodeAndConnectionPositions();
 
+            /* 表示領域をリセット */
+            Zoom = 1.0;
+            PanX = 0.0;
+            PanY = 0.0;
+            UpdateGridState();
+
+            /* 編集履歴をリセット */
             UndoRedo.Clear();
         }
 
