@@ -56,6 +56,8 @@
 │   ├── 📂 Core                                  # 基盤ロジック(UI非依存)
 │   │   ├── 📄 EditableField.cs                  # 編集フィールドの共通ロジック(遅延コミット)
 │   │   ├── 📄 GridManager.cs                    # 論理座標系・ズーム・パン管理
+│   │   ├── 📄 RelayCommand.cs                   # ICommand 実装(MVVMの基本)
+│   │   ├── 📄 TabInfo.cs                        # タブ管理用情報
 │   │   └── 📄 UndoRedoManager.cs                # Undo/Redo管理
 │   │
 │   ├── 📂 Service
@@ -69,11 +71,12 @@
 │   │   ├── 📄 NodeCollectionViewModel.cs        # ノード一覧管理(生成・削除・選択)
 │   │   ├── 📄 NodeEditorViewModel.cs            # ノードエディタ全体の状態管理(ズーム・パン・Undo/Redo)
 │   │   ├── 📄 NodeViewModel.cs                  # ノード1個の状態・編集ロジック
-│   │   └── 📄 PortViewModel.cs                  # ポート(入出力端子)の状態
+│   │   ├── 📄 PortViewModel.cs                  # ポート(入出力端子)の状態
+│   │   └── 📄 ProjectViewModel.cs               # 1つのプロジェクト全体の管理
 │   │
 │   ├── 📄 DateTimeEditorViewModel.cs            # 日時編集ダイアログのViewModel(UI入力ロジック)
-│   ├── 📄 RelayCommand.cs                       # ICommand 実装(MVVMの基本)
-│   └── 📄 SchedulerViewModel.cs                 # アプリケーション全体の状態管理
+│   ├── 📄 SchedulerViewModel.cs                 # アプリケーション全体の状態管理
+│   └── 📄 TeamProjectsViewModel.cs              # チーム内の複数のプロジェクトの管理
 │
 ├── 📂 Views
 │   ├── 📂 Behaviors                             # XAML の動作拡張
@@ -98,8 +101,12 @@
 │   │
 │   ├── 📄 BindingProxy.cs                       # XAMLのバインディング補助
 │   ├── 📄 DateTimeEditorWindow.xaml             # 日時編集ダイアログ(View)
-│   └── 📄 DateTimeEditorWindow.xaml.cs          # 日時編集ダイアログのコードビハインド(UIロジック)
-│
+│   ├── 📄 DateTimeEditorWindow.xaml.cs          # 日時編集ダイアログのコードビハインド(UIロジック)
+│   ├── 📄 ProjectView.xaml                      # プロジェクト単体情報
+│   ├── 📄 ProjectView.xaml.cs
+│   ├── 📄 TeamProjectsView.xaml                 # チーム内プロジェクト情報(複数のプロジェクトの管理用View)
+│   └── 📄 TeamProjectsView.xaml.cs
+│ 
 ├── 📄 App.config                                # アプリ設定
 ├── 📄 App.xaml                                  # アプリケーション定義
 ├── 📄 App.xaml.cs                               # アプリ起動ロジック
@@ -117,38 +124,58 @@ block
     %% ============================
     %% Layouts (Views / ViewModels)
     %% ============================
+
+    block:LegendList:7
+        columns 3
+        legend("凡例"):3
+
+        View
+        ViewModel
+        Other
+    end
+
+    space:7
+
     DateTimeEditorWindow_View["DateTimeEditorWindow(View)"]
     MainWindow:6
 
     space:7
 
     space
-    NodeEditorTab:4
+    TeamProjectsView:4
     SchedulerViewModel:2
-    
-    space:7
-    
-    space
-    NodeEditorControl
-    space:2
-    space
-    space:2
-    
-    space:7
-    
-    space
-    NodeControl
-    space:5
 
     space:7
 
     space
+    ProjectView:3
+    TeamProjectsViewModel:2
+    space
+
+    space:7
+
+    space
+    NodeEditorTab:3
+    ProjectViewModel
+    space
+    TabInfo
+
+    space:7
+    
+    space
+    NodeEditorControl:2
+    space:4
+    
+    space:7
+    
+    space
+    NodeControl:2
+    space:4
+
+    space:7
+
+    space:2
     PortControl
-    space:5
-
-    space
-    space
-    space
     space
     NodeDetailControl
     NodeEditorViewModel:2
@@ -156,36 +183,32 @@ block
     space:7
 
     space
+    NodeViewModel
     space
-    space
-    space
-    space
-    space
+    NodeCollectionViewModel
+    space:2
     ConnectionCollectionViewModel
 
     space:7
 
-    space
-    NodeViewModel
-    space
-    NodeCollectionViewModel
+    space:4
     HistoryControl
     space
     ConnectionViewModel
     
     space:7
     
+    space
     DateTimeEditorService
     space:4
-    space
     LineViewModel
 
     space:7
 
-    DateTimeEditorWindow_Class["DateTimeEditorWindow(Class)"]
-    EditableField
-    PortViewModel
     space
+    DateTimeEditorWindow_Class["DateTimeEditorWindow(Class)"]
+    PortViewModel
+    EditableField
     UndoRedoManager
     GridManager
     space
@@ -198,7 +221,9 @@ block
     %% ============================
     %% Dependencies (View)
     %% ============================
-    MainWindow --> NodeEditorTab
+    MainWindow --> TeamProjectsView
+    TeamProjectsView --> ProjectView
+    ProjectView --> NodeEditorTab
     NodeEditorTab --> NodeEditorControl
     NodeEditorTab --> NodeDetailControl
     NodeDetailControl --> HistoryControl
@@ -209,6 +234,9 @@ block
     %% Dependencies (View → ViewModel)
     %% ============================
     MainWindow --> SchedulerViewModel
+    TeamProjectsView --> TeamProjectsViewModel
+    ProjectView --> ProjectViewModel
+    NodeEditorTab --> NodeEditorViewModel
     NodeEditorControl --> NodeEditorViewModel
     NodeControl --> NodeViewModel
     PortControl --> PortViewModel
@@ -220,7 +248,14 @@ block
     %% ============================
     %% Dependencies (ViewModel)
     %% ============================
-    SchedulerViewModel --> NodeEditorViewModel
+    SchedulerViewModel --> TeamProjectsViewModel
+    SchedulerViewModel --> TabInfo
+
+    TeamProjectsViewModel --> ProjectViewModel
+    TeamProjectsViewModel --> TabInfo
+
+    ProjectViewModel --> TabInfo
+    ProjectViewModel --> NodeEditorViewModel
 
     NodeEditorViewModel --> NodeCollectionViewModel
     NodeEditorViewModel --> ConnectionCollectionViewModel
@@ -250,17 +285,23 @@ block
     %% ============================
 
     %% Views (blue)
+    style View fill:#D0E8FF,stroke:#4A90E2,color:#000000
     style MainWindow fill:#D0E8FF,stroke:#4A90E2,color:#000000
-    style DateTimeEditorWindow_View fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style TeamProjectsView fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style ProjectView fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style NodeEditorTab fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style NodeEditorControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style NodeDetailControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
     style NodeControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
     style PortControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
-    style NodeDetailControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
+    style DateTimeEditorWindow_View fill:#D0E8FF,stroke:#4A90E2,color:#000000
     style HistoryControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
-    style NodeEditorControl fill:#D0E8FF,stroke:#4A90E2,color:#000000
-    style NodeEditorTab fill:#D0E8FF,stroke:#4A90E2,color:#000000
 
     %% ViewModels (green)
+    style ViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style SchedulerViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style TeamProjectsViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style ProjectViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style NodeEditorViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style NodeCollectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style ConnectionCollectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
@@ -269,6 +310,8 @@ block
     style DateTimeEditorViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
 
     %% Core / Managers (gray)
+    style Other fill:#F0F0F0,stroke:#999,color:#000000
+    style TabInfo fill:#F0F0F0,stroke:#999,color:#000000
     style EditableField fill:#F0F0F0,stroke:#999,color:#000000
     style PortViewModel fill:#F0F0F0,stroke:#999,color:#000000
     style UndoRedoManager fill:#F0F0F0,stroke:#999,color:#000000

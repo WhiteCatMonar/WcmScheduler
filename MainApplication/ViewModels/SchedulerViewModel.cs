@@ -1,7 +1,7 @@
 ﻿using MainApplication.Infrastructure;
 using MainApplication.Models.SaveData;
 using MainApplication.ViewModels;
-using MainApplication.ViewModels.ProjectModel;
+using MainApplication.ViewModels.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,21 +11,34 @@ using System.Windows.Input;
 namespace MainApplication
 {
     /// <summary>
-    /// アプリ全体を統括するルートViewModel。
+    /// アプリケーション全体の状態を管理するViewModel。
     /// タブ管理、保存・読み込み、子ViewModelの生成などを担当する。
     /// </summary>
     public class SchedulerViewModel
     {
         /* ---------------------------------------------------------
-         * 子ViewModel(アプリの各機能)
+         * チーム内プロジェクト管理
          * --------------------------------------------------------- */
 
-        /// <summary>
-        /// ノードエディタ(タスク編集機能)のViewModel
-        /// </summary>
-        public NodeEditorViewModel NodeEditor { get; }
+        public TeamProjectsViewModel TeamProjects { get; }
 
-        /* TODO:タブごとの機能追加 */
+        /* ---------------------------------------------------------
+         * 保存・読み込み関連定義
+         * --------------------------------------------------------- */
+
+        private readonly IJsonSerializerService _jsonSerializer;
+        private readonly IFileService _fileService;
+
+        /// <summary>ファイル読み込みコマンド</summary>
+        public ICommand LoadCommand { get; }
+
+        /// <summary>上書き保存コマンド</summary>
+        public ICommand SaveCommand { get; }
+
+        /// <summary>別名保存コマンド</summary>
+        public ICommand SaveAsCommand { get; }
+
+        private string _currentFilePath;
 
         /* ---------------------------------------------------------
          * タブ管理
@@ -48,32 +61,8 @@ namespace MainApplication
             {
                 _selectedTab = value;
                 OnPropertyChanged(nameof(SelectedTab));
-                OnPropertyChanged(nameof(IsNodeEditor));
             }
         }
-
-        /// <summary>
-        /// 現在のタブがNodeEditorかどうか
-        /// </summary>
-        public bool IsNodeEditor => SelectedTab == NodeEditor;
-
-        /* ---------------------------------------------------------
-         * 保存・読み込み関連定義
-         * --------------------------------------------------------- */
-
-        private readonly IJsonSerializerService _jsonSerializer;
-        private readonly IFileService _fileService;
-
-        /// <summary>ファイル読み込みコマンド</summary>
-        public ICommand LoadCommand { get; }
-
-        /// <summary>上書き保存コマンド</summary>
-        public ICommand SaveCommand { get; }
-
-        /// <summary>別名保存コマンド</summary>
-        public ICommand SaveAsCommand { get; }
-
-        private string _currentFilePath;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -89,16 +78,18 @@ namespace MainApplication
             _fileService = new FileService();
 
             /* 子となるViewModelの生成 */
-            NodeEditor = new NodeEditorViewModel(modelNames["NodeEditor"]);
+            TeamProjects = new TeamProjectsViewModel();
             /* TODO:タブごとの機能追加 */
 
             /* タブ管理 */
+            var teamTab = new TabInfo("チーム内プロジェクト", TeamProjects);
             Tabs = new ObservableCollection<object>
             {
-                NodeEditor
+                teamTab
                 /* TODO:タブごとの機能追加 */
             };
-            SelectedTab = NodeEditor;
+
+            SelectedTab = teamTab;
 
             /* コマンド */
             LoadCommand = new RelayCommand(() => RequestLoad?.Invoke());
@@ -136,7 +127,8 @@ namespace MainApplication
         {
             if (root.TaskEditor != null)
             {
-                NodeEditor.LoadFromTaskEditorDataModel(root.TaskEditor);
+                TeamProjects.SelectedProject?.
+                    NodeEditor.LoadFromTaskEditorDataModel(root.TaskEditor);
 
                 /* TODO:タブごとの機能追加  */
             }
@@ -193,9 +185,14 @@ namespace MainApplication
         private RootSaveDataModel ToRootDataModel()
         {
             RootSaveDataModel save_data = new RootSaveDataModel();
+
             /* ユーザー：タスク、開発者：ノードという呼称にするため、名称をここで変更 */
-            NodeEditor.SaveToTaskEditorDataModel(out TaskEditorDataModel TaskEditor);
-            save_data.TaskEditor = TaskEditor;
+            if (TeamProjects.SelectedProject != null)
+            {
+                TeamProjects.SelectedProject.
+                    NodeEditor.SaveToTaskEditorDataModel(out TaskEditorDataModel taskEditor);
+                save_data.TaskEditor = taskEditor;
+            }
 
             /* TODO:タブごとの機能追加 */
 

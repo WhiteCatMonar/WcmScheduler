@@ -18,24 +18,6 @@ namespace MainApplication.ViewModels.ProjectModel
          * 基本プロパティ(UIの表示状態)
          * --------------------------------------------------------- */
 
-        private string _modelName;
-        
-        /// <summary>
-        /// モデル名(画面タイトルなどに使用)
-        /// </summary>
-        public string ModelName
-        {
-            get => _modelName;
-            set
-            {
-                if (_modelName != value)
-                {
-                    _modelName = value;
-                    OnPropertyChanged(nameof(ModelName));
-                }
-            }
-        }
-
         private double _baseCanvasWidth;
 
         /// <summary>
@@ -285,10 +267,8 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <summary>
         /// NodeEditorViewModel を生成し、各管理クラスを初期化する。
         /// </summary>
-        public NodeEditorViewModel(string modelName)
+        public NodeEditorViewModel()
         {
-            ModelName = modelName;
-
             Nodes = new NodeCollectionViewModel(UndoRedo, DateTimeEditor, this);
             Connections = new ConnectionCollectionViewModel(UndoRedo, this);
             Grid = new GridManager();

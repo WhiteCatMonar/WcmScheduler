@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MainApplication"
-        xmlns:views_ne_tab="clr-namespace:MainApplication.Views.NodeEditorTab"
         xmlns:converters="clr-namespace:MainApplication.ViewModels.Converters"
         mc:Ignorable="d"
         Title="WcmScheduler" Height="720" Width="1280">
@@ -25,17 +24,13 @@
                     SelectedItem="{Binding SelectedTab}">
             <TabControl.ItemTemplate>
                 <DataTemplate>
-                    <TextBlock Text="{Binding ModelName}" />
+                    <TextBlock Text="{Binding Header}" />
                 </DataTemplate>
             </TabControl.ItemTemplate>
 
             <TabControl.ContentTemplate>
                 <DataTemplate>
-                    <views_ne_tab:NodeEditorTab
-                        Visibility="{Binding DataContext.IsNodeEditor,
-                                     RelativeSource={RelativeSource AncestorType=Window}, 
-                                     Converter={StaticResource BoolToVisibilityConverter}
-                        }"/>
+                    <ContentPresenter Content="{Binding Content}" />
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>

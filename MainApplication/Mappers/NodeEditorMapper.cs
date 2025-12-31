@@ -24,7 +24,7 @@ namespace MainApplication.Mappers
          * --------------------------------------------------------- */
         public static NodeEditorViewModel ToViewModel(TaskEditorDataModel data, NodeEditorViewModel editor)
         {
-            NodeEditorViewModel loadedNodeEditor = new NodeEditorViewModel(editor.ModelName);
+            NodeEditorViewModel loadedNodeEditor = new NodeEditorViewModel();
             loadedNodeEditor.UndoRedo = editor.UndoRedo;
             loadedNodeEditor.DateTimeEditor = editor.DateTimeEditor;
             foreach (var nodeData in data.Nodes)
