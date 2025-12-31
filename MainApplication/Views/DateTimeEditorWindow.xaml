@@ -5,28 +5,28 @@
         WindowStartupLocation="CenterOwner"
         Width="250" Height="330"
         ResizeMode="NoResize">
-
     <StackPanel Margin="10">
+        
         <!-- カレンダー -->
         <Calendar SelectedDate="{Binding SelectedDate, Mode=TwoWay}" Margin="0,0,0,8"/>
 
-        <!-- 時刻入力(スピンボタン付き) -->
+        <!-- 時刻入力 -->
         <DockPanel LastChildFill="False">
             <TextBlock Text="時刻" Width="48" VerticalAlignment="Center"/>
             <StackPanel Orientation="Horizontal">
                 <TextBox Text="{Binding Hour, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Width="40" PreviewTextInput="DigitsOnly"
                          VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
-                         MaxLength="2" Margin="0,0,0,0"/>
+                         MaxLength="2"/>
                 <StackPanel Orientation="Vertical" Margin="0,0,8,0">
                     <RepeatButton Command="{Binding IncreaseHourCommand}" FontSize="8" Width="18" Height="10">
                         <RepeatButton.Content>
-                            <TextBlock Text="▲" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                            <TextBlock Text="▲" VerticalAlignment="Center"/>
                         </RepeatButton.Content>
                     </RepeatButton>
                     <RepeatButton Command="{Binding DecreaseHourCommand}" FontSize="8" Width="18" Height="10">
                         <RepeatButton.Content>
-                            <TextBlock Text="▼" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                            <TextBlock Text="▼" VerticalAlignment="Center"/>
                         </RepeatButton.Content>
                     </RepeatButton>
                 </StackPanel>
@@ -36,16 +36,16 @@
                 <TextBox Text="{Binding Minute, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Width="40" PreviewTextInput="DigitsOnly"
                          VerticalContentAlignment="Center" HorizontalContentAlignment="Center"
-                         MaxLength="2" Margin="0,0,0,0"/>
+                         MaxLength="2"/>
                 <StackPanel Orientation="Vertical" Margin="0,0,8,0">
                     <RepeatButton Command="{Binding IncreaseMinuteCommand}" FontSize="8" Width="18" Height="10">
                         <RepeatButton.Content>
-                            <TextBlock Text="▲" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                            <TextBlock Text="▲" VerticalAlignment="Center"/>
                         </RepeatButton.Content>
                     </RepeatButton>
                     <RepeatButton Command="{Binding DecreaseMinuteCommand}" FontSize="8" Width="18" Height="10">
                         <RepeatButton.Content>
-                            <TextBlock Text="▼" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                            <TextBlock Text="▼" VerticalAlignment="Center"/>
                         </RepeatButton.Content>
                     </RepeatButton>
                 </StackPanel>
@@ -63,6 +63,7 @@
             <Button Content="クリア" Margin="6,0,0,0"
                     Command="{Binding ClearCommand}"/>
         </StackPanel>
+        
     </StackPanel>
 </Window>
 

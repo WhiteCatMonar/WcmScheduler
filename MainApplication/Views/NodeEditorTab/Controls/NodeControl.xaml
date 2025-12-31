@@ -18,12 +18,12 @@
         MouseLeftButtonDown="NodeBorder_MouseLeftButtonDown">
         <Grid>
             <Grid.RowDefinitions>
+                <!-- タスク名 -->
                 <RowDefinition Height="Auto"/>
-                <!-- TaskName -->
+                <!-- 入力ポート -->
                 <RowDefinition Height="Auto"/>
-                <!-- InputPorts -->
+                <!-- 出力ポート -->
                 <RowDefinition Height="Auto"/>
-                <!-- OutputPorts -->
             </Grid.RowDefinitions>
 
             <!-- タスク名 -->

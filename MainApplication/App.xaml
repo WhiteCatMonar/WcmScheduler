@@ -5,17 +5,23 @@
              xmlns:vm_project="clr-namespace:MainApplication.ViewModels.ProjectModel"
              xmlns:views="clr-namespace:MainApplication.Views"
              xmlns:views_ne_tab="clr-namespace:MainApplication.Views.NodeEditorTab"
-             xmlns:local="clr-namespace:MainApplication"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        
+        <!-- TeamProjectsViewModel → TeamProjectsView -->
         <DataTemplate DataType="{x:Type vm:TeamProjectsViewModel}">
             <views:TeamProjectsView />
         </DataTemplate>
+        
+        <!-- ProjectViewModel → ProjectView -->
         <DataTemplate DataType="{x:Type vm_project:ProjectViewModel}">
             <views:ProjectView />
         </DataTemplate>
+
+        <!-- NodeEditorViewModel → NodeEditorTab -->
         <DataTemplate DataType="{x:Type vm_project:NodeEditorViewModel}">
             <views_ne_tab:NodeEditorTab />
         </DataTemplate>
+        
     </Application.Resources>
 </Application>

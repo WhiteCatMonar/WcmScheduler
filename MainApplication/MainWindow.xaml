@@ -1,16 +1,13 @@
 ﻿<Window x:Class="MainApplication.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:MainApplication"
         xmlns:converters="clr-namespace:MainApplication.ViewModels.Converters"
-        mc:Ignorable="d"
         Title="WcmScheduler" Height="720" Width="1280">
     <Window.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Window.Resources>
     <DockPanel>
+        
         <!-- メニューバー -->
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_ファイル">
@@ -19,6 +16,7 @@
                 <MenuItem Header="名前を付けて保存" Command="{Binding SaveAsCommand}" />
             </MenuItem>
         </Menu>
+        
         <!-- タブウィンドウ -->
         <TabControl ItemsSource="{Binding Tabs}"
                     SelectedItem="{Binding SelectedTab}">
@@ -34,5 +32,6 @@
                 </DataTemplate>
             </TabControl.ContentTemplate>
         </TabControl>
+        
     </DockPanel>
 </Window>

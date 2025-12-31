@@ -2,7 +2,6 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-             xmlns:vm="clr-namespace:MainApplication.ViewModels"
              xmlns:views="clr-namespace:MainApplication.Views.NodeEditorTab"
              xmlns:controls="clr-namespace:MainApplication.Views.NodeEditorTab.Controls"
              PreviewKeyDown="UserControl_PreviewKeyDown"
@@ -79,6 +78,7 @@
         </Grid>
 
         <GridSplitter Grid.Column="1" Background="#CCC" Style="{StaticResource VerticalGridSplitter}" />
+        
         <!-- ノードエディタ領域 -->
         <views:NodeEditorControl Grid.Column="2" Margin="5"/>
 
