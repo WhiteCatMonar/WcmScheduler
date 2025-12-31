@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using MainApplication.ViewModels;
+using MainApplication.ViewModels.ProjectModel;
 
 namespace MainApplication.Views.NodeEditorTab
 {

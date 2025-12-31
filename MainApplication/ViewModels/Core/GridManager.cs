@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
+using MainApplication.ViewModels.ProjectModel;
 
 namespace MainApplication.ViewModels.Core
 {

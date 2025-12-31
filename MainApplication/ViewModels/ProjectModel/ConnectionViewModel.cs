@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Media;
 
-namespace MainApplication.ViewModels
+namespace MainApplication.ViewModels.ProjectModel
 {
     /// <summary>
     /// 2つのポート間を結ぶ接続線を表すViewModel。

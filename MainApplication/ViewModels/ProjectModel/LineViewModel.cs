@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Media;
 
-namespace MainApplication.ViewModels
+namespace MainApplication.ViewModels.ProjectModel
 {
     /// <summary>
     /// グリッド線 1 本を表す ViewModel。

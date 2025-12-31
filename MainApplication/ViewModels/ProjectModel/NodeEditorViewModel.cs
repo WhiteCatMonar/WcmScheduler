@@ -6,7 +6,7 @@ using System;
 using System.ComponentModel;
 using System.Windows.Input;
 
-namespace MainApplication.ViewModels
+namespace MainApplication.ViewModels.ProjectModel
 {
     /// <summary>
     /// ノードエディタ全体を統括するViewModel。

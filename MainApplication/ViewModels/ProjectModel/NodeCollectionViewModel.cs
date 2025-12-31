@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 
-namespace MainApplication.ViewModels
+namespace MainApplication.ViewModels.ProjectModel
 {
     /// <summary>
     /// ノード一覧の管理、選択状態、追加・削除・移動操作、

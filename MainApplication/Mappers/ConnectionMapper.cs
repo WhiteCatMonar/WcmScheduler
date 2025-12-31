@@ -1,5 +1,5 @@
 ﻿using MainApplication.Models.SaveData;
-using MainApplication.ViewModels;
+using MainApplication.ViewModels.ProjectModel;
 using System;
 
 namespace MainApplication.Mappers

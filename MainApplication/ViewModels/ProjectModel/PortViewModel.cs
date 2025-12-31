@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
 
-namespace MainApplication.ViewModels
+namespace MainApplication.ViewModels.ProjectModel
 {
     /// <summary>
     /// ノードの入出力ポートを表すViewModel。

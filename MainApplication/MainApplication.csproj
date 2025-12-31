@@ -117,8 +117,8 @@
     <Compile Include="ViewModels\Actions\DeleteNodeAction.cs" />
     <Compile Include="ViewModels\Actions\EditNodePropertyAction.cs" />
     <Compile Include="ViewModels\Actions\MoveNodeAction.cs" />
-    <Compile Include="ViewModels\ConnectionCollectionViewModel.cs" />
-    <Compile Include="ViewModels\ConnectionViewModel.cs" />
+    <Compile Include="ViewModels\ProjectModel\ConnectionCollectionViewModel.cs" />
+    <Compile Include="ViewModels\ProjectModel\ConnectionViewModel.cs" />
     <Compile Include="ViewModels\Converters\BoolToVisibilityConverter.cs" />
     <Compile Include="ViewModels\Converters\DateTimeDisplayConverter.cs" />
     <Compile Include="ViewModels\Converters\DisplayNameConverter.cs" />
@@ -162,10 +162,10 @@
     <Compile Include="ViewModels\Core\EditableField.cs" />
     <Compile Include="ViewModels\Core\GridManager.cs" />
     <Compile Include="ViewModels\Core\UndoRedoManager.cs" />
-    <Compile Include="ViewModels\LineViewModel.cs" />
-    <Compile Include="ViewModels\NodeCollectionViewModel.cs" />
-    <Compile Include="ViewModels\NodeViewModel.cs" />
-    <Compile Include="ViewModels\PortViewModel.cs" />
+    <Compile Include="ViewModels\ProjectModel\LineViewModel.cs" />
+    <Compile Include="ViewModels\ProjectModel\NodeCollectionViewModel.cs" />
+    <Compile Include="ViewModels\ProjectModel\NodeViewModel.cs" />
+    <Compile Include="ViewModels\ProjectModel\PortViewModel.cs" />
     <Compile Include="ViewModels\RelayCommand.cs" />
     <Compile Include="ViewModels\SchedulerViewModel.cs" />
     <Compile Include="ViewModels\Service\DateTimeEditorService.cs" />
@@ -182,7 +182,7 @@
     <Compile Include="Views\NodeEditorTab\Controls\NodeControl.xaml.cs">
       <DependentUpon>NodeControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="ViewModels\NodeEditorViewModel.cs" />
+    <Compile Include="ViewModels\ProjectModel\NodeEditorViewModel.cs" />
     <Compile Include="Views\NodeEditorTab\Controls\PortControl.xaml.cs">
       <DependentUpon>PortControl.xaml</DependentUpon>
     </Compile>

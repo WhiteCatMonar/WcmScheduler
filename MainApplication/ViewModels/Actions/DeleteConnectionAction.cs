@@ -1,4 +1,5 @@
 ﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.ProjectModel;
 using System.Collections.ObjectModel;
 
 namespace MainApplication.ViewModels.Actions

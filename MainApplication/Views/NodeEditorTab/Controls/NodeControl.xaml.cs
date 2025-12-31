@@ -1,10 +1,9 @@
 ﻿using MainApplication.Helpers;
-using MainApplication.ViewModels;
+using MainApplication.ViewModels.ProjectModel;
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace MainApplication.Views.NodeEditorTab.Controls
 {

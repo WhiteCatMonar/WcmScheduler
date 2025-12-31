@@ -1,8 +1,8 @@
 ﻿using MainApplication.Models.SaveData;
-using MainApplication.ViewModels;
+using MainApplication.ViewModels.ProjectModel;
 using System;
 using System.Linq;
-using static MainApplication.ViewModels.PortViewModel;
+using static MainApplication.ViewModels.ProjectModel.PortViewModel;
 
 namespace MainApplication.Mappers
 {

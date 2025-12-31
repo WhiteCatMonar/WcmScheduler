@@ -13,7 +13,7 @@
 │   ├── 📄 FileService.cs                        # ファイル読込・保存
 │   ├── 📄 IFileService.cs                       # ファイル読込・保存のインターフェース
 │   ├── 📄 IJsonSerializerService.cs             # JSONのシリアライザのインターフェース
-│   └── 📄 JsonSerializerService.cs              # JSONのシリアライザ（シリアライズ/デシリアライズ）
+│   └── 📄 JsonSerializerService.cs              # JSONのシリアライザ(シリアライズ/デシリアライズ)
 │
 ├── 📂 Mapper
 │   ├── 📄 ConnectionMapper.cs                   # 接続線情報のViewModel⇔Model相互変換
@@ -47,30 +47,32 @@
 │   │   └── 📄 MoveNodeAction.cs                 # Undo/Redoアクション：ノード移動
 │   │
 │   ├── 📂 Converters                            # XAMLバインディング用コンバータ
-│   │   ├── 📄 BoolToVisibilityConverter.cs      # bool             →Visibility
+│   │   ├── 📄 BoolToVisibilityConverter.cs      # bool             → Visibility
 │   │   ├── 📄 DateTimeDisplayConverter.cs       # DateTime?        → 表示文字列
 │   │   ├── 📄 DisplayNameConverter.cs           # DisplayName 属性 → 表示名
 │   │   ├── 📄 PortColorConverter.cs             # ポート種別       → 色
 │   │   └── 📄 SelectionBrushConverter.cs        # 選択状態         → ブラシ
 │   │
-│   ├── 📂 Core                                  # 基盤ロジック（UI 非依存）
-│   │   ├── 📄 EditableField.cs                  # 編集フィールドの共通ロジック（遅延コミット）
+│   ├── 📂 Core                                  # 基盤ロジック(UI非依存)
+│   │   ├── 📄 EditableField.cs                  # 編集フィールドの共通ロジック(遅延コミット)
 │   │   ├── 📄 GridManager.cs                    # 論理座標系・ズーム・パン管理
 │   │   └── 📄 UndoRedoManager.cs                # Undo/Redo管理
 │   │
 │   ├── 📂 Service
-│   │   ├── 📄 DateTimeEditorService.cs          # 日時編集ダイアログを開くサービス（UI 呼び出し）
+│   │   ├── 📄 DateTimeEditorService.cs          # 日時編集ダイアログを開くサービス(UI 呼び出し)
 │   │   └── 📄 IDateTimeEditorService.cs         # 日時編集サービスのインターフェース
 │   │
-│   ├── 📄 ConnectionCollectionViewModel.cs      # 接続線の一覧管理
-│   ├── 📄 ConnectionViewModel.cs                # 接続線1本の状態
-│   ├── 📄 DateTimeEditorViewModel.cs            # 日時編集ダイアログの ViewModel（UI 入力ロジック）
-│   ├── 📄 LineViewModel.cs                      # 線分の描画情報（接続線の補助）
-│   ├── 📄 NodeCollectionViewModel.cs            # ノード一覧管理（生成・削除・選択）
-│   ├── 📄 NodeEditorViewModel.cs                # ノードエディタ全体の状態管理（ズーム・パン・Undo/Redo）
-│   ├── 📄 NodeViewModel.cs                      # ノード1個の状態・編集ロジック
-│   ├── 📄 PortViewModel.cs                      # ポート（入出力端子）の状態
-│   ├── 📄 RelayCommand.cs                       # ICommand 実装（MVVMの基本）
+│   ├── 📂 ProjectModel
+│   │   ├── 📄 ConnectionCollectionViewModel.cs  # 接続線の一覧管理
+│   │   ├── 📄 ConnectionViewModel.cs            # 接続線1本の状態
+│   │   ├── 📄 LineViewModel.cs                  # 線分の描画情報(接続線の補助)
+│   │   ├── 📄 NodeCollectionViewModel.cs        # ノード一覧管理(生成・削除・選択)
+│   │   ├── 📄 NodeEditorViewModel.cs            # ノードエディタ全体の状態管理(ズーム・パン・Undo/Redo)
+│   │   ├── 📄 NodeViewModel.cs                  # ノード1個の状態・編集ロジック
+│   │   └── 📄 PortViewModel.cs                  # ポート(入出力端子)の状態
+│   │
+│   ├── 📄 DateTimeEditorViewModel.cs            # 日時編集ダイアログのViewModel(UI入力ロジック)
+│   ├── 📄 RelayCommand.cs                       # ICommand 実装(MVVMの基本)
 │   └── 📄 SchedulerViewModel.cs                 # アプリケーション全体の状態管理
 │
 ├── 📂 Views
@@ -84,7 +86,7 @@
 │   │   │   ├── 📄 HistoryControl.xaml.cs
 │   │   │   ├── 📄 NodeControl.xaml              # ノードの見た目
 │   │   │   ├── 📄 NodeControl.xaml.cs
-│   │   │   ├── 📄 NodeDetailControl.xaml        # ノード詳細（プロパティ編集）
+│   │   │   ├── 📄 NodeDetailControl.xaml        # ノード詳細(プロパティ編集)
 │   │   │   ├── 📄 NodeDetailControl.xaml.cs
 │   │   │   ├── 📄 NodeEditorControl.xaml        # エディタ全体のUI
 │   │   │   ├── 📄 NodeEditorControl.xaml.cs
@@ -95,8 +97,8 @@
 │   │   └── 📄 NodeEditorTab.xaml.cs
 │   │
 │   ├── 📄 BindingProxy.cs                       # XAMLのバインディング補助
-│   ├── 📄 DateTimeEditorWindow.xaml             # 日時編集ダイアログ（View）
-│   └── 📄 DateTimeEditorWindow.xaml.cs          # 日時編集ダイアログのコードビハインド（UIロジック）
+│   ├── 📄 DateTimeEditorWindow.xaml             # 日時編集ダイアログ(View)
+│   └── 📄 DateTimeEditorWindow.xaml.cs          # 日時編集ダイアログのコードビハインド(UIロジック)
 │
 ├── 📄 App.config                                # アプリ設定
 ├── 📄 App.xaml                                  # アプリケーション定義

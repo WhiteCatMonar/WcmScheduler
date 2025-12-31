@@ -1,11 +1,9 @@
 ﻿using MainApplication.Helpers;
-using MainApplication.ViewModels;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using static MainApplication.ViewModels.PortViewModel;
+using MainApplication.ViewModels.ProjectModel;
 
 namespace MainApplication.Views.NodeEditorTab.Controls
 {
@@ -44,7 +42,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         private void Port_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
-            if (DataContext is PortViewModel port && port.Type == PortType.Output)
+            if (DataContext is PortViewModel port && port.Type == PortViewModel.PortType.Output)
             {
                 var editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
 
@@ -114,7 +112,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 if (hit?.VisualHit is FrameworkElement fe && fe.DataContext is PortViewModel targetPort)
                 {
                     /* 入力ポートにドロップされた場合のみ接続線を作成 */
-                    if (targetPort.Type == PortType.Input)
+                    if (targetPort.Type == PortViewModel.PortType.Input)
                     {
                         editorVM?.Connections.CreateConnection((PortViewModel)DataContext, targetPort);
                     }

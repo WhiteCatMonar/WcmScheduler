@@ -9,7 +9,7 @@ using System.Linq;
 using System.Windows.Input;
 using System.Windows.Threading;
 
-namespace MainApplication.ViewModels
+namespace MainApplication.ViewModels.ProjectModel
 {
     /// <summary>
     /// ノード(タスク)を表すViewModel。

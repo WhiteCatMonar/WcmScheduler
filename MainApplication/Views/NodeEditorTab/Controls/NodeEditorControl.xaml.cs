@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels;
+﻿using MainApplication.ViewModels.ProjectModel;
 using MainApplication.Views.NodeEditorTab.Controls;
 using System;
 using System.Windows;
