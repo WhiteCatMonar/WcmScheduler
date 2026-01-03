@@ -49,7 +49,7 @@ namespace MainApplication.ViewModels.ProjectModel
 
             /* 初期座標を設定 */
             FromPosition = from.AbsolutePosition;
-            ToPosition = from.AbsolutePosition;
+            ToPosition = to.AbsolutePosition;
 
             /* ポート座標の更新を監視 */
             from.PropertyChanged += (s, e) =>
