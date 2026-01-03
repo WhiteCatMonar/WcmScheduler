@@ -33,12 +33,15 @@ namespace MainApplication.Mappers
                     Comment = vm.Comment
                 },
 
-                Ports = vm.AllPorts.ToList().Select(p => new PortDataModel
-                {
-                    Id = p.PortGuid.ToString(),
-                    Name = p.Name,
-                    Type = p.Type.ToString()
-                }).ToList()
+                Ports = 
+                [.. 
+                    vm.AllPorts.ToList().Select(p => new PortDataModel
+                    {
+                        Id = p.PortGuid.ToString(),
+                        Name = p.Name,
+                        Type = p.Type.ToString()
+                    })
+                ]
             };
         }
 
@@ -47,7 +50,7 @@ namespace MainApplication.Mappers
          * --------------------------------------------------------- */
         public static NodeViewModel ToViewModel(NodeDataModel data, NodeEditorViewModel editor)
         {
-            NodeViewModel loadedNode = new NodeViewModel(editor.UndoRedo, editor.DateTimeEditor)
+            NodeViewModel loadedNode = new(editor.UndoRedo, editor.DateTimeEditor)
             {
                 NodeGuid = Guid.Parse(data.Id),
                 NodeType = data.Type,
@@ -62,7 +65,7 @@ namespace MainApplication.Mappers
             loadedNode.CommitEdits();
             foreach (var port in data.Ports)
             {
-                switch ((PortType)Enum.Parse(typeof(PortType), port.Type))
+                switch (Enum.Parse<PortType>(port.Type))
                 {
                     case PortType.Input:
                         loadedNode.InputPorts.Add(new PortViewModel

@@ -37,7 +37,7 @@ namespace MainApplication.Infrastructure
          * デシリアライズ(JSON → オブジェクト)
          * --------------------------------------------------------- */
 
-        public T Deserialize<T>(string json)
+        public T? Deserialize<T>(string json)
         {
             return JsonSerializer.Deserialize<T>(json, _options);
         }

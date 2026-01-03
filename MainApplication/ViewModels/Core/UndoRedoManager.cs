@@ -31,14 +31,14 @@ namespace MainApplication.ViewModels.Core
          * Undo/Redoスタック
          * --------------------------------------------------------- */
 
-        private readonly Stack<IUndoableAction> _undoStack = new Stack<IUndoableAction>();
-        private readonly Stack<IUndoableAction> _redoStack = new Stack<IUndoableAction>();
+        private readonly Stack<IUndoableAction> _undoStack = new();
+        private readonly Stack<IUndoableAction> _redoStack = new();
 
         /// <summary>Undoが可能かどうか</summary>
-        public bool CanUndo => _undoStack.Any();
+        public bool CanUndo => _undoStack.Count > 0;
 
         /// <summary>Redoが可能かどうか</summary>
-        public bool CanRedo => _redoStack.Any();
+        public bool CanRedo => _redoStack.Count > 0;
 
         /// <summary>
         /// 履歴リストに表示されるアイテム。
@@ -47,10 +47,10 @@ namespace MainApplication.ViewModels.Core
         public class HistoryItem : INotifyPropertyChanged
         {
             /// <summary>アクションの説明</summary>
-            public string Description { get; set; }
+            public required string Description { get; set; }
 
             /// <summary>アクション種別</summary>
-            public string ActionType { get; set; }
+            public required string ActionType { get; set; }
 
             /// <summary>アクション実行時刻</summary>
             public DateTime Timestamp { get; set; } = DateTime.Now;
@@ -60,7 +60,7 @@ namespace MainApplication.ViewModels.Core
             /// <summary>この履歴が現在位置かどうか</summary>
             public bool IsCurrent { get => _isCurrent; set { _isCurrent = value; OnPropertyChanged(nameof(IsCurrent)); } }
 
-            public event PropertyChangedEventHandler PropertyChanged;
+            public event PropertyChangedEventHandler? PropertyChanged;
             private void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
@@ -69,7 +69,7 @@ namespace MainApplication.ViewModels.Core
          * --------------------------------------------------------- */
 
         /// <summary>履歴アイテム一覧(UI表示用)</summary>
-        public ObservableCollection<HistoryItem> History { get; } = new ObservableCollection<HistoryItem>();
+        public ObservableCollection<HistoryItem> History { get; } = [];
         
         /// <summary>
         /// 履歴適用中かどうか(Undo/Redo実行中に副作用を防ぐため)
@@ -92,7 +92,9 @@ namespace MainApplication.ViewModels.Core
             _undoStack.Push(action);
             _redoStack.Clear();
 
-            int currentIndex = History.IndexOf(History.FirstOrDefault(h => h.IsCurrent));
+            HistoryItem? firstItem = History.FirstOrDefault(h => h.IsCurrent);
+            int currentIndex = (firstItem is null) ? -1
+                                                   : History.IndexOf(firstItem);
 
             var item = new HistoryItem
             {
@@ -165,10 +167,10 @@ namespace MainApplication.ViewModels.Core
          * 履歴位置管理
          * --------------------------------------------------------- */
 
-        private Dictionary<IUndoableAction, HistoryItem> _actionToHistory = new Dictionary<IUndoableAction, HistoryItem>();
+        private readonly Dictionary<IUndoableAction, HistoryItem> _actionToHistory = [];
 
         /// <summary>現在位置が変更されたときに通知されるイベント</summary>
-        public event EventHandler<HistoryItem> CurrentHistoryChanged;
+        public event EventHandler<HistoryItem?>? CurrentHistoryChanged;
 
         /// <summary>
         /// Undo/Redoスタックの状態に基づいて現在位置を更新する
@@ -180,7 +182,7 @@ namespace MainApplication.ViewModels.Core
                 item.IsCurrent = false;
             }
 
-            HistoryItem currentItem = null;
+            HistoryItem? currentItem = null;
             if (_undoStack.Count > 0)
             {
                 var currentAction = _undoStack.Peek();
@@ -201,14 +203,22 @@ namespace MainApplication.ViewModels.Core
         /// <summary>
         /// 指定した履歴アイテムの位置まで Undo/Redoを繰り返して移動する
         /// </summary>
-        public void MoveToHistory(HistoryItem target)
+        public void MoveToHistory(HistoryItem? target)
         {
-            if (target == null) return;
+            if (target == null)
+            {
+                return;
+            }
 
             int targetIndex = History.IndexOf(target);
-            if (targetIndex < 0) return;
+            if (targetIndex < 0)
+            {
+                return;
+            }
 
-            int currentIndex = History.IndexOf(History.FirstOrDefault(h => h.IsCurrent));
+            HistoryItem? firstItem = History.FirstOrDefault(h => h.IsCurrent);
+            int currentIndex = (firstItem is null) ? -1
+                                                   : History.IndexOf(firstItem);
 
             if (currentIndex < 0)
             {
@@ -220,14 +230,18 @@ namespace MainApplication.ViewModels.Core
             while (currentIndex < targetIndex && CanUndo)
             {
                 Undo();
-                currentIndex = History.IndexOf(History.FirstOrDefault(h => h.IsCurrent));
+                firstItem = History.FirstOrDefault(h => h.IsCurrent);
+                currentIndex = (firstItem is null) ? -1
+                                                   : History.IndexOf(firstItem);
             }
 
             /* 現在位置より未来に進める場合 → Redoを繰り返す */
             while (currentIndex > targetIndex && CanRedo)
             {
                 Redo();
-                currentIndex = History.IndexOf(History.FirstOrDefault(h => h.IsCurrent));
+                firstItem = History.FirstOrDefault(h => h.IsCurrent);
+                currentIndex = (firstItem is null) ? -1
+                                                   : History.IndexOf(firstItem);
             }
         }
 

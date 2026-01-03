@@ -20,7 +20,7 @@ namespace MainApplication.Views
         /// 入力された日時が有効かどうかを判定するためのコールバック。
         /// nullの場合はバリデーションなし。
         /// </summary>
-        private readonly Func<DateTime?, bool> _validate;
+        private readonly Func<DateTime?, bool>? _validate;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -29,7 +29,7 @@ namespace MainApplication.Views
         /// <summary>
         /// 初期値とバリデーション関数を受け取り、ViewModelを初期化する。
         /// </summary>
-        public DateTimeEditorWindow(DateTime? initial, Func<DateTime?, bool> validate = null)
+        public DateTimeEditorWindow(DateTime? initial, Func<DateTime?, bool>? validate = null)
         {
             InitializeComponent();
             DataContext = new DateTimeEditorViewModel(initial);

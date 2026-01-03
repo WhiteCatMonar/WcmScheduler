@@ -22,17 +22,17 @@ namespace MainApplication.Models.SaveData
         /// <summary>
         /// ノードの座標情報
         /// </summary>
-        public PositionDataModel Position { get; set; } = new PositionDataModel();
+        public PositionDataModel Position { get; set; } = new();
 
         /// <summary>
         /// ノードの詳細情報(タスク名・担当者・日時など)
         /// </summary>
-        public NodeDetailsDataModel Details { get; set; } = new NodeDetailsDataModel();
+        public NodeDetailsDataModel Details { get; set; } = new();
 
         /// <summary>
         /// ノードが持つポート一覧(入出力端子)
         /// </summary>
-        public List<PortDataModel> Ports { get; set; } = new List<PortDataModel>();
+        public List<PortDataModel> Ports { get; set; } = [];
     }
 }
 

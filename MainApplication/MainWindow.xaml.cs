@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using MainApplication.ViewModels;
 using System.Windows;
 
 namespace MainApplication
@@ -32,9 +32,7 @@ namespace MainApplication
             InitializeComponent();
 
             /* 子ViewModel名の辞書を渡してSchedulerViewModelを生成 */
-            SchedulerVM = new SchedulerViewModel(new Dictionary<string, string>(){
-                { "NodeEditor", "タスク編集" }
-            });
+            SchedulerVM = new SchedulerViewModel();
             DataContext = SchedulerVM;
 
             Loaded += MainWindow_Loaded;

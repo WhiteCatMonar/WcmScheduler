@@ -23,7 +23,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <summary>
         /// このポートに接続されている接続線一覧
         /// </summary>
-        public List<ConnectionViewModel> ConnectedConnections { get; } = new List<ConnectionViewModel>();
+        public List<ConnectionViewModel> ConnectedConnections { get; } = [];
 
         /* ---------------------------------------------------------
          * 識別子・基本情報
@@ -48,27 +48,15 @@ namespace MainApplication.ViewModels.ProjectModel
             }
         }
 
-        private string _name;
-
         /// <summary>
         /// ポート名(UI表示用)
         /// </summary>
-        public string Name
-        {
-            get => _name;
-            set { _name = value; OnPropertyChanged(nameof(Name)); }
-        }
-
-        private PortType _type;
+        public required string Name{ get; init; }
 
         /// <summary>
         /// ポートの種類(入力 or 出力)
         /// </summary>
-        public PortType Type
-        {
-            get => _type;
-            set { _type = value; OnPropertyChanged(nameof(Type)); }
-        }
+        public required PortType Type { get; init; }
 
         /* ---------------------------------------------------------
          * ノード内の相対座標(論理座標)
@@ -122,23 +110,10 @@ namespace MainApplication.ViewModels.ProjectModel
          * 親ノード
          * --------------------------------------------------------- */
 
-        public NodeViewModel _parentNode;
-
         /// <summary>
         /// このポートが属するノード
         /// </summary>
-        public NodeViewModel ParentNode
-        {
-            get => _parentNode;
-            set
-            {
-                if (_parentNode != value)
-                {
-                    _parentNode = value;
-                    OnPropertyChanged(nameof(ParentNode));
-                }
-            }
-        }
+        public required NodeViewModel ParentNode { get; init; }
 
         /* ---------------------------------------------------------
          * 座標更新
@@ -165,7 +140,7 @@ namespace MainApplication.ViewModels.ProjectModel
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する

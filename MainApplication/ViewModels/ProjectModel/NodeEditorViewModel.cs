@@ -154,7 +154,7 @@ namespace MainApplication.ViewModels.ProjectModel
          * 操作履歴管理(Undo/Redo)
          * --------------------------------------------------------- */
 
-        private UndoRedoManager _undoredo = new UndoRedoManager();
+        private UndoRedoManager _undoredo = new();
 
         /// <summary>
         /// Undo/Redo管理クラス
@@ -182,9 +182,9 @@ namespace MainApplication.ViewModels.ProjectModel
         public ICommand MoveToHistoryCommand { get; }
 
         /// <summary>現在の履歴位置が変化したときに発火するイベント</summary>
-        public event EventHandler<UndoRedoManager.HistoryItem> CurrentHistoryChanged;
+        public event EventHandler<UndoRedoManager.HistoryItem?>? CurrentHistoryChanged;
 
-        private void OnCurrentHistoryChanged(object sender, UndoRedoManager.HistoryItem e)
+        private void OnCurrentHistoryChanged(object? sender, UndoRedoManager.HistoryItem? e)
         {
             CurrentHistoryChanged?.Invoke(this, e);
             RefreshNodeAndConnectionPositions();
@@ -320,7 +320,7 @@ namespace MainApplication.ViewModels.ProjectModel
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する。

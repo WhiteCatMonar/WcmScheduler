@@ -16,7 +16,7 @@
          * デシリアライズ(JSON → オブジェクト)
          * ----------------------------------------------------- */
 
-        T Deserialize<T>(string json);
+        T? Deserialize<T>(string json);
     }
 }
 

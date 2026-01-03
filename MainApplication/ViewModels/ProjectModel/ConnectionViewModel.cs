@@ -46,27 +46,25 @@ namespace MainApplication.ViewModels.ProjectModel
         public ConnectionViewModel(PortViewModel from, PortViewModel to)
         {
             ConnectionGuid = Guid.NewGuid();
-            FromPort = from;
-            ToPort = to;
 
             /* 初期座標を設定 */
-            FromPosition = FromPort?.AbsolutePosition ?? new Point(0, 0);
-            ToPosition = ToPort?.AbsolutePosition ?? new Point(0, 0);
+            FromPosition = from.AbsolutePosition;
+            ToPosition = from.AbsolutePosition;
 
             /* ポート座標の更新を監視 */
-            FromPort.PropertyChanged += (s, e) =>
+            from.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(PortViewModel.AbsolutePosition))
                 {
-                    FromPosition = FromPort.AbsolutePosition;
+                    FromPosition = from.AbsolutePosition;
                 }
             };
 
-            ToPort.PropertyChanged += (s, e) =>
+            to.PropertyChanged += (s, e) =>
             {
                 if (e.PropertyName == nameof(PortViewModel.AbsolutePosition))
                 {
-                    ToPosition = ToPort.AbsolutePosition;
+                    ToPosition = to.AbsolutePosition;
                 }
             };
         }
@@ -75,12 +73,12 @@ namespace MainApplication.ViewModels.ProjectModel
          * 接続線ジオメトリ
          * --------------------------------------------------------- */
 
-        private Geometry _connectionGeometry;
+        private Geometry? _connectionGeometry;
 
         /// <summary>
         /// 描画用のベジェ曲線ジオメトリ
         /// </summary>
-        public Geometry ConnectionGeometry
+        public Geometry? ConnectionGeometry
         {
             get => _connectionGeometry;
             private set
@@ -109,13 +107,14 @@ namespace MainApplication.ViewModels.ProjectModel
             var figure = new PathFigure
             {
                 StartPoint = start,
-                Segments = new PathSegmentCollection {
+                Segments =
+                [
                     new BezierSegment(p1, p2, end, true)
-                },
+                ],
                 IsClosed = false
             };
 
-            ConnectionGeometry = new PathGeometry(new[] { figure });
+            ConnectionGeometry = new PathGeometry([ figure ]);
         }
 
         /* ---------------------------------------------------------
@@ -123,12 +122,12 @@ namespace MainApplication.ViewModels.ProjectModel
          * --------------------------------------------------------- */
 
         /// <summary>接続元ポート</summary>
-        public PortViewModel FromPort { get; set; }
+        public required PortViewModel FromPort { get; set; }
 
         /// <summary>接続先ポート</summary>
-        public PortViewModel ToPort { get; set; }
+        public required PortViewModel ToPort { get; set; }
 
-        private Point _fromPosition = new Point(0, 0);
+        private Point _fromPosition = new(0, 0);
 
         /// <summary>
         /// 接続元ポートの現在位置(論理座標)
@@ -148,7 +147,7 @@ namespace MainApplication.ViewModels.ProjectModel
             }
         }
 
-        private Point _toPosition = new Point(0, 0);
+        private Point _toPosition = new(0, 0);
 
         /// <summary>
         /// 接続先ポートの現在位置(論理座標)
@@ -171,12 +170,12 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <summary>
         /// 接続元側のベジェ制御点
         /// </summary>
-        public Point FromBezierControlPoint => new Point(FromPosition.X + 50, FromPosition.Y);
+        public Point FromBezierControlPoint => new(FromPosition.X + 50, FromPosition.Y);
         
         /// <summary>
         /// 接続先側のベジェ制御点
         /// </summary>
-        public Point ToBezierControlPoint => new Point(ToPosition.X - 50, ToPosition.Y);
+        public Point ToBezierControlPoint => new(ToPosition.X - 50, ToPosition.Y);
 
         /* ---------------------------------------------------------
          * 選択状態
@@ -204,7 +203,7 @@ namespace MainApplication.ViewModels.ProjectModel
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する

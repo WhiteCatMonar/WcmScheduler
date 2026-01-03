@@ -248,8 +248,7 @@ namespace MainApplication.ViewModels.Core
         /// <summary>
         /// 描画用のグリッド線一覧
         /// </summary>
-        public ObservableCollection<LineViewModel> GridLines { get; }
-            = new ObservableCollection<LineViewModel>();
+        public ObservableCollection<LineViewModel> GridLines { get; } = [];
 
         /// <summary>
         /// グリッド線の間隔(描画用)
@@ -316,7 +315,7 @@ namespace MainApplication.ViewModels.Core
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する

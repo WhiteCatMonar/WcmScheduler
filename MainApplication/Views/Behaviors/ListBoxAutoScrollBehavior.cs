@@ -132,8 +132,7 @@ namespace MainApplication.Views.Behaviors
          * ItemsSourceのCollectionChangedを管理
          * --------------------------------------------------------- */
 
-        private static readonly Dictionary<ListBox, NotifyCollectionChangedEventHandler> _collectionHandlers
-            = new Dictionary<ListBox, NotifyCollectionChangedEventHandler>();
+        private static readonly Dictionary<ListBox, NotifyCollectionChangedEventHandler> _collectionHandlers = [];
 
         /// <summary>
         /// ListBox の ItemsSource を監視し、HistoryItem の追加時に購読を行う。
@@ -172,7 +171,7 @@ namespace MainApplication.Views.Behaviors
          * CollectionChanged(項目追加時)
          * --------------------------------------------------------- */
 
-        private static void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs args, ListBox listBox)
+        private static void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs args, ListBox listBox)
         {
             if (sender is INotifyCollectionChanged)
             {

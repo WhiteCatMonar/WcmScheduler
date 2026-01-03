@@ -44,12 +44,12 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <summary>
         /// すべての接続線を保持するコレクション。
         /// </summary>
-        public ObservableCollection<ConnectionViewModel> Connections { get; } = new ObservableCollection<ConnectionViewModel>();
+        public ObservableCollection<ConnectionViewModel> Connections { get; } = [];
 
         /// <summary>
         /// 指定ノードに関連する接続線のジオメトリを更新する。
         /// </summary>
-        public void UpdateConnectionsForNode(NodeViewModel node)
+        public static void UpdateConnectionsForNode(NodeViewModel node)
         {
             foreach (var port in node.AllPorts)
             {
@@ -75,12 +75,12 @@ namespace MainApplication.ViewModels.ProjectModel
          * ドラッグ中の接続線(始点)
          * --------------------------------------------------------- */
 
-        private PortViewModel _draggingFromPort;
+        private PortViewModel? _draggingFromPort;
 
         /// <summary>
         /// 接続線ドラッグ開始ポート(nullならドラッグ中ではない)
         /// </summary>
-        public PortViewModel DraggingFromPort
+        public PortViewModel? DraggingFromPort
         {
             get => _draggingFromPort;
             set
@@ -138,9 +138,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <summary>
         /// 終点側のベジェ制御点(論理座標)
         /// </summary>
-        public Point DraggingToPointBezierControl =>
-            new Point(DraggingToPoint.X - 50, DraggingToPoint.Y);
-
+        public Point DraggingToPointBezierControl => new(DraggingToPoint.X - 50, DraggingToPoint.Y);
         /// <summary>
         /// 現在接続線をドラッグ中かどうか
         /// </summary>
@@ -155,7 +153,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public void CreateConnection(PortViewModel fromPort, PortViewModel toPort)
         {
-            if (fromPort == null || toPort == null)
+            if ((fromPort == null) || (toPort == null))
             {
                 return;
             }
@@ -170,7 +168,11 @@ namespace MainApplication.ViewModels.ProjectModel
                 return; /* 同一ノード内禁止 */
             }
 
-            var connection = new ConnectionViewModel(fromPort, toPort);
+            var connection = new ConnectionViewModel(fromPort, toPort)
+            {
+                FromPort = fromPort,
+                ToPort = toPort
+            };
 
             fromPort.ConnectedConnections.Add(connection);
             toPort.ConnectedConnections.Add(connection);
@@ -183,27 +185,21 @@ namespace MainApplication.ViewModels.ProjectModel
          * 選択管理
          * --------------------------------------------------------- */
 
-        private ConnectionViewModel _selectedConnection;
+        private ConnectionViewModel? _selectedConnection;
 
         /// <summary>
         /// 現在選択されている接続線
         /// </summary>
-        public ConnectionViewModel SelectedConnection
+        public ConnectionViewModel? SelectedConnection
         {
             get => _selectedConnection;
             set
             {
                 if (_selectedConnection != value)
                 {
-                    if (_selectedConnection != null)
-                    {
-                        _selectedConnection.IsSelected = false;
-                    }
+                    _selectedConnection?.IsSelected = false;
                     _selectedConnection = value;
-                    if (_selectedConnection != null)
-                    {
-                        _selectedConnection.IsSelected = true;
-                    }
+                    _selectedConnection?.IsSelected = true;
 
                     OnPropertyChanged(nameof(SelectedConnection));
                 }
@@ -215,7 +211,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public ICommand SelectConnectionCommand { get; }
 
-        private void SelectConnection(ConnectionViewModel connection)
+        private void SelectConnection(ConnectionViewModel? connection)
         {
             SelectedConnection = connection;
         }
@@ -251,7 +247,7 @@ namespace MainApplication.ViewModels.ProjectModel
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する

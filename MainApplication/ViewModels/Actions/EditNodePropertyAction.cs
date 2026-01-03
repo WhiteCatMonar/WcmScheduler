@@ -27,8 +27,8 @@ namespace MainApplication.ViewModels.Actions
 
         private readonly NodeViewModel _node;
         private readonly string _propertyName;
-        private readonly object _oldValue;
-        private readonly object _newValue;
+        private readonly object? _oldValue;
+        private readonly object? _newValue;
         private readonly string _displayName;
 
         /* ---------------------------------------------------------
@@ -42,7 +42,7 @@ namespace MainApplication.ViewModels.Actions
         /// <param name="propertyName">変更対象プロパティ名</param>
         /// <param name="oldValue">変更前の値</param>
         /// <param name="newValue">変更後の値</param>
-        public EditNodePropertyAction(NodeViewModel node, string propertyName, object oldValue, object newValue)
+        public EditNodePropertyAction(NodeViewModel node, string propertyName, object? oldValue, object? newValue)
         {
             _node = node;
             _propertyName = propertyName;
@@ -86,7 +86,7 @@ namespace MainApplication.ViewModels.Actions
         /// <summary>
         /// リフレクションを用いて対象プロパティに値を設定する
         /// </summary>
-        private void SetValue(object value)
+        private void SetValue(object? value)
         {
             var prop = _node.GetType().GetProperty(_propertyName);
             prop?.SetValue(_node, value);

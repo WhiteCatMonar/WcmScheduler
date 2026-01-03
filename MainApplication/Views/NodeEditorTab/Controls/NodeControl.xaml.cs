@@ -18,8 +18,8 @@ namespace MainApplication.Views.NodeEditorTab.Controls
          * フィールド(キャッシュ)
          * --------------------------------------------------------- */
 
-        private NodeEditorControl _editor;
-        private NodeEditorViewModel _editorVM;
+        private NodeEditorControl? _editor;
+        private NodeEditorViewModel? _editorVM;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -106,7 +106,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 _isDragging = true;
 
                 /* キャンバス基準のマウス位置(ズーム・パンの影響を受けない) */
-                _lastMousePos = e.GetPosition(_editor.NodeEditorArea);
+                _lastMousePos = e.GetPosition(_editor?.NodeEditorArea);
 
                 /* Undo/Redo用に開始位置を記録 */
                 _startX = node.X;
@@ -125,7 +125,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         {
             if (_isDragging && DataContext is NodeViewModel node && _editorVM != null)
             {
-                Point current = e.GetPosition(_editor.NodeEditorCanvas);
+                Point current = e.GetPosition(_editor?.NodeEditorCanvas);
 
                 /* 画面上の移動量 */
                 Vector screenDelta = current - _lastMousePos;
@@ -147,7 +147,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
 
                 /* ポート位置更新 */
                 node.UpdateAllPortPositions();
-                _editorVM.Connections.UpdateConnectionsForNode(node);
+                ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
             }
         }
 
@@ -161,10 +161,10 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 _isDragging = false;
                 ReleaseMouseCapture();
 
-                _editorVM.Connections.UpdateConnectionsForNode(node);
+                ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
 
                 /* Undo/Redo用に移動履歴を登録 */
-                _editorVM.Nodes.MoveNode(node, _startX, _startY, node.X, node.Y);
+                _editorVM?.Nodes.MoveNode(node, _startX, _startY, node.X, node.Y);
             }
         }
 
@@ -195,11 +195,11 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         {
             if (DataContext is NodeViewModel node)
             {
-                node.Width = Math.Max(node.MinWidth, e.NewSize.Width);
-                node.Height = Math.Max(node.MinHeight, e.NewSize.Height);
+                node.Width = Math.Max(NodeViewModel.MinWidth, e.NewSize.Width);
+                node.Height = Math.Max(NodeViewModel.MinHeight, e.NewSize.Height);
 
                 node.UpdateAllPortPositions();
-                _editorVM?.Connections.UpdateConnectionsForNode(node);
+                ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
             }
         }
 
@@ -215,7 +215,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
             if (DataContext is NodeViewModel node)
             {
                 node.UpdateAllPortPositions();
-                _editorVM?.Connections.UpdateConnectionsForNode(node);
+                ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
             }
         }
     }

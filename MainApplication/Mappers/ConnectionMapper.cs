@@ -22,10 +22,10 @@ namespace MainApplication.Mappers
         /* ---------------------------------------------------------
          * DataModel → ViewModel
          * --------------------------------------------------------- */
-        public static ConnectionViewModel ToViewModel(ConnectionDataModel data, NodeEditorViewModel editor)
+        public static ConnectionViewModel? ToViewModel(ConnectionDataModel data, NodeEditorViewModel editor)
         {
-            PortViewModel from = null;
-            PortViewModel to = null;
+            PortViewModel? from = null;
+            PortViewModel? to = null;
 
             foreach (NodeViewModel node in editor.Nodes.Nodes)
             {
@@ -45,8 +45,13 @@ namespace MainApplication.Mappers
             {
                 return null;
             }
-            ConnectionViewModel loadedConnection = new ConnectionViewModel(from, to);
-            loadedConnection.ConnectionGuid = Guid.Parse(data.Id);
+            ConnectionViewModel loadedConnection = new(from, to)
+            {
+                ConnectionGuid = Guid.Parse(data.Id),
+                FromPort = from,
+                ToPort = to
+            };
+
             return loadedConnection;
         }
     }

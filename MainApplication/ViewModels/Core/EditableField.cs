@@ -7,7 +7,7 @@ namespace MainApplication.ViewModels.Core
     /// Getter/Setterを通じて値を取得・設定し、
     /// 値が変更された場合は履歴記録処理を呼び出す。
     /// </summary>
-    public class EditableField<T>
+    public class EditableField<T>(string name, Func<T?> getter, Action<T?> setter)
     {
         /* ---------------------------------------------------------
          * プロパティ
@@ -16,39 +16,23 @@ namespace MainApplication.ViewModels.Core
         /// <summary>
         /// フィールド名(履歴記録時の識別用)
         /// </summary>
-        public string Name { get; }
+        public string Name { get; } = name;
 
         /// <summary>
         /// 現在の値を取得するためのデリゲート
         /// </summary>
-        public Func<T> Getter { get; }
+        public Func<T?> Getter { get; } = getter;
 
         /// <summary>
         /// 新しい値を設定するためのデリゲート
         /// </summary>
-        public Action<T> Setter { get; }
+        public Action<T?> Setter { get; } = setter;
 
         /* ---------------------------------------------------------
          * フィールド
          * --------------------------------------------------------- */
 
-        private T _oldValue;
-
-        /* ---------------------------------------------------------
-         * コンストラクタ
-         * --------------------------------------------------------- */
-
-        /// <summary>
-        /// 編集可能フィールドを生成する。
-        /// 初期値はGetterにより取得され、変更検知の基準となる。
-        /// </summary>
-        public EditableField(string name, Func<T> getter, Action<T> setter)
-        {
-            Name = name;
-            Getter = getter;
-            Setter = setter;
-            _oldValue = getter();
-        }
+        private T? _oldValue = getter();
 
         /* ---------------------------------------------------------
          * 変更確定処理
@@ -63,7 +47,7 @@ namespace MainApplication.ViewModels.Core
         /// <returns>
         /// 値が変更されて履歴が記録された場合はtrue、変更がなければfalse。
         /// </returns>
-        public bool TryCommit(Action<string, T, T> commitHistory)
+        public bool TryCommit(Action<string, T?, T?> commitHistory)
         {
             var newValue = Getter();
             if (!Equals(_oldValue, newValue))

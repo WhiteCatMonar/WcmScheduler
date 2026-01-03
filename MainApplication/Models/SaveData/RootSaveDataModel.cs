@@ -9,7 +9,7 @@
         /// <summary>
         /// タスクエディタ全体の保存データ
         /// </summary>
-        public TaskEditorDataModel TaskEditor { get; set; }
+        public required TaskEditorDataModel TaskEditor { get; set; }
     }
 }
 

@@ -47,7 +47,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 var editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
 
                 /* ドラッグ開始ポートを記録 */
-                editorVM.Connections.DraggingFromPort = port;
+                editorVM?.Connections.DraggingFromPort = port;
 
                 _isDragging = true;
                 CaptureMouse();
@@ -119,7 +119,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 }
 
                 /* ドラッグ状態解除 */
-                editorVM.Connections.DraggingFromPort = null;
+                editorVM?.Connections.DraggingFromPort = null;
             }
         }
 
@@ -133,7 +133,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         /// </summary>
         public void UpdateRelativePositionFromUI()
         {
-            if (!(DataContext is PortViewModel port))
+            if (DataContext is not PortViewModel port)
             {
                 return;
             }

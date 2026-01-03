@@ -14,7 +14,7 @@ namespace MainApplication.Helpers
         /// VisualTreeとLogicalTreeの両方を辿って
         /// 指定した型の親要素を探すユーティリティ
         /// </summary>
-        public static T FindAncestor<T>(DependencyObject child) where T : DependencyObject
+        public static T? FindAncestor<T>(DependencyObject child) where T : DependencyObject
         {
             DependencyObject current = child;
 
@@ -26,7 +26,7 @@ namespace MainApplication.Helpers
                 }
 
                 /* Visual Tree を優先 */
-                DependencyObject visualParent = null;
+                DependencyObject? visualParent = null;
                 try
                 {
                     visualParent = VisualTreeHelper.GetParent(current);
@@ -63,7 +63,7 @@ namespace MainApplication.Helpers
         /// VisualTreeとLogicalTreeの両方を辿って
         /// 指定したViewModelを持つ親要素を探す
         /// </summary>
-        public static T FindParentViewModel<T>(DependencyObject child) where T : class
+        public static T? FindParentViewModel<T>(DependencyObject child) where T : class
         {
             DependencyObject current = child;
 
@@ -75,7 +75,7 @@ namespace MainApplication.Helpers
                 }
 
                 /* Visual Tree を優先 */
-                DependencyObject visualParent = null;
+                DependencyObject? visualParent = null;
                 try
                 {
                     visualParent = VisualTreeHelper.GetParent(current);

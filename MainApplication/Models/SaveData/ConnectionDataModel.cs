@@ -16,12 +16,12 @@ namespace MainApplication.Models.SaveData
         /// <summary>
         /// 接続元ポートのID
         /// </summary>
-        public string FromPortId { get; set; }
+        public required string FromPortId { get; set; }
 
         /// <summary>
         /// 接続先ポートのID
         /// </summary>
-        public string ToPortId { get; set; }
+        public required string ToPortId { get; set; }
     }
 }
 

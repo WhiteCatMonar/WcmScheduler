@@ -1,4 +1,4 @@
-﻿using System;
+﻿using MainApplication.ViewModels.Core;
 using System.ComponentModel;
 using System.Windows.Input;
 
@@ -159,7 +159,7 @@ namespace MainApplication.ViewModels
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する

@@ -16,12 +16,12 @@ namespace MainApplication.Models.SaveData
         /// <summary>
         /// ポート名(例：In,Out,Triggerなど)
         /// </summary>
-        public string Name { get; set; }
+        public required string Name { get; set; }
 
         /// <summary>
         /// ポート種別(Input/Outputなど)
         /// </summary>
-        public string Type { get; set; }
+        public required string Type { get; set; }
     }
 }
 

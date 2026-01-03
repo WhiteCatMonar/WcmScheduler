@@ -14,12 +14,12 @@ namespace MainApplication.ViewModels.ProjectModel
          * プロジェクト全体の基本情報
          * --------------------------------------------------------- */
 
-        private string _projectName;
+        private string? _projectName;
 
         /// <summary>
         /// プロジェクト名(画面タイトルやタブ名として使用)。
         /// </summary>
-        public string ProjectName
+        public string? ProjectName
         {
             get => _projectName;
             set
@@ -51,12 +51,12 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public ObservableCollection<TabInfo> Tabs { get; }
 
-        private TabInfo _selectedTab;
+        private TabInfo? _selectedTab;
 
         /// <summary>
         /// 現在選択されているタブ
         /// </summary>
-        public TabInfo SelectedTab
+        public TabInfo? SelectedTab
         {
             get => _selectedTab;
             set
@@ -70,7 +70,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <summary>
         /// 現在のタブがNodeEditorかどうか
         /// </summary>
-        public bool IsNodeEditor => SelectedTab.Content == NodeEditor;
+        public bool IsNodeEditor => SelectedTab?.Content == NodeEditor;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -101,7 +101,7 @@ namespace MainApplication.ViewModels.ProjectModel
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する。

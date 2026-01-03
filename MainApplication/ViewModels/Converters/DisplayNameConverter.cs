@@ -30,10 +30,11 @@ namespace MainApplication.ViewModels.Converters
                 return string.Empty;
             }
 
-            var type = value.GetType();
-            var prop = type.GetProperty(parameter.ToString());
-            var attr = prop?.GetCustomAttribute<DisplayNameAttribute>();
-            return attr?.DisplayName ?? parameter.ToString();
+            string proprertyName = parameter.ToString() ?? string.Empty;
+            var type      = value.GetType();
+            var property  = type.GetProperty(proprertyName);
+            var attribute = property?.GetCustomAttribute<DisplayNameAttribute>();
+            return attribute?.DisplayName ?? proprertyName;
         }
 
         /* ---------------------------------------------------------

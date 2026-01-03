@@ -22,12 +22,12 @@ namespace MainApplication.Views.NodeEditorTab
         /// ノード未選択時に表示するテンプレート。
         /// 例：説明文や「ノードを選択してください」などのUI。
         /// </summary>
-        public DataTemplate PlaceholderTemplate { get; set; }
+        public required DataTemplate PlaceholderTemplate { get; set; }
 
         /// <summary>
         /// NodeViewModelが選択されている場合に使用するテンプレート。
         /// </summary>
-        public DataTemplate NodeDetailTemplate { get; set; }
+        public required DataTemplate NodeDetailTemplate { get; set; }
 
         /* ---------------------------------------------------------
          * テンプレート選択ロジック
@@ -40,17 +40,17 @@ namespace MainApplication.Views.NodeEditorTab
         /// 
         /// テンプレートが未設定の場合はResourceからフォールバック検索する。
         /// </summary>
-        public override DataTemplate SelectTemplate(object item, DependencyObject container)
+        public override DataTemplate? SelectTemplate(object item, DependencyObject container)
         {
             var element = container as FrameworkElement;
             if (item is NodeViewModel)
             {
                 /* NodeDetailTemplateが設定されていればそれを使い、無ければResourceからNodeViewModel用テンプレートを探す */
-                return NodeDetailTemplate ?? element.FindResource(typeof(NodeViewModel)) as DataTemplate;
+                return NodeDetailTemplate ?? element?.FindResource(typeof(NodeViewModel)) as DataTemplate;
             }
 
             /* プレースホルダー用テンプレート */
-            return PlaceholderTemplate ?? element.FindResource("PlaceholderTemplate") as DataTemplate;
+            return PlaceholderTemplate ?? element?.FindResource("PlaceholderTemplate") as DataTemplate;
         }
     }
 }

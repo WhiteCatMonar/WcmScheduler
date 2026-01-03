@@ -1,14 +1,11 @@
 ﻿using MainApplication.Infrastructure;
 using MainApplication.Models.SaveData;
-using MainApplication.ViewModels;
 using MainApplication.ViewModels.Core;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 
-namespace MainApplication
+namespace MainApplication.ViewModels
 {
     /// <summary>
     /// アプリケーション全体の状態を管理するViewModel。
@@ -38,7 +35,7 @@ namespace MainApplication
         /// <summary>別名保存コマンド</summary>
         public ICommand SaveAsCommand { get; }
 
-        private string _currentFilePath;
+        private string? _currentFilePath;
 
         /* ---------------------------------------------------------
          * タブ管理
@@ -49,12 +46,12 @@ namespace MainApplication
         /// </summary>
         public ObservableCollection<object> Tabs { get; }
 
-        private object _selectedTab;
+        private object? _selectedTab;
 
         /// <summary>
         /// 現在選択されているタブ
         /// </summary>
-        public object SelectedTab
+        public object? SelectedTab
         {
             get => _selectedTab;
             set
@@ -71,7 +68,7 @@ namespace MainApplication
         /// <summary>
         /// SchedulerViewModelを生成し、子ViewModelやサービスを初期化する。
         /// </summary>
-        public SchedulerViewModel(Dictionary<string,string> modelNames)
+        public SchedulerViewModel()
         {
             /* サービス */
             _jsonSerializer = new JsonSerializerService();
@@ -184,15 +181,15 @@ namespace MainApplication
         /// </summary>
         private RootSaveDataModel ToRootDataModel()
         {
-            RootSaveDataModel save_data = new RootSaveDataModel();
+            TaskEditorDataModel taskEditor = new();
 
             /* ユーザー：タスク、開発者：ノードという呼称にするため、名称をここで変更 */
-            if (TeamProjects.SelectedProject != null)
+            TeamProjects.SelectedProject?.NodeEditor.SaveToTaskEditorDataModel(out taskEditor);
+
+            RootSaveDataModel save_data = new()
             {
-                TeamProjects.SelectedProject.
-                    NodeEditor.SaveToTaskEditorDataModel(out TaskEditorDataModel taskEditor);
-                save_data.TaskEditor = taskEditor;
-            }
+                TaskEditor = taskEditor
+            };
 
             /* TODO:タブごとの機能追加 */
 
@@ -206,18 +203,18 @@ namespace MainApplication
         /// <summary>
         /// Viewに「ファイルを開くダイアログを表示してほしい」と依頼するイベント
         /// </summary>
-        public event Action RequestLoad;
+        public event Action? RequestLoad;
 
         /// <summary>
         /// Viewに「名前を付けて保存ダイアログを表示してほしい」と依頼するイベント
         /// </summary>
-        public event Action RequestSaveAs;
+        public event Action? RequestSaveAs;
 
         /* ---------------------------------------------------------
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する

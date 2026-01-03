@@ -103,7 +103,7 @@ namespace MainApplication.Views.NodeEditorTab
         /// <summary>
         /// VisualTreeを遡って指定型の親要素を探す。
         /// </summary>
-        private static T FindParent<T>(DependencyObject child) where T : DependencyObject
+        private static T? FindParent<T>(DependencyObject? child) where T : DependencyObject
         {
             while (child != null)
             {
@@ -145,7 +145,7 @@ namespace MainApplication.Views.NodeEditorTab
         /// </summary>
         private void NodeEditorCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (!(DataContext is NodeEditorViewModel vm))
+            if (DataContext is not NodeEditorViewModel vm)
             {
                 return;
             }
@@ -200,7 +200,7 @@ namespace MainApplication.Views.NodeEditorTab
 
         private void NodeEditorCanvas_MouseMove(object sender, MouseEventArgs e)
         {
-            if (!(DataContext is NodeEditorViewModel vm))
+            if (DataContext is not NodeEditorViewModel vm)
             {
                 return;
             }

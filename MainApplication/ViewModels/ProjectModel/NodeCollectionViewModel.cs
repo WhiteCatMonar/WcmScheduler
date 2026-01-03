@@ -46,7 +46,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <summary>
         /// すべてのノードを保持するコレクション。
         /// </summary>
-        public ObservableCollection<NodeViewModel> Nodes { get; } = new ObservableCollection<NodeViewModel>();
+        public ObservableCollection<NodeViewModel> Nodes { get; } = [];
 
         /// <summary>
         /// すべてのノードのポート位置を更新する。
@@ -63,12 +63,12 @@ namespace MainApplication.ViewModels.ProjectModel
          * 選択管理
          * --------------------------------------------------------- */
 
-        private NodeViewModel _selectedNode;
+        private NodeViewModel? _selectedNode;
         
         /// <summary>
         /// 現在選択されているノード。
         /// </summary>
-        public NodeViewModel SelectedNode
+        public NodeViewModel? SelectedNode
         {
             get => _selectedNode;
             set
@@ -78,15 +78,9 @@ namespace MainApplication.ViewModels.ProjectModel
                     return;
                 }
 
-                if (_selectedNode != null)
-                {
-                    _selectedNode.IsSelected = false;
-                }
+                _selectedNode?.IsSelected = false;
                 _selectedNode = value;
-                if (_selectedNode != null)
-                {
-                    _selectedNode.IsSelected = true;
-                }
+                _selectedNode?.IsSelected = true;
 
                 OnPropertyChanged(nameof(SelectedNode));
             }
@@ -224,12 +218,12 @@ namespace MainApplication.ViewModels.ProjectModel
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する。
         /// </summary>
-        private void OnPropertyChanged(string name = null)
+        private void OnPropertyChanged(string name)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

@@ -20,12 +20,12 @@ namespace MainApplication.ViewModels
          * 選択中のプロジェクト(UIのタブ切り替えなどで使用)
          * --------------------------------------------------------- */
 
-        private ProjectViewModel _selectedProject;
+        private ProjectViewModel? _selectedProject;
 
         /// <summary>
         /// 現在選択されているプロジェクト。
         /// </summary>
-        public ProjectViewModel SelectedProject
+        public ProjectViewModel? SelectedProject
         {
             get => _selectedProject;
             set
@@ -48,21 +48,27 @@ namespace MainApplication.ViewModels
         public ObservableCollection<TabInfo> Tabs { get; }
 
 
-        private TabInfo _selectedTab;
+        private TabInfo? _selectedTab;
 
         /// <summary>
         /// 現在選択されているタブ
         /// </summary>
-        public TabInfo SelectedTab
+        public TabInfo? SelectedTab
         {
             get => _selectedTab;
             set
             {
-                _selectedTab = value;
-                OnPropertyChanged(nameof(SelectedTab));
+                if (_selectedTab != value)
+                {
+                    _selectedTab = value;
+                    OnPropertyChanged(nameof(SelectedTab));
 
-                /* タブ切り替え時にプロジェクトも同期 */
-                SelectedProject = (ProjectViewModel)_selectedTab.Content;
+                    /* タブ切り替え時にプロジェクトも同期 */
+                    if (_selectedTab != null)
+                    {
+                        SelectedProject = (ProjectViewModel)_selectedTab.Content;
+                    }
+                }
             }
         }
 
@@ -75,17 +81,17 @@ namespace MainApplication.ViewModels
         /// </summary>
         public TeamProjectsViewModel()
         {
-            Projects = new ObservableCollection<ProjectViewModel>();
+            Projects = [];
             var project = new ProjectViewModel("New Project");
             Projects.Add(project);
 
             /* タブ管理 */
-            var newProjectTab = new TabInfo(project.ProjectName, project);
-            Tabs = new ObservableCollection<TabInfo>
-            {
+            var newProjectTab = new TabInfo(project.ProjectName ?? string.Empty, project);
+            Tabs =
+            [
                 newProjectTab
                 /* TODO:タブごとの機能追加 */
-            };
+            ];
 
             /* 初期選択タブの設定 */
             SelectedTab = Tabs[0];
@@ -95,7 +101,7 @@ namespace MainApplication.ViewModels
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する。

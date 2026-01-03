@@ -11,12 +11,12 @@ namespace MainApplication.Models.SaveData
         /// <summary>
         /// タスク名
         /// </summary>
-        public string TaskName { get; set; }
+        public string? TaskName { get; set; }
 
         /// <summary>
         /// 担当者名
         /// </summary>
-        public string Person { get; set; }
+        public string? Person { get; set; }
 
         /// <summary>
         /// 開始日時(着手日時)(未設定の場合はnull)
@@ -31,7 +31,7 @@ namespace MainApplication.Models.SaveData
         /// <summary>
         /// 備考・コメント
         /// </summary>
-        public string Comment { get; set; }
+        public string? Comment { get; set; }
     }
 }
 

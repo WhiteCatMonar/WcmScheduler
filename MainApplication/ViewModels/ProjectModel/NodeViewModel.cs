@@ -24,8 +24,8 @@ namespace MainApplication.ViewModels.ProjectModel
 
         private readonly UndoRedoManager _undoRedo;
         private readonly IDateTimeEditorService _dateTimeEditor;
-        private DispatcherTimer _editTimer;
-        private List<EditableField<string>> _editableFields;
+        private readonly DispatcherTimer _editTimer;
+        private readonly List<EditableField<string>> _editableFields;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -56,12 +56,12 @@ namespace MainApplication.ViewModels.ProjectModel
             };
 
             /* 遅延コミット対象フィールド */
-            _editableFields = new List<EditableField<string>>
-            {
+            _editableFields =
+            [
                 new EditableField<string>("TaskName", () => TaskName, v => TaskName = v),
                 new EditableField<string>("Person", () => Person, v => Person = v),
                 new EditableField<string>("Comment", () => Comment, v => Comment = v)
-            };
+           ];
         }
 
         /* ---------------------------------------------------------
@@ -94,7 +94,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <summary>
         /// 遅延コミットされたプロパティ変更をUndo/Redoに登録する。
         /// </summary>
-        public void CommitHistory(string propertyName, object oldValue, object newValue)
+        public void CommitHistory(string propertyName, object? oldValue, object? newValue)
         {
             if (!_undoRedo.IsApplyingHistory)
             {
@@ -174,7 +174,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public static readonly double _minWidth = 100;
 
         /// <summary>ノードの最小幅</summary>
-        public double MinWidth
+        public static double MinWidth
         {
             get => _minWidth;
         }
@@ -182,7 +182,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public static readonly double _minHeight = 60;
 
         /// <summary>ノードの最小高さ</summary>
-        public double MinHeight
+        public static double MinHeight
         {
             get => _minHeight;
         }
@@ -261,10 +261,10 @@ namespace MainApplication.ViewModels.ProjectModel
             }
         }
 
-        private string _taskName = $"(New Task)";
+        private string? _taskName = $"(New Task)";
 
         [DisplayName("タスク名")]
-        public string TaskName
+        public string? TaskName
         {
             get => _taskName;
             set
@@ -278,10 +278,10 @@ namespace MainApplication.ViewModels.ProjectModel
             }
         }
 
-        private string _person;
+        private string? _person;
         
         [DisplayName("担当者")]
-        public string Person
+        public string? Person
         {
             get => _person;
             set
@@ -337,10 +337,10 @@ namespace MainApplication.ViewModels.ProjectModel
             }
         }
 
-        private string _comment;
+        private string? _comment;
 
         [DisplayName("コメント")]
-        public string Comment
+        public string? Comment
         {
             get => _comment;
             set
@@ -397,10 +397,10 @@ namespace MainApplication.ViewModels.ProjectModel
          * --------------------------------------------------------- */
 
         /// <summary>入力ポート一覧</summary>
-        public ObservableCollection<PortViewModel> InputPorts { get; } = new ObservableCollection<PortViewModel>();
+        public ObservableCollection<PortViewModel> InputPorts { get; } = [];
 
         /// <summary>出力ポート一覧</summary>
-        public ObservableCollection<PortViewModel> OutputPorts { get; } = new ObservableCollection<PortViewModel>();
+        public ObservableCollection<PortViewModel> OutputPorts { get; } = [];
 
         /// <summary>すべてのポート</summary>
         public IEnumerable<PortViewModel> AllPorts => InputPorts.Concat(OutputPorts);
@@ -452,7 +452,7 @@ namespace MainApplication.ViewModels.ProjectModel
          * INotifyPropertyChanged
          * --------------------------------------------------------- */
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// プロパティ変更通知を発行する。
