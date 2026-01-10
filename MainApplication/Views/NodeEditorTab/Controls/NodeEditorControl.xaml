@@ -10,7 +10,6 @@
 
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
-        <views:BindingProxy x:Key="NodeEditorViewModelProxy" Data="{Binding}" />
     </UserControl.Resources>
 
     <!-- Undo / Redo -->
@@ -52,116 +51,11 @@
                         </TransformGroup>
                     </Canvas.RenderTransform>
 
-                    <!-- グリッド線 -->
-                    <ItemsControl ItemsSource="{Binding Grid.GridLines}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas IsHitTestVisible="False" />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Line X1="{Binding X1}"
-                                      Y1="{Binding Y1}"
-                                      X2="{Binding X2}"
-                                      Y2="{Binding Y2}">
-                                    <Line.Style>
-                                        <Style TargetType="Line">
-                                            <Setter Property="Stroke" Value="#EEE"/>
-                                            <Setter Property="StrokeThickness" Value="0.5"/>
-
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsMajor}" Value="True">
-                                                    <Setter Property="StrokeThickness" Value="1.5"/>
-                                                    <Setter Property="Stroke" Value="#CCC"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Line.Style>
-                                </Line>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-
-                    <!-- 原点軸(X軸) -->
-                    <Line x:Name="OriginAxisX"
-                          X1="{Binding Grid.CanvasViewAreaStartX}"
-                          Y1="0"
-                          X2="{Binding Grid.CanvasViewAreaEndX}"
-                          Y2="0"
-                          Stroke="Red"
-                          StrokeThickness="2"
-                          SnapsToDevicePixels="True" />
-
-                    <!-- 原点軸(Y軸) -->
-                    <Line x:Name="OriginAxisY"
-                          X1="0"
-                          Y1="{Binding Grid.CanvasViewAreaStartY}"
-                          X2="0"
-                          Y2="{Binding Grid.CanvasViewAreaEndY}"
-                          Stroke="Blue"
-                          StrokeThickness="2"
-                          SnapsToDevicePixels="True" />
+                    <!-- グリッド線(原点軸含む) -->
+                    <controls:GridControl />
 
                     <!-- 接続線 -->
-                    <ItemsControl ItemsSource="{Binding Connections.Connections}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas/>
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Path StrokeThickness="2"
-                                      SnapsToDevicePixels="True"
-                                      StrokeStartLineCap="Round"
-                                      StrokeEndLineCap="Round"
-                                      IsHitTestVisible="True">
-                                    <Path.Style>
-                                        <Style TargetType="Path">
-                                            <Setter Property="Stroke" Value="Black"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                                    <Setter Property="Stroke" Value="Red"/>
-                                                    <Setter Property="StrokeThickness" Value="3"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Path.Style>
-
-                                    <Path.Data>
-                                        <PathGeometry>
-                                            <PathFigure StartPoint="{Binding FromPosition}">
-                                                <BezierSegment Point1="{Binding FromBezierControlPoint}"
-                                                       Point2="{Binding ToBezierControlPoint}"
-                                                       Point3="{Binding ToPosition}" />
-                                            </PathFigure>
-                                        </PathGeometry>
-                                    </Path.Data>
-
-                                    <Path.ContextMenu>
-                                        <ContextMenu DataContext="{Binding Source={StaticResource NodeEditorViewModelProxy}, Path=Data}">
-                                            <MenuItem Header="接続線を削除" Command="{Binding Connections.DeleteSelectedConnectionCommand}" />
-                                        </ContextMenu>
-                                    </Path.ContextMenu>
-
-                                    <i:Interaction.Triggers>
-                                        <i:EventTrigger EventName="MouseLeftButtonDown">
-                                            <i:InvokeCommandAction Command="{Binding DataContext.Connections.SelectConnectionCommand,
-                                                                 RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                       CommandParameter="{Binding}" />
-                                        </i:EventTrigger>
-                                        <i:EventTrigger EventName="MouseRightButtonUp">
-                                            <i:InvokeCommandAction Command="{Binding DataContext.Connections.SelectConnectionCommand,
-                                                                 RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                                       CommandParameter="{Binding}" />
-                                        </i:EventTrigger>
-                                    </i:Interaction.Triggers>
-                                </Path>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
+                    <controls:ConnectionCollectionControl/>
 
                     <!-- 仮接続線 -->
                     <Path Stroke="Gray" StrokeDashArray="2,2" StrokeThickness="2" IsHitTestVisible="False"
@@ -178,25 +72,8 @@
                     </Path>
 
                     <!-- ノード -->
-                    <ItemsControl ItemsSource="{Binding Nodes.Nodes}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
-                        <ItemsControl.ItemContainerStyle>
-                            <Style>
-                                <Setter Property="Canvas.Left" Value="{Binding X}" />
-                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <controls:NodeControl />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                    
+                    <controls:NodeCollectionControl/>
+
                 </Canvas> <!-- ContentRoot -->
             </Canvas> <!-- NodeEditorCanvas -->
         </Canvas> <!-- NodeEditorArea -->

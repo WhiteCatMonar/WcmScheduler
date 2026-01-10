@@ -1,0 +1,57 @@
+﻿<UserControl x:Class="MainApplication.Views.NodeEditorTab.Controls.GridControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Canvas>
+        
+        <!-- グリッド線 -->
+        <ItemsControl ItemsSource="{Binding Grid.GridLines}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Canvas IsHitTestVisible="False" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Line X1="{Binding X1}"
+                          Y1="{Binding Y1}"
+                          X2="{Binding X2}"
+                          Y2="{Binding Y2}">
+                        <Line.Style>
+                            <Style TargetType="Line">
+                                <Setter Property="Stroke" Value="#EEE"/>
+                                <Setter Property="StrokeThickness" Value="0.5"/>
+
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsMajor}" Value="True">
+                                        <Setter Property="StrokeThickness" Value="1.5"/>
+                                        <Setter Property="Stroke" Value="#CCC"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Line.Style>
+                    </Line>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <!-- 原点軸(X軸) -->
+        <Line x:Name="OriginAxisX"
+              X1="{Binding Grid.CanvasViewAreaStartX}"
+              Y1="0"
+              X2="{Binding Grid.CanvasViewAreaEndX}"
+              Y2="0"
+              Stroke="Red"
+              StrokeThickness="2"
+              SnapsToDevicePixels="True" />
+
+        <!-- 原点軸(Y軸) -->
+        <Line x:Name="OriginAxisY"
+              X1="0"
+              Y1="{Binding Grid.CanvasViewAreaStartY}"
+              X2="0"
+              Y2="{Binding Grid.CanvasViewAreaEndY}"
+              Stroke="Blue"
+              StrokeThickness="2"
+              SnapsToDevicePixels="True" />
+    </Canvas>
+</UserControl>
