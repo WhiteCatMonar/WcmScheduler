@@ -1,13 +1,7 @@
-﻿using MainApplication.ViewModels.Actions;
-using MainApplication.ViewModels.Core;
+﻿using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Windows.Input;
-using System.Windows.Threading;
 
 namespace MainApplication.ViewModels.ProjectModel
 {
@@ -16,54 +10,10 @@ namespace MainApplication.ViewModels.ProjectModel
     /// プロパティ編集、日時編集、Undo/Redo、ポート管理など
     /// ノードに関するすべてのロジックを担当する。
     /// </summary>
-    public class NodeViewModel : INotifyPropertyChanged
+    /// <param name="undoRedo">Undo/Redo管理用オブジェクト</param>
+    /// <param name="dateTimeEditor">ノードが利用する時刻編集サービス</param>
+    public class NodeViewModel(UndoRedoManager undoRedo, IDateTimeEditorService dateTimeEditor) : INotifyPropertyChanged
     {
-        /* ---------------------------------------------------------
-         * フィールド
-         * --------------------------------------------------------- */
-
-        private readonly UndoRedoManager _undoRedo;
-        private readonly IDateTimeEditorService _dateTimeEditor;
-        private readonly DispatcherTimer _editTimer;
-        private readonly List<EditableField<string>> _editableFields;
-
-        /* ---------------------------------------------------------
-         * コンストラクタ
-         * --------------------------------------------------------- */
-
-        /// <summary>
-        /// ノードViewModelを生成する。
-        /// Undo/Redo管理と日時編集サービスを受け取る。
-        /// </summary>
-        public NodeViewModel(UndoRedoManager undoRedo, IDateTimeEditorService dateTimeEditor)
-        {
-            _undoRedo = undoRedo ?? throw new ArgumentNullException(nameof(undoRedo));
-            _dateTimeEditor = dateTimeEditor;
-            _nodeGuid = Guid.NewGuid();
-            EditStartDateTimeCommand = new RelayCommand(() => EditDateTime(true));
-            EditEndDateTimeCommand = new RelayCommand(() => EditDateTime(false));
-            NotifyEditedCommand = new RelayCommand(() => NotifyEdited());
-
-            /* 編集遅延コミット用タイマー(5秒間入力がなければ確定) */
-            _editTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(5)
-            };
-            _editTimer.Tick += (s, e) =>
-            {
-                _editTimer.Stop();
-                CommitEdits();
-            };
-
-            /* 遅延コミット対象フィールド */
-            _editableFields =
-            [
-                new EditableField<string>("TaskName", () => TaskName, v => TaskName = v),
-                new EditableField<string>("Person", () => Person, v => Person = v),
-                new EditableField<string>("Comment", () => Comment, v => Comment = v)
-           ];
-        }
-
         /* ---------------------------------------------------------
          * ノード種別
          * --------------------------------------------------------- */
@@ -85,87 +35,6 @@ namespace MainApplication.ViewModels.ProjectModel
                 _nodeType = value;
                 OnPropertyChanged(nameof(NodeType));
             }
-        }
-
-        /* ---------------------------------------------------------
-         * Undo/Redo 履歴登録
-         * --------------------------------------------------------- */
-
-        /// <summary>
-        /// 遅延コミットされたプロパティ変更をUndo/Redoに登録する。
-        /// </summary>
-        public void CommitHistory(string propertyName, object? oldValue, object? newValue)
-        {
-            if (!_undoRedo.IsApplyingHistory)
-            {
-                var action = new EditNodePropertyAction(this, propertyName, oldValue, newValue);
-                _undoRedo.Execute(action);
-            }
-        }
-
-        /* ---------------------------------------------------------
-         * 日時編集
-         * --------------------------------------------------------- */
-
-        public ICommand EditStartDateTimeCommand { get; }
-        public ICommand EditEndDateTimeCommand { get; }
-
-        /// <summary>
-        /// 日時編集ダイアログを開き、開始/終了日時を更新する。
-        /// </summary>
-        private void EditDateTime(bool isStart)
-        {
-            var initial = isStart ? StartDateTime : EndDateTime;
-            var picked = _dateTimeEditor.EditDateTime(
-                initial,
-                isStart ? (Func<DateTime?, bool>)CanSetStartDateTime : CanSetEndDateTime
-            );
-
-            if (picked == initial)
-            {
-                return;
-            }
-
-            if (isStart)
-            {
-                if (!CanSetStartDateTime(picked))
-                {
-                    return;
-                }
-                StartDateTime = picked;
-            }
-            else
-            {
-                if (!CanSetEndDateTime(picked))
-                {
-                    return;
-                }
-                EndDateTime = picked;
-            }
-        }
-
-        /// <summary>
-        /// 開始日時が終了日時より後になってないかチェックする。
-        /// </summary>
-        public bool CanSetStartDateTime(DateTime? newStartDateTime)
-        {
-            if ((newStartDateTime == null) || (EndDateTime == null))
-            {
-                return true;
-            }
-            return newStartDateTime <= EndDateTime;
-        }
-
-        /// <summary>
-        /// 終了日時が開始日時より前になってないかチェックする。
-        /// </summary>
-        public bool CanSetEndDateTime(DateTime? newEndDateTime)
-        {
-            if ((newEndDateTime == null) || (StartDateTime == null))
-            {
-                return true;
-            }
-            return StartDateTime <= newEndDateTime;
         }
 
         /* ---------------------------------------------------------
@@ -244,7 +113,7 @@ namespace MainApplication.ViewModels.ProjectModel
          * ノード固有情報
          * --------------------------------------------------------- */
 
-        private Guid _nodeGuid;
+        private Guid _nodeGuid = Guid.NewGuid();
 
         [DisplayName("タスクID")]
         public Guid NodeGuid
@@ -261,98 +130,8 @@ namespace MainApplication.ViewModels.ProjectModel
             }
         }
 
-        private string? _taskName = $"(New Task)";
-
-        [DisplayName("タスク名")]
-        public string? TaskName
-        {
-            get => _taskName;
-            set
-            {
-                if (_taskName == value)
-                {
-                    return;
-                }
-                _taskName = value;
-                OnPropertyChanged(nameof(TaskName));
-            }
-        }
-
-        private string? _person;
-        
-        [DisplayName("担当者")]
-        public string? Person
-        {
-            get => _person;
-            set
-            {
-                if (_person == value)
-                {
-                    return;
-                }
-                _person = value;
-                OnPropertyChanged(nameof(Person));
-            }
-        }
-
-        private DateTime? _startDateTime;
-
-        [DisplayName("開始日時")]
-        public DateTime? StartDateTime
-        {
-            get => _startDateTime;
-            set
-            {
-                if (_startDateTime == value)
-                {
-                    return;
-                }
-                if (!_undoRedo.IsApplyingHistory)
-                {
-                    _undoRedo.Execute(new EditNodePropertyAction(this, nameof(StartDateTime), _startDateTime, value));
-                }
-                _startDateTime = value;
-                OnPropertyChanged(nameof(StartDateTime));
-            }
-        }
-
-        private DateTime? _endDateTime;
-
-        [DisplayName("終了日時")]
-        public DateTime? EndDateTime
-        {
-            get => _endDateTime;
-            set
-            {
-                if (_endDateTime == value)
-                {
-                    return;
-                }
-                if (!_undoRedo.IsApplyingHistory)
-                {
-                    _undoRedo.Execute(new EditNodePropertyAction(this, nameof(EndDateTime), _endDateTime, value));
-                }
-                _endDateTime = value;
-                OnPropertyChanged(nameof(EndDateTime));
-            }
-        }
-
-        private string? _comment;
-
-        [DisplayName("コメント")]
-        public string? Comment
-        {
-            get => _comment;
-            set
-            {
-                if (_comment == value)
-                {
-                    return;
-                }
-                _comment = value;
-                OnPropertyChanged(nameof(Comment));
-            }
-        }
+        /* その他ノード固有詳細情報 */
+        public NodeDetailViewModel Detail { get; } = new(undoRedo, dateTimeEditor);
 
         /* ---------------------------------------------------------
          * ノード位置
@@ -418,33 +197,6 @@ namespace MainApplication.ViewModels.ProjectModel
             foreach (var port in OutputPorts)
             {
                 port.UpdateAbsolutePosition();
-            }
-        }
-
-        /* ---------------------------------------------------------
-         * 遅延コミット(テキスト編集)
-         * --------------------------------------------------------- */
-
-        /// <summary>編集通知コマンド(5秒後にCommitEditsが実行される)</summary>
-        public ICommand NotifyEditedCommand { get; }
-
-        /// <summary>
-        /// 編集が行われたことを通知し、遅延コミットタイマーをリセットする。
-        /// </summary>
-        public void NotifyEdited()
-        {
-            _editTimer.Stop();
-            _editTimer.Start();
-        }
-
-        /// <summary>
-        /// 遅延コミット対象フィールドをチェックし、変更があれば Undo/Redoに登録する。
-        /// </summary>
-        public void CommitEdits()
-        {
-            foreach (var field in _editableFields)
-            {
-                field.TryCommit(CommitHistory);
             }
         }
 

@@ -43,7 +43,7 @@
 │   │   ├── 📄 AddNodeAction.cs                        # Undo/Redoアクション：ノード追加
 │   │   ├── 📄 DeleteConnectionAction.cs               # Undo/Redoアクション：接続線削除
 │   │   ├── 📄 DeleteNodeAction.cs                     # Undo/Redoアクション：ノード削除
-│   │   ├── 📄 EditNodePropertyAction.cs               # Undo/Redoアクション：ノードプロパティ編集
+│   │   ├── 📄 EditNodeDetailPropertyAction.cs         # Undo/Redoアクション：ノード詳細プロパティ編集
 │   │   └── 📄 MoveNodeAction.cs                       # Undo/Redoアクション：ノード移動
 │   │
 │   ├── 📂 Converters                                  # XAMLバインディング用コンバータ
@@ -69,6 +69,7 @@
 │   │   ├── 📄 ConnectionViewModel.cs                  # 接続線1本の状態
 │   │   ├── 📄 LineViewModel.cs                        # 線分の描画情報(接続線の補助)
 │   │   ├── 📄 NodeCollectionViewModel.cs              # ノード一覧管理(生成・削除・選択)
+│   │   ├── 📄 NodeDetailViewModel.cs                  # ノードの詳細情報(編集可能プロパティ)
 │   │   ├── 📄 NodeEditorViewModel.cs                  # ノードエディタ全体の状態管理(ズーム・パン・Undo/Redo)
 │   │   ├── 📄 NodeViewModel.cs                        # ノード1個の状態・編集ロジック
 │   │   ├── 📄 PortViewModel.cs                        # ポート(入出力端子)の状態
@@ -202,9 +203,7 @@ block
 
     space:8
 
-    space
-    NodeViewModel
-    space:2
+    space:4
     NodeCollectionViewModel
     space
     ConnectionCollectionViewModel
@@ -212,10 +211,19 @@ block
 
     space:8
 
-    space:3
+    space
+    NodeViewModel
+    space
     HistoryControl
     space:3
     ConnectionViewModel
+
+    space:8
+
+    space
+    NodeDetailViewModel
+    PortViewModel
+    space:5
     
     space:8
     
@@ -228,7 +236,7 @@ block
 
     space
     DateTimeEditorWindow_Class["DateTimeEditorWindow(Class)"]
-    PortViewModel
+    space
     EditableField
     UndoRedoManager
     GridManager
@@ -290,15 +298,16 @@ block
     NodeCollectionViewModel --> NodeViewModel
     NodeCollectionViewModel --> UndoRedoManager
 
-    NodeViewModel --> EditableField
     NodeViewModel --> PortViewModel
-    NodeViewModel --> DateTimeEditorService
-    NodeViewModel --> UndoRedoManager
+    NodeViewModel --> NodeDetailViewModel
+
+    NodeDetailViewModel --> EditableField
+    NodeDetailViewModel --> UndoRedoManager
+    NodeDetailViewModel --> DateTimeEditorService
 
     ConnectionCollectionViewModel --> ConnectionViewModel
     ConnectionCollectionViewModel --> UndoRedoManager
 
-    ConnectionViewModel --> PortViewModel
     ConnectionViewModel --> LineViewModel
 
     DateTimeEditorService --> DateTimeEditorWindow_Class
@@ -332,8 +341,9 @@ block
     style ProjectViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style NodeEditorViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style NodeCollectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
-    style ConnectionCollectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style NodeViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style NodeDetailViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style ConnectionCollectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style ConnectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style DateTimeEditorViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
 

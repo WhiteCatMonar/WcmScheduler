@@ -147,7 +147,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public void CommitCurrentNodeEdits()
         {
-            Nodes.SelectedNode?.CommitEdits();
+            Nodes.SelectedNode?.Detail.CommitEdits();
         }
 
         /* ---------------------------------------------------------

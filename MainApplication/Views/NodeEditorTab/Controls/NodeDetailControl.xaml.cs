@@ -38,7 +38,7 @@ namespace MainApplication.Views.NodeEditorTab
         /// </summary>
         private void NodeDetailControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
-            (e.OldValue as NodeViewModel)?.CommitEdits();
+            (e.OldValue as NodeViewModel)?.Detail.CommitEdits();
         }
     }
 }

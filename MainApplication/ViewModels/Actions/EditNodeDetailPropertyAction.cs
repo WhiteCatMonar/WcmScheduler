@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace MainApplication.ViewModels.Actions
 {
-    public class EditNodePropertyAction : IUndoableAction
+    public class EditNodeDetailPropertyAction : IUndoableAction
     {
         /* ---------------------------------------------------------
          * アクションのメタ情報
@@ -14,7 +14,7 @@ namespace MainApplication.ViewModels.Actions
         /// <summary>
         /// アクション種別(識別用)
         /// </summary>
-        public string ActionType => "EditNodeProperty";
+        public string ActionType => "EditNodeDetailProperty";
         
         /// <summary>
         /// アクションの説明(UI表示用)
@@ -25,7 +25,7 @@ namespace MainApplication.ViewModels.Actions
          * フィールド
          * --------------------------------------------------------- */
 
-        private readonly NodeViewModel _node;
+        private readonly NodeDetailViewModel _nodeDetail;
         private readonly string _propertyName;
         private readonly object? _oldValue;
         private readonly object? _newValue;
@@ -38,19 +38,19 @@ namespace MainApplication.ViewModels.Actions
         /// <summary>
         /// ノードの任意プロパティ変更アクションを生成する
         /// </summary>
-        /// <param name="node">対象ノード</param>
+        /// <param name="nodeDetail">対象ノードの詳細情報</param>
         /// <param name="propertyName">変更対象プロパティ名</param>
         /// <param name="oldValue">変更前の値</param>
         /// <param name="newValue">変更後の値</param>
-        public EditNodePropertyAction(NodeViewModel node, string propertyName, object? oldValue, object? newValue)
+        public EditNodeDetailPropertyAction(NodeDetailViewModel nodeDetail, string propertyName, object? oldValue, object? newValue)
         {
-            _node = node;
+            _nodeDetail = nodeDetail;
             _propertyName = propertyName;
             _oldValue = oldValue;
             _newValue = newValue;
 
             /* DisplayNameAttributeが付いていればUI表示名として使用 */
-            var prop = _node.GetType().GetProperty(_propertyName);
+            var prop = _nodeDetail.GetType().GetProperty(_propertyName);
             var displayAttr = prop?.GetCustomAttribute<DisplayNameAttribute>();
             _displayName = displayAttr?.DisplayName ?? _propertyName;
         }
@@ -88,8 +88,8 @@ namespace MainApplication.ViewModels.Actions
         /// </summary>
         private void SetValue(object? value)
         {
-            var prop = _node.GetType().GetProperty(_propertyName);
-            prop?.SetValue(_node, value);
+            var prop = _nodeDetail.GetType().GetProperty(_propertyName);
+            prop?.SetValue(_nodeDetail, value);
         }
     }
 }

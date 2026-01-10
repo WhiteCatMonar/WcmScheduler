@@ -28,7 +28,7 @@
 
             <!-- タスク名 -->
             <TextBlock Grid.Row="0"
-                       Text="{Binding TaskName}"
+                       Text="{Binding Detail.TaskName}"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Top"
                        TextWrapping="Wrap"

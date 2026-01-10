@@ -26,11 +26,11 @@ namespace MainApplication.Mappers
 
                 Details = new NodeDetailsDataModel
                 {
-                    TaskName = vm.TaskName,
-                    Person = vm.Person,
-                    StartDateTime = vm.StartDateTime,
-                    EndDateTime = vm.EndDateTime,
-                    Comment = vm.Comment
+                    TaskName = vm.Detail.TaskName,
+                    Person = vm.Detail.Person,
+                    StartDateTime = vm.Detail.StartDateTime,
+                    EndDateTime = vm.Detail.EndDateTime,
+                    Comment = vm.Detail.Comment
                 },
 
                 Ports = 
@@ -55,35 +55,32 @@ namespace MainApplication.Mappers
                 NodeGuid = Guid.Parse(data.Id),
                 NodeType = data.Type,
                 X = data.Position.X,
-                Y = data.Position.Y,
-                TaskName = data.Details.TaskName,
-                Person = data.Details.Person,
-                StartDateTime = data.Details.StartDateTime,
-                EndDateTime = data.Details.EndDateTime,
-                Comment = data.Details.Comment
+                Y = data.Position.Y
             };
-            loadedNode.CommitEdits();
+            loadedNode.Detail.TaskName = data.Details.TaskName;
+            loadedNode.Detail.Person = data.Details.Person;
+            loadedNode.Detail.StartDateTime = data.Details.StartDateTime;
+            loadedNode.Detail.EndDateTime = data.Details.EndDateTime;
+            loadedNode.Detail.Comment = data.Details.Comment;
+            loadedNode.Detail.CommitEdits();
             foreach (var port in data.Ports)
             {
-                switch (Enum.Parse<PortType>(port.Type))
+                var type = Enum.Parse<PortType>(port.Type);
+                var vmPort = new PortViewModel
+                {
+                    PortGuid = Guid.Parse(port.Id),
+                    Name = port.Name,
+                    Type = type,
+                    ParentNode = loadedNode
+                };
+
+                switch (type)
                 {
                     case PortType.Input:
-                        loadedNode.InputPorts.Add(new PortViewModel
-                        {
-                            PortGuid = Guid.Parse(port.Id),
-                            Name = port.Name,
-                            Type = PortType.Input,
-                            ParentNode = loadedNode
-                        });
+                        loadedNode.InputPorts.Add(vmPort);
                         break;
                     case PortType.Output:
-                        loadedNode.OutputPorts.Add(new PortViewModel
-                        {
-                            PortGuid = Guid.Parse(port.Id),
-                            Name = port.Name,
-                            Type = PortType.Output,
-                            ParentNode = loadedNode
-                        });
+                        loadedNode.OutputPorts.Add(vmPort);
                         break;
                 }
             }

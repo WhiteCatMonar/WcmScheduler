@@ -16,60 +16,60 @@
         </DockPanel>
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Left"
-                       Text="{Binding ., Converter={StaticResource DisplayNameConverter}, ConverterParameter=TaskName}"
+                       Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=TaskName}"
                        FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
-            <TextBox DockPanel.Dock="Left" Text="{Binding TaskName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5"
+            <TextBox DockPanel.Dock="Left" Text="{Binding Detail.TaskName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5"
                      AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
                      MaxHeight="100" VerticalAlignment="Top">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="TextChanged">
-                        <i:InvokeCommandAction Command="{Binding NotifyEditedCommand}" />
+                        <i:InvokeCommandAction Command="{Binding Detail.NotifyEditedCommand}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
         </DockPanel>
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Left"
-                       Text="{Binding ., Converter={StaticResource DisplayNameConverter}, ConverterParameter=Person}"
+                       Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=Person}"
                        FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
-            <TextBox DockPanel.Dock="Left" Text="{Binding Person, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5">
+            <TextBox DockPanel.Dock="Left" Text="{Binding Detail.Person, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="TextChanged">
-                        <i:InvokeCommandAction Command="{Binding NotifyEditedCommand}" />
+                        <i:InvokeCommandAction Command="{Binding Detail.NotifyEditedCommand}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
         </DockPanel>
         <DockPanel LastChildFill="True">
-            <Button DockPanel.Dock="Right" Content="編集" Command="{Binding EditStartDateTimeCommand}" Width="40"/>
+            <Button DockPanel.Dock="Right" Content="編集" Command="{Binding Detail.EditStartDateTimeCommand}" Width="40"/>
             <DockPanel LastChildFill="True">
                 <TextBlock DockPanel.Dock="Left"
-                           Text="{Binding ., Converter={StaticResource DisplayNameConverter}, ConverterParameter=StartDateTime}"
+                           Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=StartDateTime}"
                            FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
-                <TextBlock Text="{Binding StartDateTime, Converter={StaticResource DateTimeDisplayConverter}}"
+                <TextBlock Text="{Binding Detail.StartDateTime, Converter={StaticResource DateTimeDisplayConverter}}"
                            VerticalAlignment="Center" Margin="0,0,8,0" FontFamily="Consolas"/>
             </DockPanel>
         </DockPanel>
         <DockPanel LastChildFill="True">
-            <Button DockPanel.Dock="Right" Content="編集" Command="{Binding EditEndDateTimeCommand}" Width="40"/>
+            <Button DockPanel.Dock="Right" Content="編集" Command="{Binding Detail.EditEndDateTimeCommand}" Width="40"/>
             <DockPanel LastChildFill="True">
                 <TextBlock DockPanel.Dock="Left"
-                           Text="{Binding ., Converter={StaticResource DisplayNameConverter}, ConverterParameter=EndDateTime}"
+                           Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=EndDateTime}"
                            FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
-                <TextBlock Text="{Binding EndDateTime, Converter={StaticResource DateTimeDisplayConverter}}"
+                <TextBlock Text="{Binding Detail.EndDateTime, Converter={StaticResource DateTimeDisplayConverter}}"
                            VerticalAlignment="Center" Margin="0,0,8,0" FontFamily="Consolas"/>
             </DockPanel>
         </DockPanel>
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Left"
-                       Text="{Binding ., Converter={StaticResource DisplayNameConverter}, ConverterParameter=Comment}"
+                       Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=Comment}"
                        FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
-            <TextBox DockPanel.Dock="Left" Text="{Binding Comment, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5"
+            <TextBox DockPanel.Dock="Left" Text="{Binding Detail.Comment, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5"
                      AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
                      MaxHeight="100" VerticalAlignment="Top">
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="TextChanged">
-                        <i:InvokeCommandAction Command="{Binding NotifyEditedCommand}" />
+                        <i:InvokeCommandAction Command="{Binding Detail.NotifyEditedCommand}" />
                     </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
