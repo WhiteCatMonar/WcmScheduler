@@ -12,10 +12,10 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Line X1="{Binding X1}"
-                          Y1="{Binding Y1}"
-                          X2="{Binding X2}"
-                          Y2="{Binding Y2}">
+                    <Line X1="{Binding Start.X}"
+                          Y1="{Binding Start.Y}"
+                          X2="{Binding End.X}"
+                          Y2="{Binding End.Y}">
                         <Line.Style>
                             <Style TargetType="Line">
                                 <Setter Property="Stroke" Value="#EEE"/>
@@ -36,9 +36,9 @@
 
         <!-- 原点軸(X軸) -->
         <Line x:Name="OriginAxisX"
-              X1="{Binding Grid.CanvasViewAreaStartX}"
+              X1="{Binding Grid.CanvasViewAreaStart.X}"
               Y1="0"
-              X2="{Binding Grid.CanvasViewAreaEndX}"
+              X2="{Binding Grid.CanvasViewAreaEnd.X}"
               Y2="0"
               Stroke="Red"
               StrokeThickness="2"
@@ -47,9 +47,9 @@
         <!-- 原点軸(Y軸) -->
         <Line x:Name="OriginAxisY"
               X1="0"
-              Y1="{Binding Grid.CanvasViewAreaStartY}"
+              Y1="{Binding Grid.CanvasViewAreaStart.Y}"
               X2="0"
-              Y2="{Binding Grid.CanvasViewAreaEndY}"
+              Y2="{Binding Grid.CanvasViewAreaEnd.Y}"
               Stroke="Blue"
               StrokeThickness="2"
               SnapsToDevicePixels="True" />

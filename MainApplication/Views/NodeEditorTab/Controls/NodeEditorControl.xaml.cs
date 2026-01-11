@@ -164,12 +164,14 @@ namespace MainApplication.Views.NodeEditorTab
                 var mousePos = e.GetPosition(NodeEditorCanvas);
 
                 /* Canvas論理原点とマウス位置の座標差分を算出 */
-                var deltaX = mousePos.X - vm.PanX;
-                var deltaY = mousePos.Y - vm.PanY;
+                var deltaX = mousePos.X - vm.Pan.X;
+                var deltaY = mousePos.Y - vm.Pan.Y;
 
                 /* 座標差分から拡縮時にCanvas論理原点が移動する量を算出 */
-                vm.PanX += deltaX - (deltaX * appliedFactor);
-                vm.PanY += deltaY - (deltaY * appliedFactor);
+                vm.Pan = new(
+                    vm.Pan.X + deltaX - (deltaX * appliedFactor),
+                    vm.Pan.Y + deltaY - (deltaY * appliedFactor)
+                );
             }
         }
 
@@ -211,8 +213,10 @@ namespace MainApplication.Views.NodeEditorTab
                 var delta = pos - _lastPanPoint;
                 _lastPanPoint = pos;
 
-                vm.PanX += delta.X;
-                vm.PanY += delta.Y;
+                vm.Pan = new(
+                    vm.Pan.X + delta.X,
+                    vm.Pan.Y + delta.Y
+                );
             }
         }
 

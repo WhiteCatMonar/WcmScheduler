@@ -1,5 +1,6 @@
 ﻿using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
+using System.Windows;
 
 namespace MainApplication.ViewModels.Actions
 {
@@ -17,17 +18,15 @@ namespace MainApplication.ViewModels.Actions
         /// <summary>
         /// アクションの説明(UI表示用)
         /// </summary>
-        public string Description => $"タスクを移動([{_oldX}, {_oldY}]→[{_newX}, {_newY}])";
+        public string Description => $"タスクを移動([{_oldPosition}]→[{_newPosition}])";
 
         /* ---------------------------------------------------------
          * フィールド
          * --------------------------------------------------------- */
 
         private readonly NodeViewModel _node;
-        private readonly double _oldX;
-        private readonly double _oldY;
-        private readonly double _newX;
-        private readonly double _newY;
+        private readonly Point _oldPosition;
+        private readonly Point _newPosition;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -37,17 +36,13 @@ namespace MainApplication.ViewModels.Actions
         /// ノード移動アクションを生成する
         /// </summary>
         /// <param name="node">対象ノード</param>
-        /// <param name="oldX">移動前のX座標</param>
-        /// <param name="oldY">移動前のY座標</param>
-        /// <param name="newX">移動後のX座標</param>
-        /// <param name="newY">移動後のY座標</param>
-        public MoveNodeAction(NodeViewModel node, double oldX, double oldY, double newX, double newY)
+        /// <param name="oldPosition">移動前の座標</param>
+        /// <param name="newPosition">移動後の座標</param>
+        public MoveNodeAction(NodeViewModel node, Point oldPosition, Point newPosition)
         {
             _node = node;
-            _oldX = oldX;
-            _oldY = oldY;
-            _newX = newX;
-            _newY = newY;
+            _oldPosition = oldPosition;
+            _newPosition = newPosition;
         }
 
         /* ---------------------------------------------------------
@@ -59,8 +54,7 @@ namespace MainApplication.ViewModels.Actions
         /// </summary>
         public void Undo()
         {
-            _node.X = _oldX;
-            _node.Y = _oldY;
+            _node.Position = _oldPosition;
         }
 
         /* ---------------------------------------------------------
@@ -72,8 +66,7 @@ namespace MainApplication.ViewModels.Actions
         /// </summary>
         public void Redo()
         {
-            _node.X = _newX;
-            _node.Y = _newY;
+            _node.Position = _newPosition;
         }
     }
 }

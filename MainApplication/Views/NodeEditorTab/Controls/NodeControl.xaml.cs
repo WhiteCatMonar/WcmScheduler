@@ -75,7 +75,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
 
         /// <summary>
         /// UI上のPortControlの位置を取得し、
-        /// PortViewModelのRelativeX/RelativeYに反映する。
+        /// PortViewModelのRelativePositionに反映する。
         /// </summary>
         private void UpdatePortPositions()
         {
@@ -91,7 +91,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
 
         private bool _isDragging;
         private Point _lastMousePos;
-        private double _startX, _startY;
+        private Point _start;
 
         /// <summary>
         /// ノードをドラッグ開始する。
@@ -109,8 +109,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 _lastMousePos = e.GetPosition(_editor?.NodeEditorArea);
 
                 /* Undo/Redo用に開始位置を記録 */
-                _startX = node.X;
-                _startY = node.Y;
+                _start = node.Position;
 
                 CaptureMouse();
                 e.Handled = true;
@@ -136,14 +135,11 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 double logicalDeltaY = screenDelta.Y / _editorVM.Zoom;
 
                 /* ノードの座標を更新(差分加算) */
-                double newX = node.X + logicalDeltaX;
-                double newY = node.Y + logicalDeltaY;
+                double newX = node.Position.X + logicalDeltaX;
+                double newY = node.Position.Y + logicalDeltaY;
 
                 /* キャンバス内に制限 */
-                var clamped = _editorVM.Grid.ClampNodePosition(newX, newY, node);
-
-                node.X = clamped.X;
-                node.Y = clamped.Y;
+                node.Position = _editorVM.Grid.ClampNodePosition(new(newX, newY), node);
 
                 /* ポート位置更新 */
                 node.UpdateAllPortPositions();
@@ -164,7 +160,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
 
                 /* Undo/Redo用に移動履歴を登録 */
-                _editorVM?.Nodes.MoveNode(node, _startX, _startY, node.X, node.Y);
+                _editorVM?.Nodes.MoveNode(node, _start, node.Position);
             }
         }
 

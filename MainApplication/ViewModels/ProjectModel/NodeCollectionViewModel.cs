@@ -1,10 +1,8 @@
 ﻿using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
-using System;
-using System.CodeDom;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
+using System.Windows;
 using System.Windows.Input;
 
 namespace MainApplication.ViewModels.ProjectModel
@@ -118,9 +116,7 @@ namespace MainApplication.ViewModels.ProjectModel
             var node = CreateDefaultNode();
 
             /* 初期位置をクランプして配置 */
-            var initial = _editor.Grid.ClampNodePosition(20, 20, node);
-            node.X = initial.X;
-            node.Y = initial.Y;
+            node.Position = _editor.Grid.ClampNodePosition(new(20, 20), node);
 
             var action = new AddNodeAction(Nodes, node);
             _undoRedo.Execute(action);
@@ -181,32 +177,20 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <summary>
         /// ノードの位置を更新する(Undo/Redoなし)。
         /// </summary>
-        public void UpdateNodePosition(NodeViewModel node, double newX, double newY)
+        public void UpdateNodePosition(NodeViewModel node, Point newPosition)
         {
-            if (node == null)
-            {
-                return;
-            }
-
-            var clamped = _editor.Grid.ClampNodePosition(newX, newY, node);
-            node.X = clamped.X;
-            node.Y = clamped.Y;
+            node.Position = _editor.Grid.ClampNodePosition(newPosition, node);
         }
 
         /// <summary>
         /// ノードを移動し、Undo/Redo対応のアクションとして記録する。
         /// </summary>
-        public void MoveNode(NodeViewModel node, double oldX, double oldY, double newX, double newY)
+        public void MoveNode(NodeViewModel node, Point oldPosition, Point newPosition)
         {
-            if (node == null)
+            var clamped = _editor.Grid.ClampNodePosition(newPosition, node);
+            if (!oldPosition.Equals(clamped))
             {
-                return;
-            }
-
-            var clamped = _editor.Grid.ClampNodePosition(newX, newY, node);
-            if ((oldX != clamped.X) || (oldY != clamped.Y))
-            {
-                var action = new MoveNodeAction(node, oldX, oldY, clamped.X, clamped.Y);
+                var action = new MoveNodeAction(node, oldPosition, clamped);
                 _undoRedo.Execute(action);
             }
         }

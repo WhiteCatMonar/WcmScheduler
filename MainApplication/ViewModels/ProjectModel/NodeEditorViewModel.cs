@@ -5,6 +5,7 @@ using MainApplication.Mappers;
 using System;
 using System.ComponentModel;
 using System.Windows.Input;
+using System.Windows;
 
 namespace MainApplication.ViewModels.ProjectModel
 {
@@ -72,34 +73,17 @@ namespace MainApplication.ViewModels.ProjectModel
             );
         }
 
-        private double _panX;
+
+        private Point _pan;
 
         /// <summary>
-        /// パン位置(X)
+        /// パン位置
         /// </summary>
-        public double PanX
+        public Point Pan
         {
-            get => _panX;
+            get => _pan;
             set => SetProperty(
-                ref _panX,
-                value,
-                CreateHooksFromValue(
-                    value,
-                    chain: () => UpdateGridState()
-                )
-            );
-        }
-
-        private double _panY;
-
-        /// <summary>
-        /// パン位置(Y)
-        /// </summary>
-        public double PanY
-        {
-            get => _panY;
-            set => SetProperty(
-                ref _panY,
+                ref _pan,
                 value,
                 CreateHooksFromValue(
                     value,
@@ -111,7 +95,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /* ---------------------------------------------------------
          * GridManager(論理座標系の中枢)
          * --------------------------------------------------------- */
-        
+
         /// <summary>
         /// ズーム・パン・論理座標系を管理するGridManager
         /// </summary>
@@ -223,8 +207,7 @@ namespace MainApplication.ViewModels.ProjectModel
 
             /* 表示領域をリセット */
             Zoom = 1.0;
-            PanX = 0.0;
-            PanY = 0.0;
+            Pan = new(0.0, 0.0);
             UpdateGridState();
 
             /* 編集履歴をリセット */
@@ -284,16 +267,14 @@ namespace MainApplication.ViewModels.ProjectModel
         {
             /* ズーム・パン */
             Grid.Zoom = Zoom;
-            Grid.PanX = PanX;
-            Grid.PanY = PanY;
+            Grid.Pan  = Pan;
 
             /* 論理座標系のサイズ */
             Grid.CanvasViewLogicalWidth = BaseCanvasWidth / Zoom;
             Grid.CanvasViewLogicalHeight = BaseCanvasHeight / Zoom;
 
             /* 論理原点 */
-            Grid.CanvasViewOriginX = -PanX / Zoom;
-            Grid.CanvasViewOriginY = -PanY / Zoom;
+            Grid.CanvasViewOrigin = new(-Pan.X / Zoom, -Pan.Y / Zoom);
 
             /* グリッド線更新 */
             Grid.UpdateGrid();

@@ -46,8 +46,8 @@
                         <TransformGroup>
                             <ScaleTransform ScaleX="{Binding Zoom}"
                                             ScaleY="{Binding Zoom}"/>
-                            <TranslateTransform X="{Binding PanX}"
-                                                Y="{Binding PanY}"/>
+                            <TranslateTransform X="{Binding Pan.X}"
+                                                Y="{Binding Pan.Y}"/>
                         </TransformGroup>
                     </Canvas.RenderTransform>
 

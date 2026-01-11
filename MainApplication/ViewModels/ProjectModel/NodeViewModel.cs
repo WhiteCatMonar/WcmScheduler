@@ -2,6 +2,7 @@
 using MainApplication.ViewModels.Service;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Windows;
 
 namespace MainApplication.ViewModels.ProjectModel
 {
@@ -99,23 +100,20 @@ namespace MainApplication.ViewModels.ProjectModel
          * ノード位置
          * --------------------------------------------------------- */
 
-        private double _x;
-
-        /// <summary>ノードのX座標(論理座標)</summary>
-        public double X
+        private Point _position;
+        public Point Position
         {
-            get => _x;
-            set => SetProperty(ref _x, value);
+            get => _position;
+            set => SetProperty(
+                ref _position,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    chain: () => UpdateAllPortPositions()
+                )
+            );
         }
 
-        private double _y;
-
-        /// <summary>ノードのY座標(論理座標)</summary>
-        public double Y
-        {
-            get => _y;
-            set => SetProperty(ref _y, value);
-        }
 
         /* ---------------------------------------------------------
          * ポート管理

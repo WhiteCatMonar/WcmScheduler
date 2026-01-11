@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using MainApplication.ViewModels.ProjectModel;
 
@@ -27,26 +25,18 @@ namespace MainApplication.ViewModels.Core
             set => SetProperty(ref _zoom, value);
         }
 
-        private double _panX;
-
         /// <summary>
-        /// キャンバスのパン位置(X)
+        /// キャンバスのパン位置
         /// </summary>
-        public double PanX
-        {
-            get => _panX;
-            set => SetProperty(ref _panX, value);
-        }
+        private Point _pan;
 
-        private double _panY;
-
-        /// <summary>
-        /// キャンバスのパン位置(Y)
-        /// </summary>
-        public double PanY
+        public Point Pan
         {
-            get => _panY;
-            set => SetProperty(ref _panY, value);
+            get => _pan;
+            set => SetProperty(
+                ref _pan,
+                value
+            );
         }
 
         /* ---------------------------------------------------------
@@ -61,7 +51,7 @@ namespace MainApplication.ViewModels.Core
         public double CanvasViewLogicalWidth
         {
             get => _canvasViewLogicalWidth;
-            set => SetProperty(ref _canvasViewLogicalWidth, value, [nameof(CanvasViewAreaEndX)]);
+            set => SetProperty(ref _canvasViewLogicalWidth, value, [nameof(CanvasViewAreaEnd)]);
         }
 
         private double _canvasViewLogicalHeight;
@@ -72,45 +62,27 @@ namespace MainApplication.ViewModels.Core
         public double CanvasViewLogicalHeight
         {
             get => _canvasViewLogicalHeight;
-            set => SetProperty(ref _canvasViewLogicalHeight, value, [nameof(CanvasViewAreaEndY)]);
+            set => SetProperty(ref _canvasViewLogicalHeight, value, [nameof(CanvasViewAreaEnd)]);
         }
 
         /* ---------------------------------------------------------
          * キャンバスの表示原点(論理座標)
          * --------------------------------------------------------- */
 
-        private double _canvasViewOriginX;
+        private Point _canvasViewOrigin;
 
         /// <summary>
-        /// 表示領域の左上X座標(論理座標)
+        /// 表示領域の左上座標(論理座標)
         /// </summary>
-        public double CanvasViewOriginX
+        public Point CanvasViewOrigin
         {
-            get => _canvasViewOriginX;
+            get => _canvasViewOrigin;
             set => SetProperty(
-                ref _canvasViewOriginX,
+                ref _canvasViewOrigin,
                 value,
                 [
-                    nameof(CanvasViewAreaStartX),
-                    nameof(CanvasViewAreaEndX),
-                ]
-            );
-        }
-
-        private double _canvasViewOriginY;
-
-        /// <summary>
-        /// 表示領域の左上Y座標(論理座標)
-        /// </summary>
-        public double CanvasViewOriginY
-        {
-            get => _canvasViewOriginY;
-            set => SetProperty(
-                ref _canvasViewOriginY,
-                value,
-                [
-                    nameof(CanvasViewAreaStartY),
-                    nameof(CanvasViewAreaEndY),
+                    nameof(CanvasViewAreaStart),
+                    nameof(CanvasViewAreaEnd)
                 ]
             );
         }
@@ -119,17 +91,14 @@ namespace MainApplication.ViewModels.Core
          * キャンバスの表示領域(論理座標)
          * --------------------------------------------------------- */
 
-        /// <summary>表示領域の開始X座標</summary>
-        public double CanvasViewAreaStartX => CanvasViewOriginX;
-
-        /// <summary>表示領域の開始Y座標</summary>
-        public double CanvasViewAreaStartY => CanvasViewOriginY;
+        /// <summary>表示領域の開始座標</summary>
+        public Point CanvasViewAreaStart => CanvasViewOrigin;
 
         /// <summary>表示領域の終了X座標</summary>
-        public double CanvasViewAreaEndX => CanvasViewOriginX + CanvasViewLogicalWidth;
-
-        /// <summary>表示領域の終了Y座標</summary>
-        public double CanvasViewAreaEndY => CanvasViewOriginY + CanvasViewLogicalHeight;
+        public Point CanvasViewAreaEnd => new(
+            CanvasViewOrigin.X + CanvasViewLogicalWidth,
+            CanvasViewOrigin.Y + CanvasViewLogicalHeight
+        );
 
         /* ---------------------------------------------------------
          * グリッドスナップ
@@ -169,18 +138,11 @@ namespace MainApplication.ViewModels.Core
         /// <summary>
         /// ノードの位置を表示領域内に収め、かつグリッドにスナップさせる
         /// </summary>
-        public Point ClampNodePosition(double x, double y, NodeViewModel node)
+        public Point ClampNodePosition(Point Position, NodeViewModel node)
         {
-            double clampedX = Math.Max(CanvasViewOriginX,
-                Math.Min(x, CanvasViewOriginX + CanvasViewLogicalWidth - node.Width));
-
-            double clampedY = Math.Max(CanvasViewOriginY,
-                Math.Min(y, CanvasViewOriginY + CanvasViewLogicalHeight - node.Height));
-
-            clampedX = RoundToGrid(clampedX);
-            clampedY = RoundToGrid(clampedY);
-
-            return new Point(clampedX, clampedY);
+            return new Point(
+                RoundToGrid(Math.Clamp(Position.X, CanvasViewOrigin.X, CanvasViewOrigin.X + CanvasViewLogicalWidth - node.Width)),
+                RoundToGrid(Math.Clamp(Position.Y, CanvasViewOrigin.Y, CanvasViewOrigin.Y + CanvasViewLogicalHeight - node.Height)));
         }
 
         /* ---------------------------------------------------------
@@ -192,13 +154,10 @@ namespace MainApplication.ViewModels.Core
         /// </summary>
         public Point ClampPoint(Point p)
         {
-            double x = Math.Max(CanvasViewOriginX,
-                Math.Min(p.X, CanvasViewOriginX + CanvasViewLogicalWidth));
-
-            double y = Math.Max(CanvasViewOriginY,
-                Math.Min(p.Y, CanvasViewOriginY + CanvasViewLogicalHeight));
-
-            return new Point(x, y);
+            return new Point(
+                Math.Clamp(p.X, CanvasViewOrigin.X, CanvasViewOrigin.X + CanvasViewLogicalWidth),
+                Math.Clamp(p.Y, CanvasViewOrigin.Y, CanvasViewOrigin.Y + CanvasViewLogicalHeight)
+            );
         }
 
         /* ---------------------------------------------------------
@@ -222,19 +181,22 @@ namespace MainApplication.ViewModels.Core
         {
             GridLines.Clear();
 
-            double originX = CanvasViewOriginX;
-            double originY = CanvasViewOriginY;
+            Point origin = CanvasViewOrigin;
 
-            double gridOriginX = Math.Floor(originX / GridSpacing) * GridSpacing;
-            double gridOriginY = Math.Floor(originY / GridSpacing) * GridSpacing;
+            Point gridOrigin = new(
+                Math.Floor(origin.X / GridSpacing) * GridSpacing,
+                Math.Floor(origin.Y / GridSpacing) * GridSpacing
+            );
 
-            double endX = gridOriginX + CanvasViewLogicalWidth + GridSpacing;
-            double endY = gridOriginY + CanvasViewLogicalHeight + GridSpacing;
+            Point end = new(
+                gridOrigin.X + CanvasViewLogicalWidth + GridSpacing,
+                gridOrigin.Y + CanvasViewLogicalHeight + GridSpacing
+            );
 
             double actualSpacing = GridSpacing * Zoom;
             bool showSubGrid = actualSpacing >= 8;
 
-            for (double x = gridOriginX; x < endX; x += GridSpacing)
+            for (double x = gridOrigin.X; x < end.X; x += GridSpacing)
             {
                 int index = (int)Math.Round(x / GridSpacing);
                 bool isMajor = (index % 10 == 0);
@@ -244,15 +206,13 @@ namespace MainApplication.ViewModels.Core
 
                 GridLines.Add(new LineViewModel
                 {
-                    X1 = x,
-                    Y1 = gridOriginY,
-                    X2 = x,
-                    Y2 = endY,
+                    Start = new(x, gridOrigin.Y),
+                    End = new(x, end.Y),
                     IsMajor = isMajor
                 });
             }
 
-            for (double y = gridOriginY; y < endY; y += GridSpacing)
+            for (double y = gridOrigin.Y; y < end.Y; y += GridSpacing)
             {
                 int index = (int)Math.Round(y / GridSpacing);
                 bool isMajor = (index % 10 == 0);
@@ -262,10 +222,8 @@ namespace MainApplication.ViewModels.Core
 
                 GridLines.Add(new LineViewModel
                 {
-                    X1 = gridOriginX,
-                    Y1 = y,
-                    X2 = endX,
-                    Y2 = y,
+                    Start = new(gridOrigin.X, y),
+                    End = new(end.X, y),
                     IsMajor = isMajor
                 });
             }

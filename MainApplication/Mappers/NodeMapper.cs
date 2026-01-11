@@ -1,7 +1,6 @@
 ﻿using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.ProjectModel;
-using System;
-using System.Linq;
+using System.Windows;
 using static MainApplication.ViewModels.ProjectModel.PortViewModel;
 
 namespace MainApplication.Mappers
@@ -20,8 +19,8 @@ namespace MainApplication.Mappers
 
                 Position = new PositionDataModel
                 {
-                    X = vm.X,
-                    Y = vm.Y
+                    X = vm.Position.X,
+                    Y = vm.Position.Y
                 },
 
                 Details = new NodeDetailsDataModel
@@ -54,8 +53,7 @@ namespace MainApplication.Mappers
             {
                 NodeGuid = Guid.Parse(data.Id),
                 NodeType = data.Type,
-                X = data.Position.X,
-                Y = data.Position.Y
+                Position = new Point(data.Position.X, data.Position.Y)
             };
             loadedNode.Detail.TaskName = data.Details.TaskName;
             loadedNode.Detail.Person = data.Details.Person;

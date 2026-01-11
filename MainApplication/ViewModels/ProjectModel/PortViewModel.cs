@@ -55,27 +55,15 @@ namespace MainApplication.ViewModels.ProjectModel
          * ノード内の相対座標(論理座標)
          * --------------------------------------------------------- */
 
-        private double _relativeX;
+        private Point _relativePosition;
 
-        /// <summary>
-        /// ノード左上からの相対X座標(論理座標)
-        /// </summary>
-        public double RelativeX
+        public Point RelativePosition
         {
-            get => _relativeX;
-            set => SetProperty(ref _relativeX, value);
-
-        }
-
-        private double _relativeY;
-
-        /// <summary>
-        /// ノード左上からの相対Y座標(論理座標)
-        /// </summary>
-        public double RelativeY
-        {
-            get => _relativeY;
-            set => SetProperty(ref _relativeY, value);
+            get => _relativePosition;
+            set => SetProperty(
+                ref _relativePosition,
+                value
+            );
         }
 
         /* ---------------------------------------------------------
@@ -118,8 +106,8 @@ namespace MainApplication.ViewModels.ProjectModel
             }
 
             AbsolutePosition = new Point(
-                ParentNode.X + RelativeX,
-                ParentNode.Y + RelativeY
+                ParentNode.Position.X + RelativePosition.X,
+                ParentNode.Position.Y + RelativePosition.Y
             );
         }
     }

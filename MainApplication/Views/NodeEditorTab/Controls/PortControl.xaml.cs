@@ -79,8 +79,8 @@ namespace MainApplication.Views.NodeEditorTab.Controls
 
             /* 画面座標 → 論理座標に変換 */
             var logicalPos = new Point(
-                (screenPos.X - editorVM.PanX) / editorVM.Zoom,
-                (screenPos.Y - editorVM.PanY) / editorVM.Zoom
+                (screenPos.X - editorVM.Pan.X) / editorVM.Zoom,
+                (screenPos.Y - editorVM.Pan.Y) / editorVM.Zoom
             );
 
             editorVM.Connections.DraggingToPoint = logicalPos;
@@ -129,7 +129,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
 
         /// <summary>
         /// UI上のポート位置(画面座標)を取得し、
-        /// Node内の相対座標(RelativeX/Y)としてViewModelに反映する。
+        /// Node内の相対座標(RelativePosition)としてViewModelに反映する。
         /// </summary>
         public void UpdateRelativePositionFromUI()
         {
@@ -155,18 +155,20 @@ namespace MainApplication.Views.NodeEditorTab.Controls
 
             /* 画面座標 → 論理座標 */
             var portLogical = new Point(
-                (portScreen.X - editorVM.PanX) / editorVM.Zoom,
-                (portScreen.Y - editorVM.PanY) / editorVM.Zoom
+                (portScreen.X - editorVM.Pan.X) / editorVM.Zoom,
+                (portScreen.Y - editorVM.Pan.Y) / editorVM.Zoom
             );
 
             var nodeLogical = new Point(
-                (nodeScreen.X - editorVM.PanX) / editorVM.Zoom,
-                (nodeScreen.Y - editorVM.PanY) / editorVM.Zoom
+                (nodeScreen.X - editorVM.Pan.X) / editorVM.Zoom,
+                (nodeScreen.Y - editorVM.Pan.Y) / editorVM.Zoom
             );
 
             /* Node 内の相対座標 */
-            port.RelativeX = portLogical.X - nodeLogical.X;
-            port.RelativeY = portLogical.Y - nodeLogical.Y;
+            port.RelativePosition = new(
+                portLogical.X - nodeLogical.X,
+                portLogical.Y - nodeLogical.Y
+            );
 
             /* 絶対座標も更新 */
             port.UpdateAbsolutePosition();
