@@ -56,6 +56,7 @@
 │   ├── 📂 Core                                        # 基盤ロジック(UI非依存)
 │   │   ├── 📄 EditableField.cs                        # 編集フィールドの共通ロジック(遅延コミット)
 │   │   ├── 📄 GridManager.cs                          # 論理座標系・ズーム・パン管理
+│   │   ├── 📄 PointEx.cs                              # 座標計算用Point型拡張
 │   │   ├── 📄 RelayCommand.cs                         # ICommand 実装(MVVMの基本)
 │   │   ├── 📄 TabInfo.cs                              # タブ管理用情報
 │   │   ├── 📄 UndoRedoManager.cs                      # Undo/Redo管理報

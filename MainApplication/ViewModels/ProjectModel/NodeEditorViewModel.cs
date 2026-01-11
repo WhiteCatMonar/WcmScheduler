@@ -274,7 +274,7 @@ namespace MainApplication.ViewModels.ProjectModel
             Grid.CanvasViewLogicalHeight = BaseCanvasHeight / Zoom;
 
             /* 論理原点 */
-            Grid.CanvasViewOrigin = new(-Pan.X / Zoom, -Pan.Y / Zoom);
+            Grid.CanvasViewOrigin = Pan.MirrorPoint().Div(Zoom);
 
             /* グリッド線更新 */
             Grid.UpdateGrid();

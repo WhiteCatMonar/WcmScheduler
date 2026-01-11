@@ -1,6 +1,7 @@
-﻿using System.Collections.ObjectModel;
+﻿using MainApplication.ViewModels.ProjectModel;
+using System.Collections.ObjectModel;
 using System.Windows;
-using MainApplication.ViewModels.ProjectModel;
+using System.Xml.Linq;
 
 namespace MainApplication.ViewModels.Core
 {
@@ -95,10 +96,7 @@ namespace MainApplication.ViewModels.Core
         public Point CanvasViewAreaStart => CanvasViewOrigin;
 
         /// <summary>表示領域の終了X座標</summary>
-        public Point CanvasViewAreaEnd => new(
-            CanvasViewOrigin.X + CanvasViewLogicalWidth,
-            CanvasViewOrigin.Y + CanvasViewLogicalHeight
-        );
+        public Point CanvasViewAreaEnd => PointEx.Add(CanvasViewOrigin, CanvasViewLogicalWidth, CanvasViewLogicalHeight);
 
         /* ---------------------------------------------------------
          * グリッドスナップ
@@ -140,9 +138,14 @@ namespace MainApplication.ViewModels.Core
         /// </summary>
         public Point ClampNodePosition(Point Position, NodeViewModel node)
         {
-            return new Point(
-                RoundToGrid(Math.Clamp(Position.X, CanvasViewOrigin.X, CanvasViewOrigin.X + CanvasViewLogicalWidth - node.Width)),
-                RoundToGrid(Math.Clamp(Position.Y, CanvasViewOrigin.Y, CanvasViewOrigin.Y + CanvasViewLogicalHeight - node.Height)));
+            /* ノード配置可能な位置はノードサイズの影響を受けるため、配置可能エリアを計算 */
+            Point nodeAreaEnd = PointEx.Sub(CanvasViewAreaEnd, node.Width, node.Height);
+
+            /* 座標を配置可能エリアでクリップする */
+            Point clamped = PointEx.Clamp(Position, CanvasViewAreaStart, nodeAreaEnd);
+
+            /* グリッドにスナップさせた座標を返す */
+            return PointEx.RoundSnap(clamped, GridSize);
         }
 
         /* ---------------------------------------------------------
@@ -154,10 +157,7 @@ namespace MainApplication.ViewModels.Core
         /// </summary>
         public Point ClampPoint(Point p)
         {
-            return new Point(
-                Math.Clamp(p.X, CanvasViewOrigin.X, CanvasViewOrigin.X + CanvasViewLogicalWidth),
-                Math.Clamp(p.Y, CanvasViewOrigin.Y, CanvasViewOrigin.Y + CanvasViewLogicalHeight)
-            );
+            return PointEx.Clamp(p, CanvasViewAreaStart, CanvasViewAreaEnd);
         }
 
         /* ---------------------------------------------------------
@@ -183,14 +183,12 @@ namespace MainApplication.ViewModels.Core
 
             Point origin = CanvasViewOrigin;
 
-            Point gridOrigin = new(
-                Math.Floor(origin.X / GridSpacing) * GridSpacing,
-                Math.Floor(origin.Y / GridSpacing) * GridSpacing
-            );
+            Point gridOrigin = PointEx.FloorSnap(origin, GridSpacing);
 
-            Point end = new(
-                gridOrigin.X + CanvasViewLogicalWidth + GridSpacing,
-                gridOrigin.Y + CanvasViewLogicalHeight + GridSpacing
+            Point end = PointEx.Add(
+                gridOrigin,
+                CanvasViewLogicalWidth + GridSpacing,
+                CanvasViewLogicalHeight + GridSpacing
             );
 
             double actualSpacing = GridSpacing * Zoom;

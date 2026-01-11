@@ -1,7 +1,4 @@
 ﻿using MainApplication.ViewModels.Core;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Windows;
 
 namespace MainApplication.ViewModels.ProjectModel
@@ -105,10 +102,7 @@ namespace MainApplication.ViewModels.ProjectModel
                 return;
             }
 
-            AbsolutePosition = new Point(
-                ParentNode.Position.X + RelativePosition.X,
-                ParentNode.Position.Y + RelativePosition.Y
-            );
+            AbsolutePosition = PointEx.Add(ParentNode.Position, RelativePosition);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using MainApplication.ViewModels.ProjectModel;
+using MainApplication.ViewModels.Core;
 
 namespace MainApplication.Views.NodeEditorTab.Controls
 {
@@ -78,12 +79,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
             var screenPos = e.GetPosition(editor.NodeEditorCanvas);
 
             /* 画面座標 → 論理座標に変換 */
-            var logicalPos = new Point(
-                (screenPos.X - editorVM.Pan.X) / editorVM.Zoom,
-                (screenPos.Y - editorVM.Pan.Y) / editorVM.Zoom
-            );
-
-            editorVM.Connections.DraggingToPoint = logicalPos;
+            editorVM.Connections.DraggingToPoint = screenPos.Sub(editorVM.Pan).Div(editorVM.Zoom);
         }
 
         /* ---------------------------------------------------------
@@ -154,21 +150,11 @@ namespace MainApplication.Views.NodeEditorTab.Controls
             var nodeScreen = nodeControl.TransformToVisual(editor.NodeEditorArea).Transform(new Point(0, 0));
 
             /* 画面座標 → 論理座標 */
-            var portLogical = new Point(
-                (portScreen.X - editorVM.Pan.X) / editorVM.Zoom,
-                (portScreen.Y - editorVM.Pan.Y) / editorVM.Zoom
-            );
-
-            var nodeLogical = new Point(
-                (nodeScreen.X - editorVM.Pan.X) / editorVM.Zoom,
-                (nodeScreen.Y - editorVM.Pan.Y) / editorVM.Zoom
-            );
+            var portLogical = portScreen.Sub(editorVM.Pan).Div(editorVM.Zoom);
+            var nodeLogical = nodeScreen.Sub(editorVM.Pan).Div(editorVM.Zoom);
 
             /* Node 内の相対座標 */
-            port.RelativePosition = new(
-                portLogical.X - nodeLogical.X,
-                portLogical.Y - nodeLogical.Y
-            );
+            port.RelativePosition = portLogical.Sub(nodeLogical);
 
             /* 絶対座標も更新 */
             port.UpdateAbsolutePosition();

@@ -1,4 +1,5 @@
 ﻿using MainApplication.Helpers;
+using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
 using System;
 using System.Windows;
@@ -127,19 +128,17 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 Point current = e.GetPosition(_editor?.NodeEditorCanvas);
 
                 /* 画面上の移動量 */
-                Vector screenDelta = current - _lastMousePos;
+                Point screenDelta = PointEx.Sub(current, _lastMousePos);
                 _lastMousePos = current;
 
                 /* ズーム倍率を考慮して論理座標系に変換 */
-                double logicalDeltaX = screenDelta.X / _editorVM.Zoom;
-                double logicalDeltaY = screenDelta.Y / _editorVM.Zoom;
+                Point logicalDelta = PointEx.Div(screenDelta, _editorVM.Zoom);
 
                 /* ノードの座標を更新(差分加算) */
-                double newX = node.Position.X + logicalDeltaX;
-                double newY = node.Position.Y + logicalDeltaY;
+                Point newPosition = PointEx.Add(node.Position, logicalDelta);
 
                 /* キャンバス内に制限 */
-                node.Position = _editorVM.Grid.ClampNodePosition(new(newX, newY), node);
+                node.Position = _editorVM.Grid.ClampNodePosition(newPosition, node);
 
                 /* ポート位置更新 */
                 node.UpdateAllPortPositions();

@@ -1,4 +1,5 @@
-﻿using MainApplication.ViewModels.ProjectModel;
+﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.ProjectModel;
 using MainApplication.Views.NodeEditorTab.Controls;
 using System;
 using System.Windows;
@@ -164,14 +165,10 @@ namespace MainApplication.Views.NodeEditorTab
                 var mousePos = e.GetPosition(NodeEditorCanvas);
 
                 /* Canvas論理原点とマウス位置の座標差分を算出 */
-                var deltaX = mousePos.X - vm.Pan.X;
-                var deltaY = mousePos.Y - vm.Pan.Y;
+                var delta = mousePos.Sub(vm.Pan);
 
                 /* 座標差分から拡縮時にCanvas論理原点が移動する量を算出 */
-                vm.Pan = new(
-                    vm.Pan.X + deltaX - (deltaX * appliedFactor),
-                    vm.Pan.Y + deltaY - (deltaY * appliedFactor)
-                );
+                vm.Pan = vm.Pan.Add(delta.Sub(delta.Mul(appliedFactor)));
             }
         }
 
@@ -210,13 +207,10 @@ namespace MainApplication.Views.NodeEditorTab
             if (_isPanning)
             {
                 var pos = e.GetPosition(NodeEditorCanvas);
-                var delta = pos - _lastPanPoint;
+                var delta = pos.Sub(_lastPanPoint);
                 _lastPanPoint = pos;
 
-                vm.Pan = new(
-                    vm.Pan.X + delta.X,
-                    vm.Pan.Y + delta.Y
-                );
+                vm.Pan = vm.Pan.Add(delta);
             }
         }
 
