@@ -93,7 +93,7 @@ namespace MainApplication.ViewModels.ProjectModel
         }
 
         /* ---------------------------------------------------------
-         * GridManager(論理座標系の中枢)
+         * 座標系管理
          * --------------------------------------------------------- */
 
         /// <summary>
@@ -101,10 +101,58 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public GridManager Grid { get; }
 
+        /// <summary>
+        /// 画面座標を論理座標に変換する。
+        /// ズーム倍率とパン位置を考慮して変換を行う。
+        /// </summary>
+        /// <param name="screen">画面座標</param>
+        /// <returns>論理座標</returns>
+        public Point ScreenToLogical(Point screen)
+            => Grid.ScreenToLogical(screen);
+
+        /// <summary>
+        /// 論理座標を画面座標に変換する。
+        /// ズーム倍率とパン位置を考慮して変換を行う。
+        /// </summary>
+        /// <param name="logical">論理座標</param>
+        /// <returns>画面座標</returns>
+        public Point LogicalToScreen(Point logical)
+            => Grid.LogicalToScreen(logical);
+
+        /// <summary>
+        /// 画面上の移動量を論理座標系の移動量に変換する。
+        /// </summary>
+        /// <param name="screenDelta">画面座標での移動量</param>
+        /// <returns>論理座標での移動量</returns>
+        public Point ScreenDeltaToLogical(Point delta)
+            => Grid.ScreenDeltaToLogical(delta);
+
+
+        /// <summary>
+        /// ズーム・パン・キャンバスサイズをGridManagerに反映し、
+        /// グリッド線を更新する。
+        /// </summary>
+        public void UpdateGridState()
+        {
+            /* ズーム・パン */
+            Grid.Zoom = Zoom;
+            Grid.Pan = Pan;
+
+            /* 論理座標系のサイズ */
+            Grid.CanvasViewLogicalWidth = BaseCanvasWidth / Zoom;
+            Grid.CanvasViewLogicalHeight = BaseCanvasHeight / Zoom;
+
+            /* 論理原点 */
+            Grid.CanvasViewOrigin = Pan.MirrorPoint().Div(Zoom);
+
+            /* グリッド線更新 */
+            Grid.UpdateGrid();
+        }
+
         /* ---------------------------------------------------------
          * ノード・接続線管理
          * --------------------------------------------------------- */
-        
+
         /// <summary>ノード一覧管理</summary>
         public NodeCollectionViewModel Nodes { get; }
 
@@ -253,31 +301,6 @@ namespace MainApplication.ViewModels.ProjectModel
             MoveToHistoryCommand = new RelayCommand<UndoRedoManager.HistoryItem>(item => UndoRedo.MoveToHistory(item));
 
             UndoRedo.CurrentHistoryChanged += OnCurrentHistoryChanged;
-        }
-
-        /* ---------------------------------------------------------
-         * GridManagerにUI状態を反映
-         * --------------------------------------------------------- */
-
-        /// <summary>
-        /// ズーム・パン・キャンバスサイズをGridManagerに反映し、
-        /// グリッド線を更新する。
-        /// </summary>
-        public void UpdateGridState()
-        {
-            /* ズーム・パン */
-            Grid.Zoom = Zoom;
-            Grid.Pan  = Pan;
-
-            /* 論理座標系のサイズ */
-            Grid.CanvasViewLogicalWidth = BaseCanvasWidth / Zoom;
-            Grid.CanvasViewLogicalHeight = BaseCanvasHeight / Zoom;
-
-            /* 論理原点 */
-            Grid.CanvasViewOrigin = Pan.MirrorPoint().Div(Zoom);
-
-            /* グリッド線更新 */
-            Grid.UpdateGrid();
         }
     }
 }

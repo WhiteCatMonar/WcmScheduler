@@ -76,10 +76,8 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 return;
             }
 
-            var screenPos = e.GetPosition(editor.NodeEditorCanvas);
-
-            /* 画面座標 → 論理座標に変換 */
-            editorVM.Connections.DraggingToPoint = screenPos.Sub(editorVM.Pan).Div(editorVM.Zoom);
+            /* マウス位置の論理座標を取得して保持 */
+            editorVM.Connections.DraggingToPoint = editorVM.ScreenToLogical(e.GetPosition(editor.NodeEditorCanvas));
         }
 
         /* ---------------------------------------------------------
@@ -149,12 +147,8 @@ namespace MainApplication.Views.NodeEditorTab.Controls
             /* Node の左上(画面座標) */
             var nodeScreen = nodeControl.TransformToVisual(editor.NodeEditorArea).Transform(new Point(0, 0));
 
-            /* 画面座標 → 論理座標 */
-            var portLogical = portScreen.Sub(editorVM.Pan).Div(editorVM.Zoom);
-            var nodeLogical = nodeScreen.Sub(editorVM.Pan).Div(editorVM.Zoom);
-
-            /* Node 内の相対座標 */
-            port.RelativePosition = portLogical.Sub(nodeLogical);
+            /* Node 内の相対座標(論理座標) */
+            port.RelativePosition = editorVM.ScreenDeltaToLogical(portScreen.Sub(nodeScreen));
 
             /* 絶対座標も更新 */
             port.UpdateAbsolutePosition();

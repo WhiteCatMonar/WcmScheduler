@@ -41,6 +41,43 @@ namespace MainApplication.ViewModels.Core
         }
 
         /* ---------------------------------------------------------
+         * 座標変換
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 画面座標を論理座標に変換する。
+        /// ズーム倍率とパン位置を考慮して変換を行う。
+        /// </summary>
+        /// <param name="screen">画面座標</param>
+        /// <returns>論理座標</returns>
+        public Point ScreenToLogical(Point screen)
+        {
+            return screen.Sub(Pan).Div(Zoom);
+        }
+
+        /// <summary>
+        /// 論理座標を画面座標に変換する。
+        /// ズーム倍率とパン位置を考慮して変換を行う。
+        /// </summary>
+        /// <param name="logical">論理座標</param>
+        /// <returns>画面座標</returns>
+        public Point LogicalToScreen(Point logical)
+        {
+            return logical.Mul(Zoom).Add(Pan);
+        }
+
+        /// <summary>
+        /// 画面上の移動量を論理座標系の移動量に変換する。
+        /// </summary>
+        /// <param name="screenDelta">画面座標での移動量</param>
+        /// <returns>論理座標での移動量</returns>
+        public Point ScreenDeltaToLogical(Point screenDelta)
+        {
+            return screenDelta.Div(Zoom);
+        }
+
+
+        /* ---------------------------------------------------------
          * キャンバスの論理サイズ(ズーム後のサイズ)
          * --------------------------------------------------------- */
 

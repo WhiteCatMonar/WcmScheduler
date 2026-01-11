@@ -1,7 +1,6 @@
 ﻿using MainApplication.Helpers;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -132,7 +131,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 _lastMousePos = current;
 
                 /* ズーム倍率を考慮して論理座標系に変換 */
-                Point logicalDelta = screenDelta.Div(_editorVM.Zoom);
+                Point logicalDelta = _editorVM.ScreenDeltaToLogical(screenDelta);
 
                 /* ノードの座標を更新(差分加算) */
                 Point newPosition = node.Position.Add(logicalDelta);
