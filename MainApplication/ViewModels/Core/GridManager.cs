@@ -10,7 +10,7 @@ namespace MainApplication.ViewModels.Core
     /// キャンバスのズーム・パン・表示領域・グリッド生成など、
     /// エディタ全体の座標系管理を行うクラス。
     /// </summary>
-    public class GridManager : INotifyPropertyChanged
+    public class GridManager : ViewModelBase
     {
         /* ---------------------------------------------------------
          * ズーム・パン状態
@@ -24,14 +24,7 @@ namespace MainApplication.ViewModels.Core
         public double Zoom
         {
             get => _zoom;
-            set
-            {
-                if (_zoom != value)
-                {
-                    _zoom = value;
-                    OnPropertyChanged(nameof(Zoom));
-                }
-            }
+            set => SetProperty(ref _zoom, value);
         }
 
         private double _panX;
@@ -42,14 +35,7 @@ namespace MainApplication.ViewModels.Core
         public double PanX
         {
             get => _panX;
-            set
-            {
-                if (_panX != value)
-                {
-                    _panX = value;
-                    OnPropertyChanged(nameof(PanX));
-                }
-            }
+            set => SetProperty(ref _panX, value);
         }
 
         private double _panY;
@@ -60,14 +46,7 @@ namespace MainApplication.ViewModels.Core
         public double PanY
         {
             get => _panY;
-            set
-            {
-                if (_panY != value)
-                {
-                    _panY = value;
-                    OnPropertyChanged(nameof(PanY));
-                }
-            }
+            set => SetProperty(ref _panY, value);
         }
 
         /* ---------------------------------------------------------
@@ -82,15 +61,7 @@ namespace MainApplication.ViewModels.Core
         public double CanvasViewLogicalWidth
         {
             get => _canvasViewLogicalWidth;
-            set
-            {
-                if (_canvasViewLogicalWidth != value)
-                {
-                    _canvasViewLogicalWidth = value;
-                    OnPropertyChanged(nameof(CanvasViewAreaEndX));
-                    OnPropertyChanged(nameof(CanvasViewLogicalWidth));
-                }
-            }
+            set => SetProperty(ref _canvasViewLogicalWidth, value, [nameof(CanvasViewAreaEndX)]);
         }
 
         private double _canvasViewLogicalHeight;
@@ -101,15 +72,7 @@ namespace MainApplication.ViewModels.Core
         public double CanvasViewLogicalHeight
         {
             get => _canvasViewLogicalHeight;
-            set
-            {
-                if (_canvasViewLogicalHeight != value)
-                {
-                    _canvasViewLogicalHeight = value;
-                    OnPropertyChanged(nameof(CanvasViewAreaEndY));
-                    OnPropertyChanged(nameof(CanvasViewLogicalHeight));
-                }
-            }
+            set => SetProperty(ref _canvasViewLogicalHeight, value, [nameof(CanvasViewAreaEndY)]);
         }
 
         /* ---------------------------------------------------------
@@ -124,16 +87,14 @@ namespace MainApplication.ViewModels.Core
         public double CanvasViewOriginX
         {
             get => _canvasViewOriginX;
-            set
-            {
-                if (_canvasViewOriginX != value)
-                {
-                    _canvasViewOriginX = value;
-                    OnPropertyChanged(nameof(CanvasViewAreaStartX));
-                    OnPropertyChanged(nameof(CanvasViewAreaEndX));
-                    OnPropertyChanged(nameof(CanvasViewOriginX));
-                }
-            }
+            set => SetProperty(
+                ref _canvasViewOriginX,
+                value,
+                [
+                    nameof(CanvasViewAreaStartX),
+                    nameof(CanvasViewAreaEndX),
+                ]
+            );
         }
 
         private double _canvasViewOriginY;
@@ -144,16 +105,14 @@ namespace MainApplication.ViewModels.Core
         public double CanvasViewOriginY
         {
             get => _canvasViewOriginY;
-            set
-            {
-                if (_canvasViewOriginY != value)
-                {
-                    _canvasViewOriginY = value;
-                    OnPropertyChanged(nameof(CanvasViewAreaStartY));
-                    OnPropertyChanged(nameof(CanvasViewAreaEndY));
-                    OnPropertyChanged(nameof(CanvasViewOriginY));
-                }
-            }
+            set => SetProperty(
+                ref _canvasViewOriginY,
+                value,
+                [
+                    nameof(CanvasViewAreaStartY),
+                    nameof(CanvasViewAreaEndY),
+                ]
+            );
         }
 
         /* ---------------------------------------------------------
@@ -184,16 +143,17 @@ namespace MainApplication.ViewModels.Core
         public double GridSize
         {
             get => _gridSize;
-            set
-            {
-                if (_gridSize != value)
-                {
-                    _gridSize = value;
-                    OnPropertyChanged(nameof(GridSize));
-                    OnPropertyChanged(nameof(GridSpacing));
-                    UpdateGrid();
-                }
-            }
+            set => SetProperty(
+                ref _gridSize,
+                value,
+                [
+                    nameof(GridSpacing)
+                ],
+                CreateHooksFromValue(
+                    value,
+                    chain: () => UpdateGrid()
+                )
+            );
         }
 
         /// <summary>
@@ -310,18 +270,6 @@ namespace MainApplication.ViewModels.Core
                 });
             }
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する
-        /// </summary>
-        private void OnPropertyChanged(string name)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MainApplication.ViewModels.Core;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Windows;
@@ -9,7 +10,7 @@ namespace MainApplication.ViewModels.ProjectModel
     /// ノードの入出力ポートを表すViewModel。
     /// ノード内の相対座標・キャンバス上の絶対座標・接続線一覧などを管理する。
     /// </summary>
-    public class PortViewModel : INotifyPropertyChanged
+    public class PortViewModel : ViewModelBase
     {
         /* ---------------------------------------------------------
          * ポート種別
@@ -37,15 +38,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public Guid PortGuid
         {
             get => _portGuid;
-            set
-            {
-                if (_portGuid == value)
-                {
-                    return;
-                }
-                _portGuid = value;
-                OnPropertyChanged(nameof(PortGuid));
-            }
+            set => SetProperty(ref _portGuid, value);
         }
 
         /// <summary>
@@ -70,7 +63,8 @@ namespace MainApplication.ViewModels.ProjectModel
         public double RelativeX
         {
             get => _relativeX;
-            set { _relativeX = value; OnPropertyChanged(nameof(RelativeX)); }
+            set => SetProperty(ref _relativeX, value);
+
         }
 
         private double _relativeY;
@@ -81,7 +75,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public double RelativeY
         {
             get => _relativeY;
-            set { _relativeY = value; OnPropertyChanged(nameof(RelativeY)); }
+            set => SetProperty(ref _relativeY, value);
         }
 
         /* ---------------------------------------------------------
@@ -96,14 +90,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public Point AbsolutePosition
         {
             get => _absolutePosition;
-            set
-            {
-                if (_absolutePosition != value)
-                {
-                    _absolutePosition = value;
-                    OnPropertyChanged(nameof(AbsolutePosition));
-                }
-            }
+            set => SetProperty(ref _absolutePosition, value);
         }
 
         /* ---------------------------------------------------------
@@ -135,18 +122,6 @@ namespace MainApplication.ViewModels.ProjectModel
                 ParentNode.Y + RelativeY
             );
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する
-        /// </summary>
-        protected void OnPropertyChanged(string name) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

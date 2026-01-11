@@ -12,7 +12,7 @@ namespace MainApplication.ViewModels.ProjectModel
     /// </summary>
     /// <param name="undoRedo">Undo/Redo管理用オブジェクト</param>
     /// <param name="dateTimeEditor">ノードが利用する時刻編集サービス</param>
-    public class NodeViewModel(UndoRedoManager undoRedo, IDateTimeEditorService dateTimeEditor) : INotifyPropertyChanged
+    public class NodeViewModel(UndoRedoManager undoRedo, IDateTimeEditorService dateTimeEditor) : ViewModelBase
     {
         /* ---------------------------------------------------------
          * ノード種別
@@ -26,66 +26,44 @@ namespace MainApplication.ViewModels.ProjectModel
         public string NodeType
         {
             get => _nodeType;
-            set
-            {
-                if (_nodeType == value)
-                {
-                    return;
-                }
-                _nodeType = value;
-                OnPropertyChanged(nameof(NodeType));
-            }
+            set => SetProperty(ref _nodeType, value);
         }
 
         /* ---------------------------------------------------------
          * ノードのサイズ
          * --------------------------------------------------------- */
-        public static readonly double _minWidth = 100;
+        private const double MinWidthValue = 100;
 
         /// <summary>ノードの最小幅</summary>
         public static double MinWidth
         {
-            get => _minWidth;
+            get => MinWidthValue;
         }
 
-        public static readonly double _minHeight = 60;
+        private const double MinHeightValue = 60;
 
         /// <summary>ノードの最小高さ</summary>
         public static double MinHeight
         {
-            get => _minHeight;
+            get => MinHeightValue;
         }
 
-        private double _width = _minWidth;
+        private double _width = MinWidthValue;
 
         /// <summary>ノードの幅</summary>
         public double Width
         {
             get => _width;
-            set
-            {
-                if (_width != value)
-                {
-                    _width = value;
-                    OnPropertyChanged(nameof(Width));
-                }
-            }
+            set => SetProperty(ref _width, value);
         }
 
-        private double _height = _minHeight;
+        private double _height = MinHeightValue;
 
         /// <summary>ノードの高さ</summary>
         public double Height
         {
             get => _height;
-            set
-            {
-                if (_height != value)
-                {
-                    _height = value;
-                    OnPropertyChanged(nameof(Height));
-                }
-            }
+            set => SetProperty(ref _height, value);
         }
 
         /* ---------------------------------------------------------
@@ -98,15 +76,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public bool IsSelected
         {
             get => _isSelected;
-            set
-            {
-                if (_isSelected == value)
-                {
-                    return;
-                }
-                _isSelected = value;
-                OnPropertyChanged(nameof(IsSelected));
-            }
+            set => SetProperty(ref _isSelected, value);
         }
 
         /* ---------------------------------------------------------
@@ -119,15 +89,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public Guid NodeGuid
         {
             get => _nodeGuid;
-            set
-            {
-                if (_nodeGuid == value)
-                {
-                    return;
-                }
-                _nodeGuid = value;
-                OnPropertyChanged(nameof(NodeGuid));
-            }
+            set => SetProperty(ref _nodeGuid, value);
         }
 
         /* その他ノード固有詳細情報 */
@@ -143,15 +105,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public double X
         {
             get => _x;
-            set
-            {
-                if (_x == value)
-                {
-                    return;
-                }
-                _x = value;
-                OnPropertyChanged(nameof(X));
-            }
+            set => SetProperty(ref _x, value);
         }
 
         private double _y;
@@ -160,15 +114,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public double Y
         {
             get => _y;
-            set
-            {
-                if (_y == value)
-                {
-                    return;
-                }
-                _y = value;
-                OnPropertyChanged(nameof(Y));
-            }
+            set => SetProperty(ref _y, value);
         }
 
         /* ---------------------------------------------------------
@@ -199,18 +145,6 @@ namespace MainApplication.ViewModels.ProjectModel
                 port.UpdateAbsolutePosition();
             }
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する。
-        /// </summary>
-        protected void OnPropertyChanged(string name) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

@@ -2,6 +2,7 @@
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using System;
+using System.CodeDom;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -12,7 +13,7 @@ namespace MainApplication.ViewModels.ProjectModel
     /// ノード一覧の管理、選択状態、追加・削除・移動操作、
     /// Undo/Redo連携を担当するViewModel。
     /// </summary>
-    public class NodeCollectionViewModel : INotifyPropertyChanged
+    public class NodeCollectionViewModel : ViewModelBase
     {
         /* ---------------------------------------------------------
          * フィールド
@@ -71,19 +72,15 @@ namespace MainApplication.ViewModels.ProjectModel
         public NodeViewModel? SelectedNode
         {
             get => _selectedNode;
-            set
-            {
-                if (_selectedNode == value)
-                {
-                    return;
-                }
-
-                _selectedNode?.IsSelected = false;
-                _selectedNode = value;
-                _selectedNode?.IsSelected = true;
-
-                OnPropertyChanged(nameof(SelectedNode));
-            }
+            set => SetProperty(
+                ref _selectedNode,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    pre: (oldNode, newNode) => oldNode?.IsSelected = false,
+                    post: (oldNode, newNode) => newNode?.IsSelected = true
+                )
+            );
         }
 
         /// <summary>
@@ -213,18 +210,6 @@ namespace MainApplication.ViewModels.ProjectModel
                 _undoRedo.Execute(action);
             }
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する。
-        /// </summary>
-        private void OnPropertyChanged(string name)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

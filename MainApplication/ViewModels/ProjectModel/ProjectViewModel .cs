@@ -1,6 +1,5 @@
 ﻿using MainApplication.ViewModels.Core;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 
 namespace MainApplication.ViewModels.ProjectModel
 {
@@ -8,7 +7,7 @@ namespace MainApplication.ViewModels.ProjectModel
     /// 1つのプロジェクトを表すViewModel。
     /// /// プロジェクト内のタブ管理もここで行う。
     /// </summary>
-    public class ProjectViewModel : INotifyPropertyChanged
+    public class ProjectViewModel : ViewModelBase
     {
         /* ---------------------------------------------------------
          * プロジェクト全体の基本情報
@@ -22,14 +21,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public string? ProjectName
         {
             get => _projectName;
-            set
-            {
-                if (_projectName != value)
-                {
-                    _projectName = value;
-                    OnPropertyChanged(nameof(ProjectName));
-                }
-            }
+            set => SetProperty(ref _projectName, value);
         }
 
         /* ---------------------------------------------------------
@@ -59,12 +51,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public TabInfo? SelectedTab
         {
             get => _selectedTab;
-            set
-            {
-                _selectedTab = value;
-                OnPropertyChanged(nameof(SelectedTab));
-                OnPropertyChanged(nameof(IsNodeEditor));
-            }
+            set => SetProperty(ref _selectedTab, value, [nameof(IsNodeEditor)]);
         }
 
         /// <summary>
@@ -96,18 +83,6 @@ namespace MainApplication.ViewModels.ProjectModel
 
             SelectedTab = nodeEditorTab;
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する。
-        /// </summary>
-        private void OnPropertyChanged(string name)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

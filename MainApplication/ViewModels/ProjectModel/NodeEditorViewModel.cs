@@ -12,7 +12,7 @@ namespace MainApplication.ViewModels.ProjectModel
     /// ノードエディタ全体を統括するViewModel。
     /// UI状態、ノード・接続線管理、Undo/Redo、データ入出力などを扱う。
     /// </summary>
-    public class NodeEditorViewModel : INotifyPropertyChanged
+    public class NodeEditorViewModel : ViewModelBase
     {
         /* ---------------------------------------------------------
          * 基本プロパティ(UIの表示状態)
@@ -26,15 +26,14 @@ namespace MainApplication.ViewModels.ProjectModel
         public double BaseCanvasWidth
         {
             get => _baseCanvasWidth;
-            set
-            {
-                if (_baseCanvasWidth != value)
-                {
-                    _baseCanvasWidth = value;
-                    OnPropertyChanged(nameof(BaseCanvasWidth));
-                    UpdateGridState();
-                }
-            }
+            set => SetProperty(
+                ref _baseCanvasWidth,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    chain: () => UpdateGridState()
+                )
+            );
         }
 
         private double _baseCanvasHeight;
@@ -45,15 +44,14 @@ namespace MainApplication.ViewModels.ProjectModel
         public double BaseCanvasHeight
         {
             get => _baseCanvasHeight;
-            set
-            {
-                if (_baseCanvasHeight != value)
-                {
-                    _baseCanvasHeight = value;
-                    OnPropertyChanged(nameof(BaseCanvasHeight));
-                    UpdateGridState();
-                }
-            }
+            set => SetProperty(
+                ref _baseCanvasHeight,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    chain: () => UpdateGridState()
+                )
+            );
         }
 
         private double _zoom = 1.0;
@@ -64,15 +62,14 @@ namespace MainApplication.ViewModels.ProjectModel
         public double Zoom
         {
             get => _zoom;
-            set
-            {
-                if (_zoom != value)
-                {
-                    _zoom = value;
-                    OnPropertyChanged(nameof(Zoom));
-                    UpdateGridState();
-                }
-            }
+            set => SetProperty(
+                ref _zoom,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    chain: () => UpdateGridState()
+                )
+            );
         }
 
         private double _panX;
@@ -83,15 +80,14 @@ namespace MainApplication.ViewModels.ProjectModel
         public double PanX
         {
             get => _panX;
-            set
-            {
-                if (_panX != value)
-                {
-                    _panX = value;
-                    OnPropertyChanged(nameof(PanX));
-                    UpdateGridState();
-                }
-            }
+            set => SetProperty(
+                ref _panX,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    chain: () => UpdateGridState()
+                )
+            );
         }
 
         private double _panY;
@@ -102,15 +98,14 @@ namespace MainApplication.ViewModels.ProjectModel
         public double PanY
         {
             get => _panY;
-            set
-            {
-                if (_panY != value)
-                {
-                    _panY = value;
-                    OnPropertyChanged(nameof(PanY));
-                    UpdateGridState();
-                }
-            }
+            set => SetProperty(
+                ref _panY,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    chain: () => UpdateGridState()
+                )
+            );
         }
 
         /* ---------------------------------------------------------
@@ -162,14 +157,9 @@ namespace MainApplication.ViewModels.ProjectModel
         public UndoRedoManager UndoRedo
         {
             get => _undoredo;
-            set
-            {
-                if (_undoredo != value)
-                {
-                    _undoredo = value;
-                    OnPropertyChanged(nameof(UndoRedo));
-                }
-            }
+
+            /* NOTE: UndoRedoManagerは参照型のため、同一インスタンス再代入では通知されない。 */
+            set => SetProperty(ref _undoredo, value);
         }
 
         /// <summary>Undo コマンド</summary>
@@ -202,14 +192,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public IDateTimeEditorService DateTimeEditor
         {
             get => _dateTimeEditor;
-            set
-            {
-                if (_dateTimeEditor != value)
-                {
-                    _dateTimeEditor = value;
-                    OnPropertyChanged(nameof(DateTimeEditor));
-                }
-            }
+            set => SetProperty(ref _dateTimeEditor, value);
         }
 
         /* ---------------------------------------------------------
@@ -315,18 +298,6 @@ namespace MainApplication.ViewModels.ProjectModel
             /* グリッド線更新 */
             Grid.UpdateGrid();
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する。
-        /// </summary>
-        private void OnPropertyChanged(string name)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

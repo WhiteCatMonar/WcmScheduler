@@ -1,5 +1,4 @@
 ﻿using MainApplication.ViewModels.Core;
-using System.ComponentModel;
 using System.Windows.Input;
 
 namespace MainApplication.ViewModels
@@ -8,7 +7,7 @@ namespace MainApplication.ViewModels
     /// 日付・時刻を編集するための ViewModel。
     /// モーダルダイアログから使用され、編集結果を Result に格納する。
     /// </summary>
-    public class DateTimeEditorViewModel : INotifyPropertyChanged
+    public class DateTimeEditorViewModel : ViewModelBase
     {
         /* ---------------------------------------------------------
          * フィールド
@@ -67,12 +66,7 @@ namespace MainApplication.ViewModels
         public DateTime? SelectedDate
         {
             get => _selectedDate;
-            set
-            {
-                _selectedDate = value;
-                OnPropertyChanged(nameof(SelectedDate));
-                OnPropertyChanged(nameof(Composed));
-            }
+            set => SetProperty(ref _selectedDate, value, [nameof(Composed)]);
         }
 
         /// <summary>
@@ -81,12 +75,7 @@ namespace MainApplication.ViewModels
         public int Hour
         {
             get => _hour;
-            set
-            {
-                _hour = Math.Max(0, Math.Min(23, value));
-                OnPropertyChanged(nameof(Hour));
-                OnPropertyChanged(nameof(Composed));
-            }
+            set => SetProperty(ref _hour, Math.Max(0, Math.Min(23, value)), [nameof(Composed)]);
         }
 
         /// <summary>
@@ -95,12 +84,7 @@ namespace MainApplication.ViewModels
         public int Minute
         {
             get => _minute;
-            set
-            {
-                _minute = Math.Max(0, Math.Min(59, value));
-                OnPropertyChanged(nameof(Minute));
-                OnPropertyChanged(nameof(Composed));
-            }
+            set => SetProperty(ref _minute, Math.Max(0, Math.Min(59, value)), [nameof(Composed)]);
         }
 
         /* ---------------------------------------------------------
@@ -148,24 +132,8 @@ namespace MainApplication.ViewModels
         /// </summary>
         public DateTime? Result {
             get => _result;
-            private set
-            {
-                _result = value;
-                OnPropertyChanged(nameof(Result));
-            }
+            private set => SetProperty(ref _result, value);
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する
-        /// </summary>
-        private void OnPropertyChanged(string name) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

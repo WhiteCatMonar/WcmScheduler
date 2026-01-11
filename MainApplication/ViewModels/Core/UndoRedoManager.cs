@@ -44,7 +44,7 @@ namespace MainApplication.ViewModels.Core
         /// 履歴リストに表示されるアイテム。
         /// アクションの説明・種別・実行時刻・現在位置フラグを保持する。
         /// </summary>
-        public class HistoryItem : INotifyPropertyChanged
+        public class HistoryItem : ViewModelBase
         {
             /// <summary>アクションの説明</summary>
             public required string Description { get; set; }
@@ -58,10 +58,10 @@ namespace MainApplication.ViewModels.Core
             private bool _isCurrent;
 
             /// <summary>この履歴が現在位置かどうか</summary>
-            public bool IsCurrent { get => _isCurrent; set { _isCurrent = value; OnPropertyChanged(nameof(IsCurrent)); } }
-
-            public event PropertyChangedEventHandler? PropertyChanged;
-            private void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            public bool IsCurrent {
+                get => _isCurrent;
+                set => SetProperty(ref _isCurrent, value);
+            }
         }
 
         /* ---------------------------------------------------------

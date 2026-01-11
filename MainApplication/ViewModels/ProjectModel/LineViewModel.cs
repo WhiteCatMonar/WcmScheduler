@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using MainApplication.ViewModels.Core;
+using System.ComponentModel;
 using System.Windows.Media;
 
 namespace MainApplication.ViewModels.ProjectModel
@@ -7,7 +8,7 @@ namespace MainApplication.ViewModels.ProjectModel
     /// グリッド線 1 本を表す ViewModel。
     /// 座標・太さ・色などの描画情報を保持する。
     /// </summary>
-    public class LineViewModel : INotifyPropertyChanged
+    public class LineViewModel : ViewModelBase
     {
         /* ---------------------------------------------------------
          * フィールド
@@ -25,45 +26,29 @@ namespace MainApplication.ViewModels.ProjectModel
         public double X1
         {
             get => _x1;
-            set
-            {
-                _x1 = value;
-                OnPropertyChanged(nameof(X1));
-            }
+            set => SetProperty(ref _x1, value);
         }
 
         /// <summary>線分の始点Y座標</summary>
         public double Y1
         {
             get => _y1;
-            set
-            {
-                _y1 = value;
-                OnPropertyChanged(nameof(Y1));
-            }
-        
+            set => SetProperty(ref _y1, value);
+
         }
 
         /// <summary>線分の終点X座標</summary>
         public double X2
         {
             get => _x2;
-            set
-            {
-                _x2 = value;
-                OnPropertyChanged(nameof(X2));
-            }
+            set => SetProperty(ref _x2, value);
         }
 
         /// <summary>線分の終点Y座標</summary>
         public double Y2
         {
             get => _y2;
-            set
-            {
-                _y2 = value;
-                OnPropertyChanged(nameof(Y2));
-            }
+            set => SetProperty(ref _y2, value);
         }
 
         /* ---------------------------------------------------------
@@ -76,11 +61,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public bool IsMajor
         {
             get => _isMajor;
-            set
-            {
-                _isMajor = value;
-                OnPropertyChanged(nameof(IsMajor));
-            }
+            set => SetProperty(ref _isMajor, value);
         }
 
         /* ---------------------------------------------------------
@@ -91,35 +72,15 @@ namespace MainApplication.ViewModels.ProjectModel
         public Brush Stroke
         {
             get => _stroke;
-            set
-            {
-                _stroke = value;
-                OnPropertyChanged(nameof(Stroke));
-            }
+            set => SetProperty(ref _stroke, value);
         }
 
         /// <summary>線の太さ</summary>
         public double Thickness
         {
             get => _thickness;
-            set
-            {
-                _thickness = value;
-                OnPropertyChanged(nameof(Thickness));
-            }
+            set => SetProperty(ref _thickness, value);
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-        
-        /// <summary>
-        /// プロパティ変更通知を発行する
-        /// </summary>
-        private void OnPropertyChanged(string name) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

@@ -11,7 +11,7 @@ namespace MainApplication.ViewModels
     /// アプリケーション全体の状態を管理するViewModel。
     /// タブ管理、保存・読み込み、子ViewModelの生成などを担当する。
     /// </summary>
-    public class SchedulerViewModel
+    public class SchedulerViewModel: ViewModelBase
     {
         /* ---------------------------------------------------------
          * チーム内プロジェクト管理
@@ -54,11 +54,7 @@ namespace MainApplication.ViewModels
         public object? SelectedTab
         {
             get => _selectedTab;
-            set
-            {
-                _selectedTab = value;
-                OnPropertyChanged(nameof(SelectedTab));
-            }
+            set => SetProperty(ref _selectedTab, value);
         }
 
         /* ---------------------------------------------------------
@@ -127,7 +123,7 @@ namespace MainApplication.ViewModels
                 TeamProjects.SelectedProject?.
                     NodeEditor.LoadFromTaskEditorDataModel(root.TaskEditor);
 
-                /* TODO:タブごとの機能追加  */
+                /* TODO: タブごとの機能追加  */
             }
         }
 
@@ -191,7 +187,7 @@ namespace MainApplication.ViewModels
                 TaskEditor = taskEditor
             };
 
-            /* TODO:タブごとの機能追加 */
+            /* TODO: タブごとの機能追加 */
 
             return save_data;
         }
@@ -209,18 +205,6 @@ namespace MainApplication.ViewModels
         /// Viewに「名前を付けて保存ダイアログを表示してほしい」と依頼するイベント
         /// </summary>
         public event Action? RequestSaveAs;
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する
-        /// </summary>
-        private void OnPropertyChanged(string name)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

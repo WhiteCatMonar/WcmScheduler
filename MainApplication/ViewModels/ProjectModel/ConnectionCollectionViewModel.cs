@@ -12,7 +12,7 @@ namespace MainApplication.ViewModels.ProjectModel
     /// 接続線(ConnectionViewModel)の管理、選択、ドラッグ操作、
     /// Undo/Redo連携を担当するViewModel。
     /// </summary>
-    public class ConnectionCollectionViewModel : INotifyPropertyChanged
+    public class ConnectionCollectionViewModel : ViewModelBase
     {
         /* ---------------------------------------------------------
          * フィールド
@@ -83,17 +83,15 @@ namespace MainApplication.ViewModels.ProjectModel
         public PortViewModel? DraggingFromPort
         {
             get => _draggingFromPort;
-            set
-            {
-                if (_draggingFromPort != value)
-                {
-                    _draggingFromPort = value;
-                    OnPropertyChanged(nameof(DraggingFromPoint));
-                    OnPropertyChanged(nameof(DraggingFromPort));
-                    OnPropertyChanged(nameof(IsDraggingConnection));
-                    OnPropertyChanged(nameof(DraggingFromPortBezierControlPoint));
-                }
-            }
+            set => SetProperty(
+                ref _draggingFromPort,
+                value,
+                [
+                    nameof(DraggingFromPoint),
+                    nameof(IsDraggingConnection),
+                    nameof(DraggingFromPortBezierControlPoint)
+                ]
+            );
         }
 
         /// <summary>
@@ -123,16 +121,14 @@ namespace MainApplication.ViewModels.ProjectModel
         public Point DraggingToPoint
         {
             get => _draggingToPoint;
-            set
-            {
-                var clamped = _editor.Grid.ClampPoint(value);
-                if (_draggingToPoint != clamped)
-                {
-                    _draggingToPoint = clamped;
-                    OnPropertyChanged(nameof(DraggingToPoint));
-                    OnPropertyChanged(nameof(DraggingToPointBezierControl));
-                }
-            }
+            set => SetProperty(
+                ref _draggingToPoint,
+                _editor.Grid.ClampPoint(value),
+                [
+                    nameof(DraggingToPoint),
+                    nameof(DraggingToPointBezierControl)
+                ]
+            );
         }
 
         /// <summary>
@@ -193,17 +189,15 @@ namespace MainApplication.ViewModels.ProjectModel
         public ConnectionViewModel? SelectedConnection
         {
             get => _selectedConnection;
-            set
-            {
-                if (_selectedConnection != value)
-                {
-                    _selectedConnection?.IsSelected = false;
-                    _selectedConnection = value;
-                    _selectedConnection?.IsSelected = true;
-
-                    OnPropertyChanged(nameof(SelectedConnection));
-                }
-            }
+            set => SetProperty(
+                ref _selectedConnection,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    pre: (oldValue, newValue) => oldValue?.IsSelected = false,
+                    post: (oldValue, newValue) => newValue?.IsSelected = true
+                )
+            );
         }
 
         /// <summary>
@@ -242,18 +236,6 @@ namespace MainApplication.ViewModels.ProjectModel
                 SelectedConnection = null;
             }
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する
-        /// </summary>
-        private void OnPropertyChanged(string name) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 

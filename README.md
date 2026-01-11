@@ -58,7 +58,8 @@
 │   │   ├── 📄 GridManager.cs                          # 論理座標系・ズーム・パン管理
 │   │   ├── 📄 RelayCommand.cs                         # ICommand 実装(MVVMの基本)
 │   │   ├── 📄 TabInfo.cs                              # タブ管理用情報
-│   │   └── 📄 UndoRedoManager.cs                      # Undo/Redo管理
+│   │   ├── 📄 UndoRedoManager.cs                      # Undo/Redo管理報
+│   │   └── 📄 ViewModelBase.cs                        # プロパティ編集を伴うViewModelの基底クラス
 │   │
 │   ├── 📂 Service
 │   │   ├── 📄 DateTimeEditorService.cs                # 日時編集ダイアログを開くサービス(UI 呼び出し)
@@ -138,9 +139,9 @@ block
         columns 3
         legend("凡例"):3
 
-        View
-        ViewModel
-        Other
+        View["青 = View"]
+        ViewModel["緑 = ViewModel"]
+        Other["灰 = その他"]
     end
 
     space:8

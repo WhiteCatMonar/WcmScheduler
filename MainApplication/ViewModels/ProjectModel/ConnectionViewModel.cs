@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using MainApplication.ViewModels.Core;
 using System.Windows;
 using System.Windows.Media;
 
@@ -10,7 +9,7 @@ namespace MainApplication.ViewModels.ProjectModel
     /// ポート座標の変化に追従し、ベジェ曲線のジオメトリを更新する。
     /// </summary>
 
-    public class ConnectionViewModel : INotifyPropertyChanged
+    public class ConnectionViewModel : ViewModelBase
     {
         /* ---------------------------------------------------------
          * 接続線の識別子
@@ -24,15 +23,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public Guid ConnectionGuid
         {
             get => _connectionGuid;
-            set
-            {
-                if (_connectionGuid == value)
-                {
-                    return;
-                }
-                _connectionGuid = value;
-                OnPropertyChanged(nameof(ConnectionGuid));
-            }
+            set => SetProperty(ref _connectionGuid, value);
         }
 
         /* ---------------------------------------------------------
@@ -81,14 +72,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public Geometry? ConnectionGeometry
         {
             get => _connectionGeometry;
-            private set
-            {
-                if (_connectionGeometry != value)
-                {
-                    _connectionGeometry = value;
-                    OnPropertyChanged(nameof(ConnectionGeometry));
-                }
-            }
+            private set => SetProperty(ref _connectionGeometry, value);
         }
 
         /// <summary>
@@ -122,10 +106,10 @@ namespace MainApplication.ViewModels.ProjectModel
          * --------------------------------------------------------- */
 
         /// <summary>接続元ポート</summary>
-        public required PortViewModel FromPort { get; set; }
+        public required PortViewModel FromPort { get; init; }
 
         /// <summary>接続先ポート</summary>
-        public required PortViewModel ToPort { get; set; }
+        public required PortViewModel ToPort { get; init; }
 
         private Point _fromPosition = new(0, 0);
 
@@ -135,16 +119,17 @@ namespace MainApplication.ViewModels.ProjectModel
         public Point FromPosition
         {
             get => _fromPosition;
-            private set
-            {
-                if (_fromPosition != value)
-                {
-                    _fromPosition = value;
-                    OnPropertyChanged(nameof(FromPosition));
-                    OnPropertyChanged(nameof(FromBezierControlPoint));
-                    UpdatePathGeometry();
-                }
-            }
+            private set => SetProperty(
+                ref _fromPosition,
+                value,
+                [
+                    nameof(FromBezierControlPoint)
+                ],
+                CreateHooksFromValue(
+                    value,
+                    chain: () => UpdatePathGeometry()
+                )
+            );
         }
 
         private Point _toPosition = new(0, 0);
@@ -155,16 +140,17 @@ namespace MainApplication.ViewModels.ProjectModel
         public Point ToPosition
         {
             get => _toPosition;
-            private set
-            {
-                if (_toPosition != value)
-                {
-                    _toPosition = value;
-                    OnPropertyChanged(nameof(ToPosition));
-                    OnPropertyChanged(nameof(ToBezierControlPoint));
-                    UpdatePathGeometry();
-                }
-            }
+            private set => SetProperty(
+                ref _toPosition,
+                value,
+                [
+                    nameof(ToBezierControlPoint)
+                ],
+                CreateHooksFromValue(
+                    value,
+                    chain: () => UpdatePathGeometry()
+                )
+            );
         }
 
         /// <summary>
@@ -189,27 +175,8 @@ namespace MainApplication.ViewModels.ProjectModel
         public bool IsSelected
         {
             get => _isSelected;
-            set
-            {
-                if (_isSelected != value)
-                {
-                    _isSelected = value;
-                    OnPropertyChanged(nameof(IsSelected));
-                }
-            }
+            set => SetProperty(ref _isSelected, value);
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する
-        /// </summary>
-        protected void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
 

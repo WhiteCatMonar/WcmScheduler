@@ -12,7 +12,7 @@ namespace MainApplication.ViewModels.ProjectModel
     /// タスク名・担当者・コメント・日時などの編集と、
     /// Undo/Redo・遅延コミットを担当する。
     /// </summary>
-    public class NodeDetailViewModel : INotifyPropertyChanged
+    public class NodeDetailViewModel : ViewModelBase
     {
         /* ---------------------------------------------------------
          * フィールド
@@ -74,14 +74,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public string? TaskName
         {
             get => _taskName;
-            set
-            {
-                if (_taskName != value)
-                {
-                    _taskName = value;
-                    OnPropertyChanged(nameof(TaskName));
-                }
-            }
+            set => SetProperty(ref _taskName, value);
         }
 
         private string? _person;
@@ -89,14 +82,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public string? Person
         {
             get => _person;
-            set
-            {
-                if (_person != value)
-                {
-                    _person = value;
-                    OnPropertyChanged(nameof(Person));
-                }
-            }
+            set => SetProperty(ref _person, value);
         }
 
         private string? _comment;
@@ -104,14 +90,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public string? Comment
         {
             get => _comment;
-            set
-            {
-                if (_comment != value)
-                {
-                    _comment = value;
-                    OnPropertyChanged(nameof(Comment));
-                }
-            }
+            set => SetProperty(ref _comment, value);
         }
 
         private DateTime? _startDateTime;
@@ -119,26 +98,27 @@ namespace MainApplication.ViewModels.ProjectModel
         public DateTime? StartDateTime
         {
             get => _startDateTime;
-            set
-            {
-                if (_startDateTime != value)
-                {
-                    if (!_undoRedo.IsApplyingHistory)
+            set => SetProperty(
+                ref _startDateTime,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    pre: (oldValue, newValue) =>
                     {
-                        _undoRedo.Execute(
-                            new EditNodeDetailPropertyAction(
-                                this,
-                                nameof(StartDateTime),
-                                _startDateTime,
-                                value
-                            )
-                        );
+                        if (!_undoRedo.IsApplyingHistory)
+                        {
+                            _undoRedo.Execute(
+                                new EditNodeDetailPropertyAction(
+                                    this,
+                                    nameof(StartDateTime),
+                                    _startDateTime,
+                                    newValue
+                                )
+                            );
+                        }
                     }
-
-                    _startDateTime = value;
-                    OnPropertyChanged(nameof(StartDateTime));
-                }
-            }
+                )
+            );
         }
 
         private DateTime? _endDateTime;
@@ -146,26 +126,27 @@ namespace MainApplication.ViewModels.ProjectModel
         public DateTime? EndDateTime
         {
             get => _endDateTime;
-            set
-            {
-                if (_endDateTime != value)
-                {
-                    if (!_undoRedo.IsApplyingHistory)
+            set => SetProperty(
+                ref _endDateTime,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    pre: (oldValue, newValue) =>
                     {
-                        _undoRedo.Execute(
-                            new EditNodeDetailPropertyAction(
-                                this,
-                                nameof(EndDateTime),
-                                _endDateTime,
-                                value
-                            )
-                        );
+                        if (!_undoRedo.IsApplyingHistory)
+                        {
+                            _undoRedo.Execute(
+                                new EditNodeDetailPropertyAction(
+                                    this,
+                                    nameof(EndDateTime),
+                                    _endDateTime,
+                                    newValue
+                                )
+                            );
+                        }
                     }
-
-                    _endDateTime = value;
-                    OnPropertyChanged(nameof(EndDateTime));
-                }
-            }
+                )
+            );
         }
 
         /* ---------------------------------------------------------
@@ -239,15 +220,6 @@ namespace MainApplication.ViewModels.ProjectModel
                 );
             }
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        private void OnPropertyChanged(string propertyName) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 }
 

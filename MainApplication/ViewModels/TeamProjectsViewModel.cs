@@ -1,14 +1,13 @@
 ﻿using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 
 namespace MainApplication.ViewModels
 {
     /// <summary>
     /// チーム内の複数プロジェクトを管理するViewModel。
     /// </summary>
-    public class TeamProjectsViewModel : INotifyPropertyChanged
+    public class TeamProjectsViewModel : ViewModelBase
     {
         /* ---------------------------------------------------------
          * プロジェクト一覧
@@ -28,14 +27,7 @@ namespace MainApplication.ViewModels
         public ProjectViewModel? SelectedProject
         {
             get => _selectedProject;
-            set
-            {
-                if (_selectedProject != value)
-                {
-                    _selectedProject = value;
-                    OnPropertyChanged(nameof(SelectedProject));
-                }
-            }
+            set => SetProperty(ref _selectedProject, value);
         }
 
         /* ---------------------------------------------------------
@@ -56,20 +48,20 @@ namespace MainApplication.ViewModels
         public TabInfo? SelectedTab
         {
             get => _selectedTab;
-            set
-            {
-                if (_selectedTab != value)
-                {
-                    _selectedTab = value;
-                    OnPropertyChanged(nameof(SelectedTab));
-
-                    /* タブ切り替え時にプロジェクトも同期 */
-                    if (_selectedTab != null)
-                    {
-                        SelectedProject = (ProjectViewModel)_selectedTab.Content;
+            set => SetProperty(
+                ref _selectedTab,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    post: (oldValue, newValue) => {
+                        /* タブ切り替え時にプロジェクトも同期 */
+                        if (newValue != null)
+                        {
+                            SelectedProject = (ProjectViewModel)newValue.Content;
+                        }
                     }
-                }
-            }
+                )
+            );
         }
 
         /* ---------------------------------------------------------
@@ -90,24 +82,12 @@ namespace MainApplication.ViewModels
             Tabs =
             [
                 newProjectTab
-                /* TODO:タブごとの機能追加 */
+                /* TODO: タブごとの機能追加 */
             ];
 
             /* 初期選択タブの設定 */
             SelectedTab = Tabs[0];
         }
-
-        /* ---------------------------------------------------------
-         * INotifyPropertyChanged
-         * --------------------------------------------------------- */
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// プロパティ変更通知を発行する。
-        /// </summary>
-        private void OnPropertyChanged(string name)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }
 
