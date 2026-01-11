@@ -128,14 +128,14 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 Point current = e.GetPosition(_editor?.NodeEditorCanvas);
 
                 /* 画面上の移動量 */
-                Point screenDelta = PointEx.Sub(current, _lastMousePos);
+                Point screenDelta = current.Sub(_lastMousePos);
                 _lastMousePos = current;
 
                 /* ズーム倍率を考慮して論理座標系に変換 */
-                Point logicalDelta = PointEx.Div(screenDelta, _editorVM.Zoom);
+                Point logicalDelta = screenDelta.Div(_editorVM.Zoom);
 
                 /* ノードの座標を更新(差分加算) */
-                Point newPosition = PointEx.Add(node.Position, logicalDelta);
+                Point newPosition = node.Position.Add(logicalDelta);
 
                 /* キャンバス内に制限 */
                 node.Position = _editorVM.Grid.ClampNodePosition(newPosition, node);

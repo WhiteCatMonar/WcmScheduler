@@ -102,7 +102,7 @@ namespace MainApplication.ViewModels.ProjectModel
                 return;
             }
 
-            AbsolutePosition = PointEx.Add(ParentNode.Position, RelativePosition);
+            AbsolutePosition = ParentNode.Position.Add(RelativePosition);
         }
     }
 }

@@ -96,7 +96,7 @@ namespace MainApplication.ViewModels.Core
         public Point CanvasViewAreaStart => CanvasViewOrigin;
 
         /// <summary>表示領域の終了X座標</summary>
-        public Point CanvasViewAreaEnd => PointEx.Add(CanvasViewOrigin, CanvasViewLogicalWidth, CanvasViewLogicalHeight);
+        public Point CanvasViewAreaEnd => CanvasViewOrigin.Add(CanvasViewLogicalWidth, CanvasViewLogicalHeight);
 
         /* ---------------------------------------------------------
          * グリッドスナップ
@@ -139,13 +139,13 @@ namespace MainApplication.ViewModels.Core
         public Point ClampNodePosition(Point Position, NodeViewModel node)
         {
             /* ノード配置可能な位置はノードサイズの影響を受けるため、配置可能エリアを計算 */
-            Point nodeAreaEnd = PointEx.Sub(CanvasViewAreaEnd, node.Width, node.Height);
+            Point nodeAreaEnd = CanvasViewAreaEnd.Sub(node.Width, node.Height);
 
             /* 座標を配置可能エリアでクリップする */
-            Point clamped = PointEx.Clamp(Position, CanvasViewAreaStart, nodeAreaEnd);
+            Point clamped = Position.Clamp(CanvasViewAreaStart, nodeAreaEnd);
 
             /* グリッドにスナップさせた座標を返す */
-            return PointEx.RoundSnap(clamped, GridSize);
+            return clamped.RoundSnap(GridSize);
         }
 
         /* ---------------------------------------------------------
@@ -155,9 +155,9 @@ namespace MainApplication.ViewModels.Core
         /// <summary>
         /// 任意の点を表示領域内に収める
         /// </summary>
-        public Point ClampPoint(Point p)
+        public Point ClampPoint(Point Position)
         {
-            return PointEx.Clamp(p, CanvasViewAreaStart, CanvasViewAreaEnd);
+            return Position.Clamp(CanvasViewAreaStart, CanvasViewAreaEnd);
         }
 
         /* ---------------------------------------------------------
@@ -183,10 +183,9 @@ namespace MainApplication.ViewModels.Core
 
             Point origin = CanvasViewOrigin;
 
-            Point gridOrigin = PointEx.FloorSnap(origin, GridSpacing);
+            Point gridOrigin = origin.FloorSnap(GridSpacing);
 
-            Point end = PointEx.Add(
-                gridOrigin,
+            Point end = gridOrigin.Add(
                 CanvasViewLogicalWidth + GridSpacing,
                 CanvasViewLogicalHeight + GridSpacing
             );
