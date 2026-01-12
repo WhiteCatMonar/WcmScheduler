@@ -4,8 +4,8 @@ using System.Windows;
 namespace MainApplication.ViewModels.ProjectModel
 {
     /// <summary>
-    /// ノードの入出力ポートを表すViewModel。
-    /// ノード内の相対座標・キャンバス上の絶対座標・接続線一覧などを管理する。
+    /// 入出力ポートを表すViewModel。
+    /// 基準点(ポートが所属するオブジェクト座標)からの相対座標・キャンバス上の絶対座標・接続線一覧などを管理する。
     /// </summary>
     public class PortViewModel : ViewModelBase
     {

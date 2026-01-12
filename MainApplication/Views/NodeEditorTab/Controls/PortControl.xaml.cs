@@ -108,7 +108,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                     /* 入力ポートにドロップされた場合のみ接続線を作成 */
                     if (targetPort.Type == PortViewModel.PortType.Input)
                     {
-                        editorVM?.Connections.CreateConnection((PortViewModel)DataContext, targetPort);
+                        editorVM?.RequestCreateConnection((PortViewModel)DataContext, targetPort);
                     }
                 }
 
@@ -148,10 +148,8 @@ namespace MainApplication.Views.NodeEditorTab.Controls
             var nodeScreen = nodeControl.TransformToVisual(editor.NodeEditorArea).Transform(new Point(0, 0));
 
             /* Node 内の相対座標(論理座標) */
+            /* NOTE: 絶対座標は相対座標更新時に自動計算 */
             port.RelativePosition = editorVM.ScreenDeltaToLogical(portScreen.Sub(nodeScreen));
-
-            /* 絶対座標も更新 */
-            port.UpdateAbsolutePosition();
         }
     }
 }
