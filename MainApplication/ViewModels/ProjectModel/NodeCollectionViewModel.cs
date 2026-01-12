@@ -135,21 +135,24 @@ namespace MainApplication.ViewModels.ProjectModel
                 NodeGuid = Guid.NewGuid()
             };
 
-            node.InputPorts.Add(new PortViewModel
+            var input = new PortViewModel
             {
                 PortGuid = Guid.NewGuid(),
                 Name = "Input",
-                Type = PortViewModel.PortType.Input,
-                ParentNode = node
-            });
+                Type = PortViewModel.PortType.Input
+            };
 
-            node.OutputPorts.Add(new PortViewModel
+            var output = new PortViewModel
             {
                 PortGuid = Guid.NewGuid(),
                 Name = "Output",
-                Type = PortViewModel.PortType.Output,
-                ParentNode = node
-            });
+                Type = PortViewModel.PortType.Output
+            };
+            
+            node.InputPorts.Add(input);
+            node.OutputPorts.Add(output);
+
+            _editor.NodePorts[node] = [input, output];
 
             return node;
         }
@@ -164,6 +167,7 @@ namespace MainApplication.ViewModels.ProjectModel
         {
             if (SelectedNode != null)
             {
+                _editor.NodePorts.Remove(SelectedNode);
                 var action = new DeleteNodeAction(Nodes, SelectedNode);
                 _undoRedo.Execute(action);
                 SelectedNode = null;

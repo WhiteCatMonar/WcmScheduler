@@ -2,6 +2,7 @@
 using MainApplication.ViewModels.Service;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Runtime.InteropServices.Swift;
 using System.Windows;
 
 namespace MainApplication.ViewModels.ProjectModel
@@ -133,14 +134,9 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public void UpdateAllPortPositions()
         {
-            foreach (var port in InputPorts)
+            foreach (var port in AllPorts)
             {
-                port.UpdateAbsolutePosition();
-            }
-
-            foreach (var port in OutputPorts)
-            {
-                port.UpdateAbsolutePosition();
+                port.ControlPoint = Position;
             }
         }
     }

@@ -1,8 +1,6 @@
 ﻿using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Core;
-using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 
@@ -149,21 +147,6 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public void CreateConnection(PortViewModel fromPort, PortViewModel toPort)
         {
-            if ((fromPort == null) || (toPort == null))
-            {
-                return;
-            }
-
-            if (fromPort == toPort)
-            {
-                return; /* 自己接続禁止 */
-            }
-
-            if (fromPort.ParentNode == toPort.ParentNode)
-            {
-                return; /* 同一ノード内禁止 */
-            }
-
             var connection = new ConnectionViewModel(fromPort, toPort)
             {
                 FromPort = fromPort,

@@ -348,15 +348,15 @@ block
     style ConnectionCollectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style ConnectionViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
     style DateTimeEditorViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style PortViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
+    style LineViewModel fill:#DFFFE0,stroke:#5CB85C,color:#000000
 
     %% Core / Managers (gray)
     style Other fill:#F0F0F0,stroke:#999,color:#000000
     style TabInfo fill:#F0F0F0,stroke:#999,color:#000000
     style EditableField fill:#F0F0F0,stroke:#999,color:#000000
-    style PortViewModel fill:#F0F0F0,stroke:#999,color:#000000
     style UndoRedoManager fill:#F0F0F0,stroke:#999,color:#000000
     style GridManager fill:#F0F0F0,stroke:#999,color:#000000
-    style LineViewModel fill:#F0F0F0,stroke:#999,color:#000000
     style DateTimeEditorService fill:#F0F0F0,stroke:#999,color:#000000
     style DateTimeEditorWindow_Class fill:#F0F0F0,stroke:#999,color:#000000
 ```

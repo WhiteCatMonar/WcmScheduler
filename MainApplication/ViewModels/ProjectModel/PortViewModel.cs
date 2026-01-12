@@ -27,83 +27,57 @@ namespace MainApplication.ViewModels.ProjectModel
          * 識別子・基本情報
          * --------------------------------------------------------- */
 
-        private Guid _portGuid;
+        /// <summary> ポートを一意に識別するGUID </summary>
+        public required Guid PortGuid { get; init; }
 
-        /// <summary>
-        /// ポートを一意に識別するGUID
-        /// </summary>
-        public Guid PortGuid
-        {
-            get => _portGuid;
-            set => SetProperty(ref _portGuid, value);
-        }
-
-        /// <summary>
-        /// ポート名(UI表示用)
-        /// </summary>
+        /// <summary> ポート名(UI表示用) </summary>
         public required string Name{ get; init; }
 
-        /// <summary>
-        /// ポートの種類(入力 or 出力)
-        /// </summary>
+        /// <summary> ポートの種類(入力 or 出力) </summary>
         public required PortType Type { get; init; }
 
         /* ---------------------------------------------------------
-         * ノード内の相対座標(論理座標)
+         * ポートの座標管理(論理座標)
          * --------------------------------------------------------- */
+
+        private Point _controlPoint;
+
+        /// <summary>
+        /// ポートの座標計算の基準点(論理座標)
+        /// </summary>
+        public Point ControlPoint
+        {
+            get => _controlPoint;
+            set => SetProperty(
+                ref _controlPoint,
+                value,
+                [
+                    nameof(AbsolutePosition)
+                ]
+            );
+        }
 
         private Point _relativePosition;
 
+        /// <summary>
+        /// 基準点からの相対座標(論理座標)
+        /// </summary>
         public Point RelativePosition
         {
             get => _relativePosition;
             set => SetProperty(
                 ref _relativePosition,
-                value
+                value,
+                [
+                    nameof(AbsolutePosition)
+                ]
             );
         }
 
-        /* ---------------------------------------------------------
-         * キャンバス上の絶対座標(論理座標)
-         * --------------------------------------------------------- */
-
-        private Point _absolutePosition;
-        
         /// <summary>
         /// キャンバス上の絶対座標(論理座標)
         /// </summary>
-        public Point AbsolutePosition
-        {
-            get => _absolutePosition;
-            set => SetProperty(ref _absolutePosition, value);
-        }
-
-        /* ---------------------------------------------------------
-         * 親ノード
-         * --------------------------------------------------------- */
-
-        /// <summary>
-        /// このポートが属するノード
-        /// </summary>
-        public required NodeViewModel ParentNode { get; init; }
-
-        /* ---------------------------------------------------------
-         * 座標更新
-         * --------------------------------------------------------- */
-
-        /// <summary>
-        /// 親ノードの位置と相対座標から絶対座標を再計算する。
-        /// ノード移動時に呼び出される。
-        /// </summary>
-        public void UpdateAbsolutePosition()
-        {
-            if (ParentNode == null)
-            {
-                return;
-            }
-
-            AbsolutePosition = ParentNode.Position.Add(RelativePosition);
-        }
+        public Point AbsolutePosition => ControlPoint.Add(RelativePosition);
     }
 }
 

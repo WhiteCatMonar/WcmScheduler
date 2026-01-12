@@ -68,8 +68,7 @@ namespace MainApplication.Mappers
                 {
                     PortGuid = Guid.Parse(port.Id),
                     Name = port.Name,
-                    Type = type,
-                    ParentNode = loadedNode
+                    Type = type
                 };
 
                 switch (type)
@@ -81,6 +80,13 @@ namespace MainApplication.Mappers
                         loadedNode.OutputPorts.Add(vmPort);
                         break;
                 }
+
+                if (!editor.NodePorts.TryGetValue(loadedNode, out var list))
+                {
+                    list = [];
+                    editor.NodePorts[loadedNode] = list;
+                }
+                list.Add(vmPort);
             }
             return loadedNode;
         }

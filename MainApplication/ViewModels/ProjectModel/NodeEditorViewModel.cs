@@ -2,8 +2,6 @@
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using MainApplication.Mappers;
-using System;
-using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows;
 
@@ -150,14 +148,18 @@ namespace MainApplication.ViewModels.ProjectModel
         }
 
         /* ---------------------------------------------------------
-         * ノード・接続線管理
+         * ノード・接続線・ポート管理
          * --------------------------------------------------------- */
 
-        /// <summary>ノード一覧管理</summary>
+        /// <summary> ノード一覧管理 </summary>
         public NodeCollectionViewModel Nodes { get; }
 
-        /// <summary>接続線一覧管理</summary>
+        /// <summary> 接続線一覧管理 </summary>
         public ConnectionCollectionViewModel Connections { get; }
+
+        /// <summary> ノードとそのポート一覧の関連付け辞書 </summary>
+        public Dictionary<NodeViewModel, List<PortViewModel>> NodePorts { get; } = [];
+
 
         /// <summary>
         /// ノード・接続線の位置を再計算する。
@@ -175,6 +177,41 @@ namespace MainApplication.ViewModels.ProjectModel
         public void CommitCurrentNodeEdits()
         {
             Nodes.SelectedNode?.Detail.CommitEdits();
+        }
+
+        /// <summary>
+        /// UI からの接続線作成リクエストを受け取り、
+        /// 同一ノード禁止・自己接続禁止などの判定を行った上で、
+        /// ConnectionCollectionViewModel に接続線作成を委譲する。
+        /// </summary>
+        public void RequestCreateConnection(PortViewModel fromPort, PortViewModel toPort)
+        {
+            if ((fromPort == null) || (toPort == null))
+            {
+                return;
+            }
+
+            if (fromPort == toPort)
+            {
+                return; /* 自己接続禁止 */
+            }
+
+            /* NodePortsを使って所属ノードを逆引き */
+            var fromNode = NodePorts.FirstOrDefault(kv => kv.Value.Contains(fromPort)).Key;
+            var toNode = NodePorts.FirstOrDefault(kv => kv.Value.Contains(toPort)).Key;
+
+            if ((fromNode == null) || (toNode == null))
+            {
+                return; /* 辞書に登録されていない */
+            }
+
+            if (fromNode == toNode)
+            {
+                return; /* 同一ノード内禁止 */
+            }
+
+            /* リクエストOK: 接続線作成 */
+            Connections.CreateConnection(fromPort, toPort);
         }
 
         /* ---------------------------------------------------------
@@ -244,6 +281,11 @@ namespace MainApplication.ViewModels.ProjectModel
             foreach (var loadedNodes in loadedData.Nodes.Nodes)
             {
                 Nodes.Nodes.Add(loadedNodes);
+            }
+
+            foreach (var loadedNodePort in loadedData.NodePorts)
+            {
+                NodePorts.Add(loadedNodePort.Key, loadedNodePort.Value);
             }
 
             foreach (var loadedConnections in loadedData.Connections.Connections)
