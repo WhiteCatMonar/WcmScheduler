@@ -1,7 +1,6 @@
 ﻿using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
 using MainApplication.Views.NodeEditorTab.Controls;
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -17,13 +16,6 @@ namespace MainApplication.Views.NodeEditorTab
     /// </summary>
     public partial class NodeEditorControl : UserControl
     {
-        /* ---------------------------------------------------------
-         * 定数(ズーム制限)
-         * --------------------------------------------------------- */
-
-        private const double MinZoom = 0.2;
-        private const double MaxZoom = 3.0;
-
         /* ---------------------------------------------------------
          * コンストラクタ
          * --------------------------------------------------------- */
@@ -85,19 +77,8 @@ namespace MainApplication.Views.NodeEditorTab
 
             if (DataContext is NodeEditorViewModel vm)
             {
-                /* ポートを選択した場合はnodeとconnectionPathの両方がnullになる */
-                
-                /* ノード以外をクリックした場合はノードの選択を解除 */
-                if (node == null)
-                {
-                    vm.Nodes.UnselectNode();
-                }
-
-                /* 接続線以外をクリックした場合は接続線の選択を解除 */
-                if (connectionPath == null)
-                {
-                    vm.Connections.UnselectConnection();
-                }
+                /* ViewModelに選択状態の更新を依頼 */
+                vm.RequestSelectStatusUpdate(node, connectionPath);
             }
         }
 
@@ -151,25 +132,11 @@ namespace MainApplication.Views.NodeEditorTab
                 return;
             }
 
+            /* ズーム倍率を計算 */
             double zoomFactor = e.Delta > 0 ? 1.1 : 0.9;
 
-            /* ズーム値を計算(制限付き) */
-            double limitedZoom = Math.Max(MinZoom, Math.Min(MaxZoom, vm.Zoom * zoomFactor));
-
-            /* 実際に適用された倍率(中心補正に必要) */
-            double appliedFactor = limitedZoom / vm.Zoom;
-            vm.Zoom = limitedZoom;
-
-            /* ズーム中心をマウス位置に合わせる */
-            {
-                var mousePos = e.GetPosition(NodeEditorCanvas);
-
-                /* Canvas論理原点とマウス位置の座標差分を算出 */
-                var delta = mousePos.Sub(vm.Pan);
-
-                /* 座標差分から拡縮時にCanvas論理原点が移動する量を算出 */
-                vm.Pan = vm.Pan.Add(delta.Sub(delta.Mul(appliedFactor)));
-            }
+            /* マウス位置に合わせて、ズーム処理 */
+            vm.RequestZoom(e.GetPosition(NodeEditorCanvas), zoomFactor);
         }
 
         /* ---------------------------------------------------------
@@ -207,10 +174,13 @@ namespace MainApplication.Views.NodeEditorTab
             if (_isPanning)
             {
                 var pos = e.GetPosition(NodeEditorCanvas);
-                var delta = pos.Sub(_lastPanPoint);
+                var screenDelta = pos.Sub(_lastPanPoint);
                 _lastPanPoint = pos;
 
-                vm.Pan = vm.Pan.Add(delta);
+                /* 画面座標 → 論理座標へ変換 */
+                var logicalDelta = vm.ScreenDeltaToLogical(screenDelta);
+
+                vm.RequestPanDelta(logicalDelta);
             }
         }
 

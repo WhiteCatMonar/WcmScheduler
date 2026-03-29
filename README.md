@@ -62,10 +62,6 @@
 │   │   ├── 📄 UndoRedoManager.cs                      # Undo/Redo管理報
 │   │   └── 📄 ViewModelBase.cs                        # プロパティ編集を伴うViewModelの基底クラス
 │   │
-│   ├── 📂 Service
-│   │   ├── 📄 DateTimeEditorService.cs                # 日時編集ダイアログを開くサービス(UI 呼び出し)
-│   │   └── 📄 IDateTimeEditorService.cs               # 日時編集サービスのインターフェース
-│   │
 │   ├── 📂 ProjectModel
 │   │   ├── 📄 ConnectionCollectionViewModel.cs        # 接続線の一覧管理
 │   │   ├── 📄 ConnectionViewModel.cs                  # 接続線1本の状態
@@ -76,6 +72,10 @@
 │   │   ├── 📄 NodeViewModel.cs                        # ノード1個の状態・編集ロジック
 │   │   ├── 📄 PortViewModel.cs                        # ポート(入出力端子)の状態
 │   │   └── 📄 ProjectViewModel.cs                     # 1つのプロジェクト全体の管理
+│   │
+│   ├── 📂 Service
+│   │   ├── 📄 DateTimeEditorService.cs                # 日時編集ダイアログを開くサービス(UI 呼び出し)
+│   │   └── 📄 IDateTimeEditorService.cs               # 日時編集サービスのインターフェース
 │   │
 │   ├── 📄 DateTimeEditorViewModel.cs                  # 日時編集ダイアログのViewModel(UI入力ロジック)
 │   ├── 📄 SchedulerViewModel.cs                       # アプリケーション全体の状態管理
@@ -118,13 +118,12 @@
 │   ├── 📄 TeamProjectsView.xaml                       # チーム内プロジェクト情報(複数のプロジェクトの管理用View)
 │   └── 📄 TeamProjectsView.xaml.cs
 │ 
-├── 📄 App.config                                      # アプリ設定
 ├── 📄 App.xaml                                        # アプリケーション定義
 ├── 📄 App.xaml.cs                                     # アプリ起動ロジック
+├── 📄 AssemblyInfo.cs                                 # アセンブリ情報
 ├── 📄 MainApplication.csproj                          # プロジェクトファイル
 ├── 📄 MainWindow.xaml                                 # メインウィンドウ
-├── 📄 MainWindow.xaml.cs                              # メインウィンドウのコードビハインド
-└── 📄 packages.config                                 # NuGetパッケージ管理
+└── 📄 MainWindow.xaml.cs                              # メインウィンドウのコードビハインド
 ```
 
 ## ノードエディタのクラス依存関係図
@@ -176,32 +175,37 @@ block
     space:8
     
     space
-    NodeEditorControl:2
-    space:4
+    NodeDetailControl
+    space
+    NodeEditorControl
+    space:3
     space
     
     space:8
     
-    space
+    space:3
     NodeCollectionControl
-    space:5
+    space:3
     ConnectionCollectionControl
     
     space:8
     
-    space
+    space:3
     NodeControl
-    space:5
+    space:3
     ConnectionControl
 
     space:8
 
     space:2
+    HistoryControl
     PortControl
-    NodeDetailControl
-    space
-    NodeEditorViewModel
-    space:2
+    space:4
+
+    space:8
+
+    space:4
+    NodeEditorViewModel:4
 
     space:8
 
@@ -213,11 +217,9 @@ block
 
     space:8
 
-    space
+    space:2
     NodeViewModel
-    space
-    HistoryControl
-    space:3
+    space:4
     ConnectionViewModel
 
     space:8
@@ -229,18 +231,17 @@ block
     
     space:8
     
+    space:2
     space
-    DateTimeEditorService
-    space:5
+    space:4
     LineViewModel
 
     space:8
 
     space
-    DateTimeEditorWindow_Class["DateTimeEditorWindow(Class)"]
-    space
     EditableField
-    UndoRedoManager
+    DateTimeEditorService
+    UndoRedoManager:2
     GridManager
     space
     space
@@ -248,6 +249,9 @@ block
     space:8
 
     DateTimeEditorViewModel
+    space
+    DateTimeEditorWindow_Class["DateTimeEditorWindow(Class)"]
+    space
 
     %% ============================
     %% Dependencies (View)
@@ -270,14 +274,12 @@ block
     MainWindow --> SchedulerViewModel
     TeamProjectsView --> TeamProjectsViewModel
     ProjectView --> ProjectViewModel
-    NodeEditorTab --> NodeEditorViewModel
     NodeEditorControl --> NodeEditorViewModel
-    NodeControl --> NodeViewModel
-    ConnectionControl --> ConnectionViewModel
-    PortControl --> PortViewModel
-    NodeDetailControl --> NodeViewModel
+    NodeControl --> NodeEditorViewModel
+    ConnectionControl --> NodeEditorViewModel
+    PortControl --> NodeEditorViewModel
+    NodeDetailControl --> NodeDetailViewModel
     HistoryControl --> UndoRedoManager
-    NodeEditorTab --> NodeEditorViewModel
     DateTimeEditorWindow_View --> DateTimeEditorViewModel
 
     %% ============================

@@ -22,7 +22,7 @@ namespace MainApplication.Views.NodeEditorTab
         public NodeDetailControl()
         {
             InitializeComponent();
-            this.DataContextChanged += NodeDetailControl_DataContextChanged;
+            DataContextChanged += NodeDetailControl_DataContextChanged;
         }
 
         /* ---------------------------------------------------------

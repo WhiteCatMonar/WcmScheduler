@@ -1,5 +1,4 @@
 ﻿using MainApplication.Helpers;
-using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -50,48 +49,11 @@ namespace MainApplication.Views.NodeEditorTab.Controls
             /* VisualTreeをキャッシュ */
             _editor = VisualTreeUtils.FindAncestor<NodeEditorControl>(this);
             _editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
-
-            /* レイアウト完了後にポート位置を確定 */
-            Dispatcher.BeginInvoke(new Action(() =>
-            {
-                /* UI → VM 相対座標更新 */
-                UpdatePortPositions();
-
-                /* VM → 絶対座標更新 */
-                if (DataContext is NodeViewModel node)
-                {
-                    node.UpdateAllPortPositions();
-                }
-
-                /* 接続線の再描画 */
-                _editorVM?.Connections.UpdateAllConnections();
-            }),
-            System.Windows.Threading.DispatcherPriority.Loaded);
-        }
-
-        /* ---------------------------------------------------------
-         * ポート位置更新
-         * --------------------------------------------------------- */
-
-        /// <summary>
-        /// UI上のPortControlの位置を取得し、
-        /// PortViewModelのRelativePositionに反映する。
-        /// </summary>
-        private void UpdatePortPositions()
-        {
-            foreach (var portControl in VisualTreeUtils.FindChildren<PortControl>(this))
-            {
-                portControl.UpdateRelativePositionFromUI();
-            }
         }
 
         /* ---------------------------------------------------------
          * ノードのドラッグ移動
          * --------------------------------------------------------- */
-
-        private bool _isDragging;
-        private Point _lastMousePos;
-        private Point _start;
 
         /// <summary>
         /// ノードをドラッグ開始する。
@@ -99,21 +61,13 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         /// </summary>
         private void NodeControl_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (DataContext is NodeViewModel node && _editorVM != null)
-            {
-                _editorVM.Nodes.SelectNode(node);
+            _editorVM?.RequestSelectNode(DataContext);
 
-                _isDragging = true;
+            /* Undo/Redo用に開始位置を記録 */
+            _editorVM?.RequestBeginNodeDrag(DataContext, e.GetPosition(_editor?.NodeEditorArea));
 
-                /* キャンバス基準のマウス位置(ズーム・パンの影響を受けない) */
-                _lastMousePos = e.GetPosition(_editor?.NodeEditorArea);
-
-                /* Undo/Redo用に開始位置を記録 */
-                _start = node.Position;
-
-                CaptureMouse();
-                e.Handled = true;
-            }
+            CaptureMouse();
+            e.Handled = true;
         }
 
         /// <summary>
@@ -122,27 +76,14 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         /// </summary>
         private void NodeControl_MouseMove(object sender, MouseEventArgs e)
         {
-            if (_isDragging && DataContext is NodeViewModel node && _editorVM != null)
+            if (_editor == null)
             {
-                Point current = e.GetPosition(_editor?.NodeEditorCanvas);
-
-                /* 画面上の移動量 */
-                Point screenDelta = current.Sub(_lastMousePos);
-                _lastMousePos = current;
-
-                /* ズーム倍率を考慮して論理座標系に変換 */
-                Point logicalDelta = _editorVM.ScreenDeltaToLogical(screenDelta);
-
-                /* ノードの座標を更新(差分加算) */
-                Point newPosition = node.Position.Add(logicalDelta);
-
-                /* キャンバス内に制限 */
-                node.Position = _editorVM.Grid.ClampNodePosition(newPosition, node);
-
-                /* ポート位置更新 */
-                node.UpdateAllPortPositions();
-                ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
+                return;
             }
+            Point current = e.GetPosition(_editor?.NodeEditorCanvas);
+
+            /* 画面上の移動量 */
+            _editorVM?.RequestDragNode(DataContext, current);
         }
 
         /// <summary>
@@ -150,16 +91,8 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         /// </summary>
         private void NodeControl_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isDragging && DataContext is NodeViewModel node)
-            {
-                _isDragging = false;
-                ReleaseMouseCapture();
-
-                ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
-
-                /* Undo/Redo用に移動履歴を登録 */
-                _editorVM?.Nodes.MoveNode(node, _start, node.Position);
-            }
+            ReleaseMouseCapture();
+            _editorVM?.RequestEndNodeDrag(DataContext);
         }
 
         /* ---------------------------------------------------------
@@ -171,10 +104,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         /// </summary>
         private void NodeBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (DataContext is NodeViewModel node)
-            {
-                _editorVM?.Nodes.SelectNode(node);
-            }
+            _editorVM?.RequestSelectNode(DataContext);
         }
 
         /* ---------------------------------------------------------
@@ -187,14 +117,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         /// </summary>
         private void NodeControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (DataContext is NodeViewModel node)
-            {
-                node.Width = Math.Max(NodeViewModel.MinWidth, e.NewSize.Width);
-                node.Height = Math.Max(NodeViewModel.MinHeight, e.NewSize.Height);
-
-                node.UpdateAllPortPositions();
-                ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
-            }
+            _editorVM?.RequestNodeSizeChanged(DataContext, e.NewSize);
         }
 
         /// <summary>
@@ -203,14 +126,12 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         /// </summary>
         private void TaskName_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            /* TaskNameの高さが変わった(ノード形状が変わった)ので、ポート位置を再計算 */
-            UpdatePortPositions();
-
-            if (DataContext is NodeViewModel node)
+            foreach (var portControl in VisualTreeUtils.FindChildren<PortControl>(this))
             {
-                node.UpdateAllPortPositions();
-                ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
+                /* UI上のPortControlの位置を取得し、PortViewModelのRelativePositionに反映する。 */
+                portControl.UpdateRelativePositionFromUI();
             }
+            _editorVM?.RequestTaskNameSizeChanged(DataContext);
         }
     }
 }

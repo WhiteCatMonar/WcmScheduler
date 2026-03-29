@@ -4,7 +4,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using MainApplication.ViewModels.ProjectModel;
-using MainApplication.ViewModels.Core;
 
 namespace MainApplication.Views.NodeEditorTab.Controls
 {
@@ -15,12 +14,6 @@ namespace MainApplication.Views.NodeEditorTab.Controls
     /// </summary>
     public partial class PortControl : UserControl
     {
-        /* ---------------------------------------------------------
-         * フィールド
-         * --------------------------------------------------------- */
-
-        private bool _isDragging;
-
         /* ---------------------------------------------------------
          * コンストラクタ
          * --------------------------------------------------------- */
@@ -43,16 +36,10 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         private void Port_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             e.Handled = true;
-            if (DataContext is PortViewModel port && port.Type == PortViewModel.PortType.Output)
-            {
-                var editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
+            var editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
 
-                /* ドラッグ開始ポートを記録 */
-                editorVM?.Connections.DraggingFromPort = port;
-
-                _isDragging = true;
-                CaptureMouse();
-            }
+            editorVM?.RequestBeginConnectionDrag(DataContext);
+            CaptureMouse();
         }
 
         /* ---------------------------------------------------------
@@ -77,7 +64,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
             }
 
             /* マウス位置の論理座標を取得して保持 */
-            editorVM.Connections.DraggingToPoint = editorVM.ScreenToLogical(e.GetPosition(editor.NodeEditorCanvas));
+            editorVM.RequestUpdateConnectionDrag(e.GetPosition(editor.NodeEditorCanvas));
         }
 
         /* ---------------------------------------------------------
@@ -89,32 +76,30 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         /// </summary>
         private void Port_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if (_isDragging)
-            {
-                _isDragging = false;
-                ReleaseMouseCapture();
 
-                var editor = VisualTreeUtils.FindAncestor<NodeEditorControl>(this);
-                var editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
+            var editor = VisualTreeUtils.FindAncestor<NodeEditorControl>(this);
+            var editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
 
-                /* ドロップ位置(画面座標) */
-                Point dropScreen = e.GetPosition(editor);
+            ReleaseMouseCapture();
 
-                /* HitTest(画面座標) */
-                var hit = VisualTreeHelper.HitTest(editor, dropScreen);
-
-                if (hit?.VisualHit is FrameworkElement fe && fe.DataContext is PortViewModel targetPort)
-                {
-                    /* 入力ポートにドロップされた場合のみ接続線を作成 */
-                    if (targetPort.Type == PortViewModel.PortType.Input)
-                    {
-                        editorVM?.RequestCreateConnection((PortViewModel)DataContext, targetPort);
-                    }
-                }
-
-                /* ドラッグ状態解除 */
-                editorVM?.Connections.DraggingFromPort = null;
+            if (editorVM is null) {
+                return;
             }
+            if (!editorVM.IsConnectionDragging) {
+                return;
+            }
+            /* ドロップ位置(画面座標) */
+            Point dropScreen = e.GetPosition(editor);
+
+            /* HitTest(画面座標) */
+            var hit = VisualTreeHelper.HitTest(editor, dropScreen);
+
+            if (hit?.VisualHit is FrameworkElement fe)
+            {
+                editorVM.RequestCreateConnection(DataContext, fe.DataContext);
+            }
+            /* ドラッグ状態解除 */
+            editorVM.RequestEndConnectionDrag();
         }
 
         /* ---------------------------------------------------------
@@ -127,11 +112,6 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         /// </summary>
         public void UpdateRelativePositionFromUI()
         {
-            if (DataContext is not PortViewModel port)
-            {
-                return;
-            }
-
             var nodeControl = VisualTreeUtils.FindAncestor<NodeControl>(this);
             var editor = VisualTreeUtils.FindAncestor<NodeEditorControl>(this);
             var editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
@@ -141,15 +121,14 @@ namespace MainApplication.Views.NodeEditorTab.Controls
                 return;
             }
 
-            /* Port の中心(画面座標) */
-            var portScreen = this.TransformToVisual(editor.NodeEditorArea).Transform(new Point(ActualWidth / 2, ActualHeight / 2));
+            /* Portの中心(画面座標) */
+            var portScreen = TransformToVisual(editor.NodeEditorArea).Transform(new Point(ActualWidth / 2, ActualHeight / 2));
 
-            /* Node の左上(画面座標) */
+            /* Nodeの左上(画面座標) */
             var nodeScreen = nodeControl.TransformToVisual(editor.NodeEditorArea).Transform(new Point(0, 0));
 
-            /* Node 内の相対座標(論理座標) */
-            /* NOTE: 絶対座標は相対座標更新時に自動計算 */
-            port.RelativePosition = editorVM.ScreenDeltaToLogical(portScreen.Sub(nodeScreen));
+            /* Node内の相対座標更新(論理座標) */
+            editorVM.RequestUpdatePortRelativePosition(DataContext, nodeScreen, portScreen);
         }
     }
 }
