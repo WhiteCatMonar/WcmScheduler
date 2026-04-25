@@ -26,6 +26,13 @@
                             <Style TargetType="MenuItem">
                                 <Setter Property="Header" Value="{Binding DisplayName}" />
                                 <Setter Property="Command" Value="{Binding ApplyCommand}" />
+                                <Setter Property="IsCheckable" Value="True" />
+                                <Setter Property="IsChecked" Value="{Binding IsCurrent, Mode=OneWay}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsCurrent}" Value="True">
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                    </DataTrigger>
+                                </Style.Triggers>
                             </Style>
                         </MenuItem.ItemContainerStyle>
                     </MenuItem>

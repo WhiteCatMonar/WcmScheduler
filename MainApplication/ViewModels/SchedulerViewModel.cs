@@ -1,4 +1,4 @@
-﻿using MainApplication.Infrastructure;
+using MainApplication.Infrastructure;
 using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ThemeModel;
@@ -55,9 +55,27 @@ namespace MainApplication.ViewModels
             foreach (var theme in ThemeManager.LoadedThemes)
             {
                 ThemeMenuItems.Add(
-                    new ThemeMenuItemViewModel(theme.Name, () => ThemeManager.ApplyTheme(theme))
+                    CreateThemeMenuItem(theme)
                 );
             }
+        }
+
+        /// <summary>
+        /// テーマ一覧メニュー項目を生成する。
+        /// </summary>
+        /// <param name="theme">対象テーマ。</param>
+        /// <returns>テーマメニュー項目。</returns>
+        private ThemeMenuItemViewModel CreateThemeMenuItem(Models.Settings.ThemeSettingModel theme)
+        {
+            return new ThemeMenuItemViewModel(
+                theme.Name,
+                ThemeManager.CurrentTheme.Name == theme.Name,
+                () =>
+                {
+                    ThemeManager.ApplyTheme(theme);
+                    RefreshThemeMenuItems();
+                }
+            );
         }
 
         /* ---------------------------------------------------------
@@ -112,10 +130,7 @@ namespace MainApplication.ViewModels
             SaveCommand = new RelayCommand(() => Save());
             SaveAsCommand = new RelayCommand(() => RequestSaveAs?.Invoke());
             ThemeMenuItems = new ObservableCollection<ThemeMenuItemViewModel>(
-                /* テーマは動的追加されるため、メニュー項目とコマンドの作成をViewModel側で行う */
-                ThemeManager.LoadedThemes.Select(t =>
-                    new ThemeMenuItemViewModel(t.Name, () => ThemeManager.ApplyTheme(t))
-                )
+                ThemeManager.LoadedThemes.Select(CreateThemeMenuItem)
             );
             OpenThemeEditorCommand = new RelayCommand(() =>
             {
