@@ -1,9 +1,11 @@
 # WcmScheduler
 
 ## 概要
+
 ノードベースのスケジュール管理ツールです
 
 ## MainApplicationフォルダの構造
+
 ```plaintext
 📂 MainApplication
 ├── 📂 Helpers
@@ -15,20 +17,28 @@
 │   ├── 📄 IJsonSerializerService.cs                   # JSONのシリアライザのインターフェース
 │   └── 📄 JsonSerializerService.cs                    # JSONのシリアライザ(シリアライズ/デシリアライズ)
 │
-├── 📂 Mapper
+├── 📂 Mappers
 │   ├── 📄 ConnectionMapper.cs                         # 接続線情報のViewModel⇔Model相互変換
 │   ├── 📄 NodeEditorMapper.cs                         # タスク編集機能(NodeEditor/TaskEditor)のViewModel⇔Model相互変換
 │   └── 📄 NodeMapper.cs                               # ノード情報のViewModel⇔Model相互変換
 │
 ├── 📂 Models
-│   └── 📂 SaveData                                    # 保存するデータのモデル
-│       ├── 📄 ConnectionDataModel.cs                  # 接続線管理用情報
-│       ├── 📄 NodeDataModel.cs                        # ノード管理用情報
-│       ├── 📄 NodeDetailsDataModel.cs                 # ノードごとの詳細情報
-│       ├── 📄 PortDataModel.cs                        # ノード内ポート管理用情報
-│       ├── 📄 PositionDataModel.cs                    # 座標管理用情報
-│       ├── 📄 RootSaveDataModel.cs                    # 保存するデータのルート情報
-│       └── 📄 TaskEditorDataModel.cs                  # タスク編集機能についての情報
+│   ├── 📂 SaveData                                    # 保存するデータのモデル
+│   │   ├── 📄 ConnectionDataModel.cs                  # 接続線管理用情報
+│   │   ├── 📄 NodeDataModel.cs                        # ノード管理用情報
+│   │   ├── 📄 NodeDetailsDataModel.cs                 # ノードごとの詳細情報
+│   │   ├── 📄 PortDataModel.cs                        # ノード内ポート管理用情報
+│   │   ├── 📄 PositionDataModel.cs                    # 座標管理用情報
+│   │   ├── 📄 RootSaveDataModel.cs                    # 保存するデータのルート情報
+│   │   └── 📄 TaskEditorDataModel.cs                  # タスク編集機能についての情報
+│   └── 📂 SaveData                                    # 設定関連のモデル
+│       └── 📄 ThemeSettingModel.cs                    # テーマ設定情報
+│
+├── 📂 Themes                                          # テーマ関連リソース
+│   ├── 📂 schema                                      # JSONスキーマ
+│   │   └── 📄 ThemeSchema.json                        # テーマ設定JSONのスキーマ
+│   ├── 📄 Dark.json                                   # ダークモード向けデフォルトテーマ
+│   └── 📄 Light.json                                  # ライトモード向けデフォルトテーマ
 │
 ├── 📂 Properties
 │   ├── 📄 AssemblyInfo.cs                             # アセンブリメタ情報
@@ -50,8 +60,7 @@
 │   │   ├── 📄 BoolToVisibilityConverter.cs            # bool             → Visibility
 │   │   ├── 📄 DateTimeDisplayConverter.cs             # DateTime?        → 表示文字列
 │   │   ├── 📄 DisplayNameConverter.cs                 # DisplayName 属性 → 表示名
-│   │   ├── 📄 PortColorConverter.cs                   # ポート種別       → 色
-│   │   └── 📄 SelectionBrushConverter.cs              # 選択状態         → ブラシ
+│   │   └── 📄 PortColorConverter.cs                   # ポート種別       → 色
 │   │
 │   ├── 📂 Core                                        # 基盤ロジック(UI非依存)
 │   │   ├── 📄 EditableField.cs                        # 編集フィールドの共通ロジック(遅延コミット)
@@ -59,7 +68,8 @@
 │   │   ├── 📄 PointEx.cs                              # 座標計算用Point型拡張
 │   │   ├── 📄 RelayCommand.cs                         # ICommand 実装(MVVMの基本)
 │   │   ├── 📄 TabInfo.cs                              # タブ管理用情報
-│   │   ├── 📄 UndoRedoManager.cs                      # Undo/Redo管理報
+│   │   ├── 📄 ThemeManager.cs                         # テーマ設定管理情報
+│   │   ├── 📄 UndoRedoManager.cs                      # Undo/Redo管理情報
 │   │   └── 📄 ViewModelBase.cs                        # プロパティ編集を伴うViewModelの基底クラス
 │   │
 │   ├── 📂 ProjectModel
@@ -72,6 +82,9 @@
 │   │   ├── 📄 NodeViewModel.cs                        # ノード1個の状態・編集ロジック
 │   │   ├── 📄 PortViewModel.cs                        # ポート(入出力端子)の状態
 │   │   └── 📄 ProjectViewModel.cs                     # 1つのプロジェクト全体の管理
+│   │
+│   ├── 📂 ThemeModel
+│   │   ├── 📄 ThemeMenuItemViewModel.cs               # テーマ関連メニューの一覧管理
 │   │
 │   ├── 📂 Service
 │   │   ├── 📄 DateTimeEditorService.cs                # 日時編集ダイアログを開くサービス(UI 呼び出し)
@@ -127,6 +140,7 @@
 ```
 
 ## ノードエディタのクラス依存関係図
+
 ```mermaid
 block
     columns 8

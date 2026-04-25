@@ -8,14 +8,26 @@
              MouseLeftButtonDown="NodeControl_MouseLeftButtonDown"
              MinWidth="{Binding MinWidth}" MinHeight="{Binding MinHeight}"
              SizeChanged="NodeControl_SizeChanged">
-    <UserControl.Resources>
-        <converters:SelectionBrushConverter x:Key="SelectionBrushConverter"/>
-    </UserControl.Resources>
 
     <Border x:Name="NodeBorder"
-        Background="{Binding IsSelected, Converter={StaticResource SelectionBrushConverter}}"
         BorderBrush="DarkBlue" BorderThickness="2" CornerRadius="5"
         MouseLeftButtonDown="NodeBorder_MouseLeftButtonDown">
+        <Border.Style>
+            <Style TargetType="Border">
+                <!-- 通常時の背景 -->
+                <Setter Property="Background" Value="{DynamicResource NodeBackgroundBrush}" />
+
+                <!-- 選択時の背景 -->
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                        <!-- TODO: テーマ設定対応 -->
+                        <Setter Property="Background"
+                                Value="#FF90EE90" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+
         <Grid>
             <Grid.RowDefinitions>
                 <!-- タスク名 -->

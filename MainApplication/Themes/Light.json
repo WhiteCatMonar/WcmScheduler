@@ -1,0 +1,7 @@
+{
+  "$schema": "./schema/ThemeSchema.json",
+  "name": "Light",
+  "colors": {
+    "node-background": "#FF87CEFA"
+  }
+}

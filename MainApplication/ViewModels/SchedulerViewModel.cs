@@ -1,8 +1,9 @@
 ﻿using MainApplication.Infrastructure;
 using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.ThemeModel;
+using MainApplication.Views;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Windows.Input;
 
 namespace MainApplication.ViewModels
@@ -36,6 +37,28 @@ namespace MainApplication.ViewModels
         public ICommand SaveAsCommand { get; }
 
         private string? _currentFilePath;
+
+        /* ---------------------------------------------------------
+         * テーマ管理
+         * --------------------------------------------------------- */
+
+        /// <summary>テーマ関連メニュー一覧</summary>
+        public ObservableCollection<ThemeMenuItemViewModel> ThemeMenuItems { get; set; }
+
+        /// <summary>テーマ編集コマンド</summary>
+        public ICommand OpenThemeEditorCommand { get; }
+
+        public void RefreshThemeMenuItems()
+        {
+            ThemeMenuItems.Clear();
+
+            foreach (var theme in ThemeManager.LoadedThemes)
+            {
+                ThemeMenuItems.Add(
+                    new ThemeMenuItemViewModel(theme.Name, () => ThemeManager.ApplyTheme(theme))
+                );
+            }
+        }
 
         /* ---------------------------------------------------------
          * タブ管理
@@ -88,6 +111,22 @@ namespace MainApplication.ViewModels
             LoadCommand = new RelayCommand(() => RequestLoad?.Invoke());
             SaveCommand = new RelayCommand(() => Save());
             SaveAsCommand = new RelayCommand(() => RequestSaveAs?.Invoke());
+            ThemeMenuItems = new ObservableCollection<ThemeMenuItemViewModel>(
+                /* テーマは動的追加されるため、メニュー項目とコマンドの作成をViewModel側で行う */
+                ThemeManager.LoadedThemes.Select(t =>
+                    new ThemeMenuItemViewModel(t.Name, () => ThemeManager.ApplyTheme(t))
+                )
+            );
+            OpenThemeEditorCommand = new RelayCommand(() =>
+            {
+                var vm = new ThemeSettingViewModel(ThemeManager.CurrentTheme);
+                vm.ThemeSaved += () =>
+                {
+                    RefreshThemeMenuItems();
+                };
+                var win = new ThemeSettingWindow { DataContext = vm };
+                win.ShowDialog();
+            });
         }
 
         /* ---------------------------------------------------------

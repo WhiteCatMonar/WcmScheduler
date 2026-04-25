@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using MainApplication.ViewModels.Core;
+using System.Windows;
 
 namespace MainApplication
 {
@@ -14,21 +15,16 @@ namespace MainApplication
     /// </summary>
     public partial class App : Application
     {
-        /* ---------------------------------------------------------
-         * 必要に応じてアプリケーションイベントを追加可能
-         * ---------------------------------------------------------
-         * 例：アプリ起動時の初期化処理
-         * protected override void OnStartup(StartupEventArgs e)
-         * {
-         *     base.OnStartup(e);
-         * }
-         * 
-         * 例：アプリ終了処理
-         * protected override void OnExit(ExitEventArgs e)
-         * {
-         *     base.OnExit(e);
-         * }
-         * --------------------------------------------------------- */
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            /* デフォルトテーマを展開 */
+            ThemeManager.ExtractDefaultThemes();
+
+            /* テーマ読み込み */
+            ThemeManager.LoadThemes();
+        }
     }
 }
 

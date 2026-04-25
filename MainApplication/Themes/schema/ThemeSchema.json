@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WcmScheduler テーマ設定用JSON",
+  "description": "配色設定などを行うための設定ファイル",
+  "type": "object",
+  "required": [
+    "name",
+    "colors"
+  ],
+  "properties": {
+    "name": {
+      "description": "テーマ名",
+      "type": "string",
+      "minLength": 1
+    },
+    "colors": {
+      "description": "配色設定",
+      "type": "object",
+      "properties": {
+        "node-background": {
+          "description": "ノード背景色",
+          "type": "string",
+          "pattern": "^#[0-9A-Fa-f]{8}$"
+        }
+      }
+    }
+  }
+}

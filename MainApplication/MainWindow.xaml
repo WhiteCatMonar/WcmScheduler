@@ -15,6 +15,25 @@
                 <MenuItem Header="保存" Command="{Binding SaveCommand}" />
                 <MenuItem Header="名前を付けて保存" Command="{Binding SaveAsCommand}" />
             </MenuItem>
+            <MenuItem Header="表示">
+                <MenuItem Header="テーマ">
+                    <!-- 動的テーマ一覧 -->
+                    <MenuItem Header="テーマ一覧" ItemsSource="{Binding ThemeMenuItems}">
+
+                        <MenuItem.ItemContainerStyle>
+                            <Style TargetType="MenuItem">
+                                <Setter Property="Header" Value="{Binding DisplayName}" />
+                                <Setter Property="Command" Value="{Binding ApplyCommand}" />
+                            </Style>
+                        </MenuItem.ItemContainerStyle>
+                    </MenuItem>
+                    
+                    <Separator />
+                    
+                    <!-- 固定メニュー -->
+                    <MenuItem Header="テーマの編集..." Command="{Binding OpenThemeEditorCommand}" />
+                </MenuItem>
+            </MenuItem>
         </Menu>
         
         <!-- タブウィンドウ -->
