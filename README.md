@@ -14,8 +14,8 @@
 ├── 📂 Infrastructure
 │   ├── 📄 FileService.cs                              # ファイル読込・保存
 │   ├── 📄 IFileService.cs                             # ファイル読込・保存のインターフェース
-│   ├── 📄 IJsonSerializerService.cs                   # JSONのシリアライザのインターフェース
-│   └── 📄 JsonSerializerService.cs                    # JSONのシリアライザ(シリアライズ/デシリアライズ)
+│   ├── 📄 IJsonSerializerService.cs                   # JSONシリアライザのインターフェース
+│   └── 📄 JsonSerializerService.cs                    # JSONシリアライズ/デシリアライズ
 │
 ├── 📂 Mappers
 │   ├── 📄 ConnectionMapper.cs                         # 接続線情報のViewModel⇔Model相互変換
@@ -31,7 +31,8 @@
 │   │   ├── 📄 PositionDataModel.cs                    # 座標管理用情報
 │   │   ├── 📄 RootSaveDataModel.cs                    # 保存するデータのルート情報
 │   │   └── 📄 TaskEditorDataModel.cs                  # タスク編集機能についての情報
-│   └── 📂 SaveData                                    # 設定関連のモデル
+│   └── 📂 Settings                                    # 設定関連のモデル
+│       ├── 📄 AppSettingsModel.cs                     # アプリケーション設定情報
 │       └── 📄 ThemeSettingModel.cs                    # テーマ設定情報
 │
 ├── 📂 Themes                                          # テーマ関連リソース
@@ -39,13 +40,6 @@
 │   │   └── 📄 ThemeSchema.json                        # テーマ設定JSONのスキーマ
 │   ├── 📄 Dark.json                                   # ダークモード向けデフォルトテーマ
 │   └── 📄 Light.json                                  # ライトモード向けデフォルトテーマ
-│
-├── 📂 Properties
-│   ├── 📄 AssemblyInfo.cs                             # アセンブリメタ情報
-│   ├── 📄 Resources.Designer.cs                       # リソースの自動生成コード
-│   ├── 📄 Resources.resx                              # 文字列・画像などのリソース
-│   ├── 📄 Settings.Designer.cs                        # 設定の自動生成コード
-│   └── 📄 Settings.settings                           # アプリ設定
 │
 ├── 📂 ViewModels
 │   ├── 📂 Actions                                     # Undo/Redo用の操作履歴アクション
@@ -57,20 +51,20 @@
 │   │   └── 📄 MoveNodeAction.cs                       # Undo/Redoアクション：ノード移動
 │   │
 │   ├── 📂 Converters                                  # XAMLバインディング用コンバータ
-│   │   ├── 📄 BoolToVisibilityConverter.cs            # bool             → Visibility
-│   │   ├── 📄 DateTimeDisplayConverter.cs             # DateTime?        → 表示文字列
-│   │   ├── 📄 DisplayNameConverter.cs                 # DisplayName 属性 → 表示名
-│   │   └── 📄 PortColorConverter.cs                   # ポート種別       → 色
+│   │   ├── 📄 BoolToVisibilityConverter.cs            # bool      → Visibility
+│   │   ├── 📄 DateTimeDisplayConverter.cs             # DateTime? → 表示文字列
+│   │   └── 📄 DisplayNameConverter.cs                 # DisplayName属性 → 表示名
 │   │
 │   ├── 📂 Core                                        # 基盤ロジック(UI非依存)
+│   │   ├── 📄 AppSettingsManager.cs                   # アプリケーション設定の読込・保存
 │   │   ├── 📄 EditableField.cs                        # 編集フィールドの共通ロジック(遅延コミット)
 │   │   ├── 📄 GridManager.cs                          # 論理座標系・ズーム・パン管理
 │   │   ├── 📄 PointEx.cs                              # 座標計算用Point型拡張
-│   │   ├── 📄 RelayCommand.cs                         # ICommand 実装(MVVMの基本)
+│   │   ├── 📄 RelayCommand.cs                         # ICommand実装(MVVMの基本)
 │   │   ├── 📄 TabInfo.cs                              # タブ管理用情報
-│   │   ├── 📄 ThemeManager.cs                         # テーマ設定管理情報
-│   │   ├── 📄 UndoRedoManager.cs                      # Undo/Redo管理情報
-│   │   └── 📄 ViewModelBase.cs                        # プロパティ編集を伴うViewModelの基底クラス
+│   │   ├── 📄 ThemeManager.cs                         # テーマ設定管理
+│   │   ├── 📄 UndoRedoManager.cs                      # Undo/Redo管理
+│   │   └── 📄 ViewModelBase.cs                        # ViewModelの基底クラス
 │   │
 │   ├── 📂 ProjectModel
 │   │   ├── 📄 ConnectionCollectionViewModel.cs        # 接続線の一覧管理
@@ -83,19 +77,23 @@
 │   │   ├── 📄 PortViewModel.cs                        # ポート(入出力端子)の状態
 │   │   └── 📄 ProjectViewModel.cs                     # 1つのプロジェクト全体の管理
 │   │
-│   ├── 📂 ThemeModel
-│   │   ├── 📄 ThemeMenuItemViewModel.cs               # テーマ関連メニューの一覧管理
-│   │
 │   ├── 📂 Service
-│   │   ├── 📄 DateTimeEditorService.cs                # 日時編集ダイアログを開くサービス(UI 呼び出し)
+│   │   ├── 📄 ColorPickerService.cs                   # 色編集ダイアログを開くサービス(UI呼び出し)
+│   │   ├── 📄 DateTimeEditorService.cs                # 日時編集ダイアログを開くサービス(UI呼び出し)
+│   │   ├── 📄 IColorPickerService.cs                  # 色編集サービスのインターフェース
 │   │   └── 📄 IDateTimeEditorService.cs               # 日時編集サービスのインターフェース
 │   │
+│   ├── 📂 ThemeModel
+│   │   ├── 📄 ThemeMenuItemViewModel.cs               # テーマ関連メニューの1項目
+│   │   └── 📄 ThemeSettingViewModel.cs                # テーマ編集画面のViewModel
+│   │
+│   ├── 📄 ColorPickerViewModel.cs                     # 色編集ダイアログのViewModel(UI入力ロジック)
 │   ├── 📄 DateTimeEditorViewModel.cs                  # 日時編集ダイアログのViewModel(UI入力ロジック)
 │   ├── 📄 SchedulerViewModel.cs                       # アプリケーション全体の状態管理
 │   └── 📄 TeamProjectsViewModel.cs                    # チーム内の複数のプロジェクトの管理
 │
 ├── 📂 Views
-│   ├── 📂 Behaviors                                   # XAML の動作拡張
+│   ├── 📂 Behaviors                                   # XAMLの動作拡張
 │   │   ├── 📄 ListBoxAutoScrollBehavior.cs            # ListBoxの自動スクロール
 │   │   └── 📄 ListBoxItemDoubleClickBehavior.cs       # ダブルクリック動作
 │   │
@@ -124,13 +122,17 @@
 │   │   └── 📄 NodeEditorTab.xaml.cs
 │   │
 │   ├── 📄 BindingProxy.cs                             # XAMLのバインディング補助
+│   ├── 📄 ColorPickerWindow.xaml                      # 色編集ダイアログ(View)
+│   ├── 📄 ColorPickerWindow.xaml.cs                   # 色編集ダイアログのコードビハインド
 │   ├── 📄 DateTimeEditorWindow.xaml                   # 日時編集ダイアログ(View)
-│   ├── 📄 DateTimeEditorWindow.xaml.cs                # 日時編集ダイアログのコードビハインド(UIロジック)
+│   ├── 📄 DateTimeEditorWindow.xaml.cs                # 日時編集ダイアログのコードビハインド
 │   ├── 📄 ProjectView.xaml                            # プロジェクト単体情報
 │   ├── 📄 ProjectView.xaml.cs
 │   ├── 📄 TeamProjectsView.xaml                       # チーム内プロジェクト情報(複数のプロジェクトの管理用View)
-│   └── 📄 TeamProjectsView.xaml.cs
-│ 
+│   ├── 📄 TeamProjectsView.xaml.cs
+│   ├── 📄 ThemeSettingWindow.xaml                     # テーマ編集ウィンドウ(View)
+│   └── 📄 ThemeSettingWindow.xaml.cs                  # テーマ編集ウィンドウのコードビハインド
+│
 ├── 📄 App.xaml                                        # アプリケーション定義
 ├── 📄 App.xaml.cs                                     # アプリ起動ロジック
 ├── 📄 AssemblyInfo.cs                                 # アセンブリ情報
