@@ -1,17 +1,25 @@
-﻿<UserControl x:Class="MainApplication.Views.NodeEditorTab.Controls.PortControl"
+<UserControl x:Class="MainApplication.Views.NodeEditorTab.Controls.PortControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:converters="clr-namespace:MainApplication.ViewModels.Converters"
              Width="14" Height="14"
              MouseLeftButtonDown="Port_MouseLeftButtonDown"
              MouseMove="Port_MouseMove"
              MouseLeftButtonUp="Port_MouseLeftButtonUp">
-    <UserControl.Resources>
-        <converters:PortColorConverter x:Key="PortColorConverter"/>
-    </UserControl.Resources>
-
     <Polygon Points="0,0 0,10 10,5"
-             Fill="{Binding Type, Converter={StaticResource PortColorConverter}}"
              HorizontalAlignment="Center"
-             VerticalAlignment="Center"/>
+             VerticalAlignment="Center">
+        <Polygon.Style>
+            <Style TargetType="Polygon">
+                <Setter Property="Fill" Value="{DynamicResource PortUnknownFillBrush}"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Type}" Value="Input">
+                        <Setter Property="Fill" Value="{DynamicResource PortInputFillBrush}"/>
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding Type}" Value="Output">
+                        <Setter Property="Fill" Value="{DynamicResource PortOutputFillBrush}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Polygon.Style>
+    </Polygon>
 </UserControl>

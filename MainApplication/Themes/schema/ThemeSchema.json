@@ -16,13 +16,167 @@
     "colors": {
       "description": "配色設定",
       "type": "object",
+      "additionalProperties": false,
       "properties": {
+        "window-background": {
+          "description": "Window全体背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "window-text": {
+          "description": "Window全体文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "tab-window-background": {
+          "description": "タブウィンドウ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "tab-item-background": {
+          "description": "通常タブ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "tab-item-selected-background": {
+          "description": "選択中タブ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "tab-item-text": {
+          "description": "通常タブ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "tab-item-selected-text": {
+          "description": "選択中タブ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-editor-border": {
+          "description": "ノードエディタ外枠",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-editor-canvas-background": {
+          "description": "ノード配置キャンバス背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "temporary-connection-stroke": {
+          "description": "接続線ドラッグ中の仮接続線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "grid-line-minor": {
+          "description": "通常グリッド線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "grid-line-major": {
+          "description": "太いグリッド線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "grid-origin-axis-x": {
+          "description": "原点X軸",
+          "$ref": "#/$defs/argbColor"
+        },
+        "grid-origin-axis-y": {
+          "description": "原点Y軸",
+          "$ref": "#/$defs/argbColor"
+        },
         "node-background": {
-          "description": "ノード背景色",
-          "type": "string",
-          "pattern": "^#[0-9A-Fa-f]{8}$"
+          "description": "通常ノード背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-selected-background": {
+          "description": "選択中ノード背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-border": {
+          "description": "ノード枠線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-text": {
+          "description": "ノード内テキスト",
+          "$ref": "#/$defs/argbColor"
+        },
+        "port-input-fill": {
+          "description": "入力ポート塗り",
+          "$ref": "#/$defs/argbColor"
+        },
+        "port-output-fill": {
+          "description": "出力ポート塗り",
+          "$ref": "#/$defs/argbColor"
+        },
+        "port-unknown-fill": {
+          "description": "不明なポート種別の塗り",
+          "$ref": "#/$defs/argbColor"
+        },
+        "connection-stroke": {
+          "description": "通常接続線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "connection-selected-stroke": {
+          "description": "選択中接続線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "side-panel-background": {
+          "description": "サイドパネル背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "splitter-background": {
+          "description": "サイドパネルとエディタ領域の区切り",
+          "$ref": "#/$defs/argbColor"
+        },
+        "placeholder-text": {
+          "description": "未選択時プレースホルダーテキスト",
+          "$ref": "#/$defs/argbColor"
+        },
+        "task-editor-heading-text": {
+          "description": "タスク編集タブ見出し文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-panel-background": {
+          "description": "履歴操作領域背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-list-background": {
+          "description": "履歴一覧背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-text": {
+          "description": "通常履歴文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-timestamp-text": {
+          "description": "履歴タイムスタンプ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-current-text": {
+          "description": "現在履歴の文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-selected-background": {
+          "description": "履歴リスト選択行背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "date-time-editor-background": {
+          "description": "日時編集ウィンドウ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "date-time-editor-text": {
+          "description": "日時編集ウィンドウ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "theme-setting-background": {
+          "description": "テーマ編集ウィンドウ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "theme-setting-text": {
+          "description": "テーマ編集ウィンドウ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "color-preview-border": {
+          "description": "色プレビュー枠線",
+          "$ref": "#/$defs/argbColor"
         }
       }
+    }
+  },
+  "$defs": {
+    "argbColor": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{8}$"
     }
   }
 }

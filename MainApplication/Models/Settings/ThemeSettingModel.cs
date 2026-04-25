@@ -1,10 +1,58 @@
-﻿namespace MainApplication.Models.Settings
+namespace MainApplication.Models.Settings
 {
+    /// <summary>
+    /// テーマ設定情報を表すモデル。
+    /// </summary>
     public class ThemeSettingModel
     {
+        /// <summary>
+        /// テーマ名。
+        /// </summary>
         public string Name { get; set; } = "Default";
-        public Dictionary<string, string> Colors { get; set; } = new (){
-            {"node-background", "#FFFFFFFF" }
+
+        /// <summary>
+        /// テーマ内で利用する色設定。
+        /// </summary>
+        public Dictionary<string, string> Colors { get; set; } = new()
+        {
+            { "window-background", "#FFF5F5F5" },
+            { "window-text", "#FF1E1E1E" },
+            { "tab-window-background", "#FFF5F5F5" },
+            { "tab-item-background", "#FFECECEC" },
+            { "tab-item-selected-background", "#FFFFFFFF" },
+            { "tab-item-text", "#FF1E1E1E" },
+            { "tab-item-selected-text", "#FF1E1E1E" },
+            { "node-editor-border", "#FFD0D0D0" },
+            { "node-editor-canvas-background", "#FFFFFFFF" },
+            { "temporary-connection-stroke", "#FF808080" },
+            { "grid-line-minor", "#FFECECEC" },
+            { "grid-line-major", "#FFD0D0D0" },
+            { "grid-origin-axis-x", "#FFE51400" },
+            { "grid-origin-axis-y", "#FF007ACC" },
+            { "node-background", "#FFDDEEFF" },
+            { "node-selected-background", "#FFCCE8FF" },
+            { "node-border", "#FF007ACC" },
+            { "node-text", "#FF1E1E1E" },
+            { "port-input-fill", "#FF388A34" },
+            { "port-output-fill", "#FFC43E1C" },
+            { "port-unknown-fill", "#FF808080" },
+            { "connection-stroke", "#FF1E1E1E" },
+            { "connection-selected-stroke", "#FF007ACC" },
+            { "side-panel-background", "#FFF3F3F3" },
+            { "splitter-background", "#FFD0D0D0" },
+            { "placeholder-text", "#FF6A6A6A" },
+            { "task-editor-heading-text", "#FF1E1E1E" },
+            { "history-panel-background", "#FFF3F3F3" },
+            { "history-list-background", "#FFFFFFFF" },
+            { "history-text", "#FF1E1E1E" },
+            { "history-timestamp-text", "#FF6A6A6A" },
+            { "history-current-text", "#FF007ACC" },
+            { "history-selected-background", "#FFD7EBFF" },
+            { "date-time-editor-background", "#FFF5F5F5" },
+            { "date-time-editor-text", "#FF1E1E1E" },
+            { "theme-setting-background", "#FFF5F5F5" },
+            { "theme-setting-text", "#FF1E1E1E" },
+            { "color-preview-border", "#FF808080" }
         };
     }
 }

@@ -1,17 +1,21 @@
-﻿<UserControl x:Class="MainApplication.Views.NodeEditorTab.Controls.HistoryControl"
+<UserControl x:Class="MainApplication.Views.NodeEditorTab.Controls.HistoryControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:behaviors="clr-namespace:MainApplication.Views.Behaviors">
-    <StackPanel Margin="5">
+    <StackPanel Margin="5"
+                Background="{DynamicResource HistoryPanelBackgroundBrush}"
+                TextElement.Foreground="{DynamicResource WindowTextBrush}">
         
         <!-- Undo/Redo ボタン -->
-        <TextBlock Text="履歴操作" FontWeight="Bold" Margin="0,10,0,5"/>
+        <TextBlock Text="履歴操作" FontWeight="Bold" Foreground="{DynamicResource TaskEditorHeadingTextBrush}" Margin="0,10,0,5"/>
         <Button Content="戻す" Command="{Binding UndoCommand}" Margin="0,0,0,5"/>
         <Button Content="進む" Command="{Binding RedoCommand}" Margin="0,0,0,10"/>
 
         <!-- 履歴リスト -->
         <ListBox ItemsSource="{Binding UndoRedo.History}"
                  behaviors:ListBoxAutoScrollBehavior.AutoScroll="True"
+                 Background="{DynamicResource HistoryListBackgroundBrush}"
+                 Foreground="{DynamicResource HistoryTextBrush}"
                  Height="200"
                  SelectionMode="Single">
             
@@ -47,18 +51,20 @@
 
                         <!-- タイムスタンプ部分 -->
                         <TextBlock Text="{Binding Timestamp, StringFormat='{}{0:yyyy/MM/dd HH:mm:ss}'}"
-                                   Foreground="Gray"
+                                   Foreground="{DynamicResource HistoryTimestampTextBrush}"
                                    VerticalAlignment="Center"
                                    Margin="0,0,10,0"/>
 
                         <!-- 説明部分 -->
-                        <TextBlock Text="{Binding Description}" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Description}"
+                                   Foreground="{DynamicResource HistoryTextBrush}"
+                                   VerticalAlignment="Center">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                                             <Setter Property="FontWeight" Value="Bold"/>
-                                            <Setter Property="Foreground" Value="DarkBlue"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource HistoryCurrentTextBrush}"/>
                                             <Setter Property="TextDecorations" Value="Underline"/>
                                         </DataTrigger>
                                     </Style.Triggers>
@@ -81,10 +87,10 @@
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsCurrent}" Value="True">
                             <Setter Property="FontWeight" Value="Bold"/>
-                            <Setter Property="Foreground" Value="DarkBlue"/>
+                            <Setter Property="Foreground" Value="{DynamicResource HistoryCurrentTextBrush}"/>
                         </DataTrigger>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="LightGray"/>
+                            <Setter Property="Background" Value="{DynamicResource HistorySelectedBackgroundBrush}"/>
                             <Setter Property="Foreground" Value="{Binding Foreground, RelativeSource={RelativeSource Self}}"/>
                         </Trigger>
                     </Style.Triggers>

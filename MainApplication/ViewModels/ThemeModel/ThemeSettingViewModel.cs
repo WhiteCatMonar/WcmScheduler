@@ -51,12 +51,14 @@ namespace MainApplication.ViewModels.ThemeModel
             _colorPicker = colorPicker ?? new ColorPickerService();
             ThemeName = source.Name;
 
-            var supportedKeys = new ThemeSettingModel().Colors.Keys;
+            var defaultColors = new ThemeSettingModel().Colors;
+            var supportedKeys = defaultColors.Keys;
 
             foreach (var key in supportedKeys)
             {
                 source.Colors.TryGetValue(key, out var value);
-                EditableColors.Add(new ColorItemViewModel(key, value ?? ""));
+                defaultColors.TryGetValue(key, out var defaultValue);
+                EditableColors.Add(new ColorItemViewModel(key, value ?? defaultValue ?? ""));
             }
 
             SaveCommand = new RelayCommand(Save);

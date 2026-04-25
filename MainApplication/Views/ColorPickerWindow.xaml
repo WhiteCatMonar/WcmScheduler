@@ -22,12 +22,12 @@
 
             <StackPanel Grid.Column="0">
                 <TextBlock Text="変更前" Margin="0,0,0,4"/>
-                <Border Height="48" BorderBrush="#808080" BorderThickness="1" Background="{Binding InitialBrush}"/>
+                <Border Height="48" BorderBrush="{DynamicResource ColorPreviewBorderBrush}" BorderThickness="1" Background="{Binding InitialBrush}"/>
             </StackPanel>
 
             <StackPanel Grid.Column="2">
                 <TextBlock Text="選択中" Margin="0,0,0,4"/>
-                <Border Height="48" BorderBrush="#808080" BorderThickness="1" Background="{Binding SelectedBrush}"/>
+                <Border Height="48" BorderBrush="{DynamicResource ColorPreviewBorderBrush}" BorderThickness="1" Background="{Binding SelectedBrush}"/>
             </StackPanel>
         </Grid>
 

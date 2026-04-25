@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="MainApplication.Views.NodeEditorTab.NodeEditorControl"
+<UserControl x:Class="MainApplication.Views.NodeEditorTab.NodeEditorControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -19,7 +19,7 @@
     </UserControl.InputBindings>
 
     <!-- ウィンドウサイズに追従する領域 -->
-    <Border BorderBrush="DarkGray"  BorderThickness="1">
+    <Border BorderBrush="{DynamicResource NodeEditorBorderBrush}" BorderThickness="1">
         <Canvas x:Name="NodeEditorArea"
                 Background="Transparent"
                 HorizontalAlignment="Stretch"
@@ -29,7 +29,7 @@
             
             <!-- ズーム後サイズを持つキャンバス(位置は固定) -->
             <Canvas x:Name="NodeEditorCanvas"
-                    Background="White"
+                    Background="{DynamicResource NodeEditorCanvasBackgroundBrush}"
                     Width="{Binding BaseCanvasWidth}"
                     Height="{Binding BaseCanvasHeight}"
                     Focusable="True"
@@ -58,7 +58,7 @@
                     <controls:ConnectionCollectionControl/>
 
                     <!-- 仮接続線 -->
-                    <Path Stroke="Gray" StrokeDashArray="2,2" StrokeThickness="2" IsHitTestVisible="False"
+                    <Path Stroke="{DynamicResource TemporaryConnectionStrokeBrush}" StrokeDashArray="2,2" StrokeThickness="2" IsHitTestVisible="False"
                           Visibility="{Binding Connections.IsDraggingConnection, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Path.Data>
                             <PathGeometry>
