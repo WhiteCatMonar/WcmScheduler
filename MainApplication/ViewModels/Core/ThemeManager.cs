@@ -91,13 +91,16 @@ namespace MainApplication.ViewModels.Core
                 LoadThemeFromJson(file);
             }
 
+            AppSettingsManager.Load();
+
             var defaultThemeName = IsSystemLightTheme() ? "Light" : "Dark";
-            var initialTheme = LoadedThemes.FirstOrDefault(t => t.Name == defaultThemeName)
+            var initialTheme = LoadedThemes.FirstOrDefault(t => t.Name == AppSettingsManager.Current.LastThemeName)
+                               ?? LoadedThemes.FirstOrDefault(t => t.Name == defaultThemeName)
                                ?? LoadedThemes.FirstOrDefault();
 
             if (initialTheme != null)
             {
-                ApplyTheme(initialTheme);
+                ApplyTheme(initialTheme, false);
             }
         }
 
@@ -228,7 +231,8 @@ namespace MainApplication.ViewModels.Core
         /// 指定テーマをアプリケーションリソースへ適用する。
         /// </summary>
         /// <param name="theme">適用対象のテーマ。</param>
-        public static void ApplyTheme(ThemeSettingModel theme)
+        /// <param name="saveAsLastTheme">最後に適用したテーマとして保存するかどうか。</param>
+        public static void ApplyTheme(ThemeSettingModel theme, bool saveAsLastTheme = true)
         {
             var dict = new ResourceDictionary();
 
@@ -244,6 +248,11 @@ namespace MainApplication.ViewModels.Core
             Application.Current.Resources.MergedDictionaries.Clear();
             Application.Current.Resources.MergedDictionaries.Add(dict);
             CurrentTheme = theme;
+
+            if (saveAsLastTheme)
+            {
+                AppSettingsManager.SaveLastThemeName(theme.Name);
+            }
         }
 
         /// <summary>
