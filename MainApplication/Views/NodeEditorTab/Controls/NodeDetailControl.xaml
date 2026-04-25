@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="MainApplication.Views.NodeEditorTab.NodeDetailControl"
+<UserControl x:Class="MainApplication.Views.NodeEditorTab.NodeDetailControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
@@ -60,6 +60,49 @@
                            VerticalAlignment="Center" Margin="0,0,8,0" FontFamily="Consolas"/>
             </DockPanel>
         </DockPanel>
+        <Grid Margin="0,0,0,5">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="60"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0"
+                       Grid.Column="0"
+                       Grid.RowSpan="2"
+                       Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=WorkEstimateMinutes}"
+                       FontWeight="Bold"
+                       Margin="0,0,0,5"/>
+            <Grid Grid.Row="0" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="64"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBox Text="{Binding Detail.WorkEstimateMinutes, UpdateSourceTrigger=PropertyChanged, TargetNullValue='', ValidatesOnExceptions=True}"
+                         HorizontalContentAlignment="Right">
+                    <i:Interaction.Triggers>
+                        <i:EventTrigger EventName="TextChanged">
+                            <i:InvokeCommandAction Command="{Binding Detail.NotifyEditedCommand}" />
+                        </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                </TextBox>
+                <TextBlock Grid.Column="1" Text="min" VerticalAlignment="Center" Margin="4,0,0,0"/>
+                <TextBlock Grid.Column="2"
+                           Text="{Binding Detail.WorkEstimateDisplayText}"
+                           VerticalAlignment="Center"
+                           Margin="8,0,0,0"
+                           MinWidth="52"/>
+            </Grid>
+            <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="0,2,0,0">
+                <RepeatButton Content="-60" Command="{Binding Detail.DecreaseWorkEstimateHourCommand}" Width="36"/>
+                <RepeatButton Content="-" Command="{Binding Detail.DecreaseWorkEstimateMinutesCommand}" Width="24" Margin="2,0,0,0"/>
+                <RepeatButton Content="+" Command="{Binding Detail.IncreaseWorkEstimateMinutesCommand}" Width="24" Margin="2,0,0,0"/>
+                <RepeatButton Content="+60" Command="{Binding Detail.IncreaseWorkEstimateHourCommand}" Width="36" Margin="2,0,0,0"/>
+            </StackPanel>
+        </Grid>
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Left"
                        Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=Comment}"

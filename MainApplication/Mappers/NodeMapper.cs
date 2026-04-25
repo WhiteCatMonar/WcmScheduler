@@ -1,4 +1,4 @@
-﻿using MainApplication.Models.SaveData;
+using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.ProjectModel;
 using System.Windows;
 using static MainApplication.ViewModels.ProjectModel.PortViewModel;
@@ -29,6 +29,7 @@ namespace MainApplication.Mappers
                     Person = vm.Detail.Person,
                     StartDateTime = vm.Detail.StartDateTime,
                     EndDateTime = vm.Detail.EndDateTime,
+                    WorkEstimateMinutes = vm.Detail.WorkEstimateMinutes,
                     Comment = vm.Detail.Comment
                 },
 
@@ -59,6 +60,7 @@ namespace MainApplication.Mappers
             loadedNode.Detail.Person = data.Details.Person;
             loadedNode.Detail.StartDateTime = data.Details.StartDateTime;
             loadedNode.Detail.EndDateTime = data.Details.EndDateTime;
+            loadedNode.Detail.WorkEstimateMinutes = data.Details.WorkEstimateMinutes;
             loadedNode.Detail.Comment = data.Details.Comment;
             loadedNode.Detail.CommitEdits();
             foreach (var port in data.Ports)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace MainApplication.Models.SaveData
 {
@@ -27,6 +27,11 @@ namespace MainApplication.Models.SaveData
         /// 終了日時(完了日時)(未設定の場合はnull)
         /// </summary>
         public DateTime? EndDateTime { get; set; }
+
+        /// <summary>
+        /// 作業見積時間(分単位)(未設定の場合はnull)
+        /// </summary>
+        public int? WorkEstimateMinutes { get; set; }
 
         /// <summary>
         /// 備考・コメント
