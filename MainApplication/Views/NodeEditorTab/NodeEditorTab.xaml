@@ -79,11 +79,24 @@
             </StackPanel>
 
             <!-- 動的UI：タスク情報 -->
-            <StackPanel Grid.Row="1" Margin="5">
-                <TextBlock Text="タスク情報" FontWeight="Bold" Foreground="{DynamicResource TaskEditorHeadingTextBrush}" Margin="0,0,0,5"/>
-                <ContentControl Content="{Binding Nodes.SelectedNode}"
-                                ContentTemplateSelector="{StaticResource NodeDetailTemplateSelector}"/>
-            </StackPanel>
+            <Grid Grid.Row="1" Margin="5">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0"
+                           Text="タスク情報"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource TaskEditorHeadingTextBrush}"
+                           Margin="0,0,0,5"/>
+                <ScrollViewer Grid.Row="1"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled"
+                              Background="{DynamicResource SidePanelBackgroundBrush}">
+                    <ContentControl Content="{Binding Nodes.SelectedNode}"
+                                    ContentTemplateSelector="{StaticResource NodeDetailTemplateSelector}"/>
+                </ScrollViewer>
+            </Grid>
             
             <!-- 固定UI：履歴操作 -->
             <controls:HistoryControl Grid.Row="2" />

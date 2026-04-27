@@ -10,6 +10,7 @@
 
 - ノードの追加、削除、選択、移動
 - ノード詳細情報の編集
+- 作業見積時間と中断期間の編集
 - 入出力ポートの表示
 - 接続線の作成、削除、選択
 - ズーム、パン、グリッド表示
@@ -58,7 +59,8 @@
 | `NodeEditorViewModel` | タスクエディタ全体の状態管理 |
 | `NodeCollectionViewModel` | ノード一覧、追加、削除、選択、移動 |
 | `NodeViewModel` | ノード1個の状態 |
-| `NodeDetailViewModel` | タスク名、担当者、日時、コメントなどの詳細情報 |
+| `NodeDetailViewModel` | タスク名、担当者、日時、作業見積時間、中断期間、コメントなどの詳細情報 |
+| `SuspensionPeriodViewModel` | タスク中断期間1件の状態と日時編集 |
 | `PortViewModel` | 入出力ポートの状態 |
 | `ConnectionCollectionViewModel` | 接続線一覧、作成、削除、選択 |
 | `ConnectionViewModel` | 接続線1本の状態と描画ジオメトリ |
@@ -75,6 +77,7 @@
 | --- | --- |
 | `GridManager` | 論理座標、ズーム、パン、グリッド線生成 |
 | `UndoRedoManager` | Undo/Redoスタックと履歴管理 |
+| `IEditableField` | 遅延コミット対象フィールドの共通インターフェース |
 | `EditableField` | 遅延コミット対象の編集フィールド管理 |
 | `TabInfo` | タブ表示用情報 |
 | `IDateTimeEditorService` | 日時編集ダイアログ起動サービスのインターフェース |
@@ -86,6 +89,53 @@
 | `ColorPickerService` | 汎用色編集ダイアログの起動 |
 | `ThemeSettingModel` | テーマ設定の保存モデル |
 | `AppSettingsModel` | アプリケーション設定の保存モデル |
+
+### Action
+
+| クラス | 役割 |
+| --- | --- |
+| `AddNodeAction` | ノード追加のUndo/Redo |
+| `DeleteNodeAction` | ノード削除のUndo/Redo |
+| `MoveNodeAction` | ノード移動のUndo/Redo |
+| `AddConnectionAction` | 接続線追加のUndo/Redo |
+| `DeleteConnectionAction` | 接続線削除のUndo/Redo |
+| `EditNodeDetailPropertyAction` | ノード詳細プロパティ編集のUndo/Redo |
+| `AddSuspensionPeriodAction` | 中断期間追加のUndo/Redo |
+| `DeleteSuspensionPeriodAction` | 中断期間削除のUndo/Redo |
+| `EditSuspensionPeriodPropertyAction` | 中断期間プロパティ編集のUndo/Redo |
+
+### SaveData
+
+| クラス | 役割 |
+| --- | --- |
+| `TaskEditorDataModel` | タスクエディタ全体の保存データ |
+| `NodeDataModel` | ノード1件の保存データ |
+| `NodeDetailsDataModel` | ノード詳細情報の保存データ |
+| `SuspensionPeriodDataModel` | タスク中断期間の保存データ |
+| `ConnectionDataModel` | 接続線の保存データ |
+| `PortDataModel` | ポートの保存データ |
+| `PositionDataModel` | 座標の保存データ |
+
+## タスク詳細情報
+
+ノード詳細では、ガントチャート表示やスケジュール算定の前提となるタスク情報を管理します。
+
+主な管理項目は以下です。
+
+- タスク名
+- 担当者
+- 開始日時
+- 終了日時
+- 作業見積時間
+- 中断期間
+- コメント
+
+作業見積時間は分単位で保持します。
+画面上では分入力に加えて、`4h30m` のような時間換算表示を行います。
+
+中断期間は任意数を保持できます。
+各中断期間は開始日時と終了日時を持ち、日時編集ダイアログを通じて編集します。
+同一タスク内の中断期間同士が重複することは入力時点では許可し、ガントチャート算定前に正規化・マージする方針です。
 
 ## 依存関係図
 
@@ -104,7 +154,7 @@ grid-gap: 40
 views: Views {
   style.fill: "#D0E8FF"
   style.stroke: "#4A90E2"
-  grid-columns: 3
+  grid-columns: 4
   grid-gap: 16
 
   MainWindow
@@ -147,10 +197,11 @@ viewmodels: ViewModels {
   ColorPickerViewModel
 
   node: Node {
-    grid-rows: 4
+    grid-rows: 5
     NodeCollectionViewModel
     NodeViewModel
     NodeDetailViewModel
+    SuspensionPeriodViewModel
     PortViewModel
   }
 
@@ -171,6 +222,7 @@ core: CoreAndServices {
   TabInfo
   GridManager
   UndoRedoManager
+  IEditableField
   EditableField
   IDateTimeEditorService
   DateTimeEditorService
@@ -181,6 +233,7 @@ core: CoreAndServices {
   ColorPickerService
   ThemeSettingModel
   AppSettingsModel
+  SuspensionPeriodDataModel
 }
 
 views -> viewmodels: binding / commands
@@ -292,6 +345,7 @@ viewmodels: ViewModels {
   ConnectionCollectionViewModel
   ConnectionViewModel
   LineViewModel
+  PortViewModel
   Blank1_5:{style.opacity:0}
   Blank1_6:{style.opacity:0}
 
@@ -302,8 +356,9 @@ viewmodels: ViewModels {
   Blank2_1:{style.opacity:0}
   NodeCollectionViewModel
   NodeViewModel
-  PortViewModel
+  NodeDetailViewModel
   Blank2_2:{style.opacity:0}
+  Blank2_3:{style.opacity:0}
 
   Blank3_1:{style.opacity:0}
   Blank3_2:{style.opacity:0}
@@ -312,7 +367,8 @@ viewmodels: ViewModels {
   Blank3_5:{style.opacity:0}
   Blank3_6:{style.opacity:0}
   Blank3_7:{style.opacity:0}
-  NodeDetailViewModel
+  Blank3_8:{style.opacity:0}
+  SuspensionPeriodViewModel
   DateTimeEditorViewModel
 }
 
@@ -324,18 +380,19 @@ core: CoreAndServices {
   Blank1_1:{style.opacity:0}
   TabInfo
   GridManager
-  UndoRedoManager
   Blank1_2:{style.opacity:0}
+  UndoRedoManager
   Blank1_3:{style.opacity:0}
   IDateTimeEditorService
   EditableField
+  IEditableField
   Blank1_4:{style.opacity:0}
 
   Blank2_1:{style.opacity:0}
   Blank2_2:{style.opacity:0}
   Blank2_3:{style.opacity:0}
-  Blank2_4:{style.opacity:0}
   DateTimeEditorService
+  Blank2_4:{style.opacity:0}
   Blank2_5:{style.opacity:0}
   Blank2_6:{style.opacity:0}
   Blank2_7:{style.opacity:0}
@@ -362,9 +419,13 @@ viewmodels.NodeCollectionViewModel -> core.IDateTimeEditorService
 viewmodels.NodeViewModel -> viewmodels.NodeDetailViewModel
 viewmodels.NodeViewModel -> viewmodels.PortViewModel
 viewmodels.NodeViewModel -> core.IDateTimeEditorService
+viewmodels.NodeDetailViewModel -> viewmodels.SuspensionPeriodViewModel
 viewmodels.NodeDetailViewModel -> core.EditableField
+viewmodels.NodeDetailViewModel -> core.IEditableField
 viewmodels.NodeDetailViewModel -> core.UndoRedoManager
 viewmodels.NodeDetailViewModel -> core.IDateTimeEditorService
+viewmodels.SuspensionPeriodViewModel -> core.UndoRedoManager
+viewmodels.SuspensionPeriodViewModel -> core.IDateTimeEditorService
 
 viewmodels.ConnectionCollectionViewModel -> viewmodels.ConnectionViewModel
 viewmodels.ConnectionCollectionViewModel -> core.UndoRedoManager
@@ -470,4 +531,4 @@ ViewはUIイベントを受け取り、できるだけ `NodeEditorViewModel` へ
 ノードや接続線の座標は論理座標で管理し、表示時にズームとパンを反映します。
 
 Undo/Redo対象の操作は `IUndoableAction` として表現します。
-ノード追加、削除、移動、接続線追加、削除、ノード詳細編集が主な履歴対象です。
+ノード追加、削除、移動、接続線追加、削除、ノード詳細編集、中断期間追加、削除、中断期間編集が主な履歴対象です。

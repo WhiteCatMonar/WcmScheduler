@@ -34,6 +34,11 @@ namespace MainApplication.Models.SaveData
         public int? WorkEstimateMinutes { get; set; }
 
         /// <summary>
+        /// 中断期間一覧
+        /// </summary>
+        public List<SuspensionPeriodDataModel> SuspensionPeriods { get; set; } = [];
+
+        /// <summary>
         /// 備考・コメント
         /// </summary>
         public string? Comment { get; set; }

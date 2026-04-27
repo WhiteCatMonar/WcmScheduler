@@ -1,6 +1,7 @@
 using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -49,6 +50,7 @@ namespace MainApplication.ViewModels.ProjectModel
             DecreaseWorkEstimateMinutesCommand = new RelayCommand(DecreaseWorkEstimateMinutes);
             IncreaseWorkEstimateHourCommand = new RelayCommand(IncreaseWorkEstimateHour);
             DecreaseWorkEstimateHourCommand = new RelayCommand(DecreaseWorkEstimateHour);
+            AddSuspensionPeriodCommand = new RelayCommand(AddSuspensionPeriod);
             NotifyEditedCommand = new RelayCommand(() => NotifyEdited());
 
             /* 編集遅延コミット用タイマー */
@@ -117,6 +119,11 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public string WorkEstimateDisplayText => FormatWorkEstimate(WorkEstimateMinutes);
 
+        /// <summary>
+        /// 中断期間一覧。
+        /// </summary>
+        public ObservableCollection<SuspensionPeriodViewModel> SuspensionPeriods { get; } = [];
+
         private DateTime? _startDateTime;
         [DisplayName("開始日時")]
         public DateTime? StartDateTime
@@ -183,6 +190,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public ICommand DecreaseWorkEstimateMinutesCommand { get; }
         public ICommand IncreaseWorkEstimateHourCommand { get; }
         public ICommand DecreaseWorkEstimateHourCommand { get; }
+        public ICommand AddSuspensionPeriodCommand { get; }
 
         private void EditDateTime(bool isStart)
         {
@@ -264,6 +272,79 @@ namespace MainApplication.ViewModels.ProjectModel
             var current = WorkEstimateMinutes ?? 0;
             WorkEstimateMinutes = Math.Max(0, current + deltaMinutes);
             NotifyEdited();
+        }
+
+        /* ---------------------------------------------------------
+         * 中断期間編集
+         * --------------------------------------------------------- */
+
+        /// <summary>
+        /// 中断期間を追加する。
+        /// </summary>
+        private void AddSuspensionPeriod()
+        {
+            var period = CreateSuspensionPeriod(null, null);
+            _undoRedo.Execute(
+                new AddSuspensionPeriodAction(this, period, SuspensionPeriods.Count)
+            );
+        }
+
+        /// <summary>
+        /// 中断期間ViewModelを生成する。
+        /// </summary>
+        /// <param name="startDateTime">中断開始日時。</param>
+        /// <param name="endDateTime">中断終了日時。</param>
+        /// <returns>中断期間ViewModel。</returns>
+        public SuspensionPeriodViewModel CreateSuspensionPeriod(DateTime? startDateTime, DateTime? endDateTime)
+        {
+            return new SuspensionPeriodViewModel(this, _undoRedo, _dateTimeEditor, startDateTime, endDateTime);
+        }
+
+        /// <summary>
+        /// 中断期間を削除する。
+        /// </summary>
+        /// <param name="period">削除対象の中断期間。</param>
+        public void DeleteSuspensionPeriod(SuspensionPeriodViewModel period)
+        {
+            var index = SuspensionPeriods.IndexOf(period);
+            if (index < 0)
+            {
+                return;
+            }
+
+            _undoRedo.Execute(
+                new DeleteSuspensionPeriodAction(this, period, index)
+            );
+        }
+
+        /// <summary>
+        /// 中断期間を指定位置に追加する。
+        /// </summary>
+        /// <param name="period">追加する中断期間。</param>
+        /// <param name="index">追加位置。</param>
+        public void InsertSuspensionPeriodDirect(SuspensionPeriodViewModel period, int index)
+        {
+            if (SuspensionPeriods.Contains(period))
+            {
+                return;
+            }
+
+            if (index < 0 || index > SuspensionPeriods.Count)
+            {
+                SuspensionPeriods.Add(period);
+                return;
+            }
+
+            SuspensionPeriods.Insert(index, period);
+        }
+
+        /// <summary>
+        /// 中断期間を削除する。
+        /// </summary>
+        /// <param name="period">削除対象の中断期間。</param>
+        public void RemoveSuspensionPeriodDirect(SuspensionPeriodViewModel period)
+        {
+            SuspensionPeriods.Remove(period);
         }
 
         /* ---------------------------------------------------------

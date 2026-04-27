@@ -30,6 +30,15 @@ namespace MainApplication.Mappers
                     StartDateTime = vm.Detail.StartDateTime,
                     EndDateTime = vm.Detail.EndDateTime,
                     WorkEstimateMinutes = vm.Detail.WorkEstimateMinutes,
+                    SuspensionPeriods =
+                    [
+                        ..
+                        vm.Detail.SuspensionPeriods.Select(p => new SuspensionPeriodDataModel
+                        {
+                            StartDateTime = p.StartDateTime,
+                            EndDateTime = p.EndDateTime
+                        })
+                    ],
                     Comment = vm.Detail.Comment
                 },
 
@@ -62,6 +71,12 @@ namespace MainApplication.Mappers
             loadedNode.Detail.EndDateTime = data.Details.EndDateTime;
             loadedNode.Detail.WorkEstimateMinutes = data.Details.WorkEstimateMinutes;
             loadedNode.Detail.Comment = data.Details.Comment;
+            foreach (var period in data.Details.SuspensionPeriods)
+            {
+                loadedNode.Detail.SuspensionPeriods.Add(
+                    loadedNode.Detail.CreateSuspensionPeriod(period.StartDateTime, period.EndDateTime)
+                );
+            }
             loadedNode.Detail.CommitEdits();
             foreach (var port in data.Ports)
             {

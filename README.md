@@ -30,6 +30,7 @@
 │   │   ├── 📄 PortDataModel.cs                        # ノード内ポート管理用情報
 │   │   ├── 📄 PositionDataModel.cs                    # 座標管理用情報
 │   │   ├── 📄 RootSaveDataModel.cs                    # 保存するデータのルート情報
+│   │   ├── 📄 SuspensionPeriodDataModel.cs            # タスク中断期間の保存情報
 │   │   └── 📄 TaskEditorDataModel.cs                  # タスク編集機能についての情報
 │   └── 📂 Settings                                    # 設定関連のモデル
 │       ├── 📄 AppSettingsModel.cs                     # アプリケーション設定情報
@@ -45,9 +46,12 @@
 │   ├── 📂 Actions                                     # Undo/Redo用の操作履歴アクション
 │   │   ├── 📄 AddConnectionAction.cs                  # Undo/Redoアクション：接続線追加
 │   │   ├── 📄 AddNodeAction.cs                        # Undo/Redoアクション：ノード追加
+│   │   ├── 📄 AddSuspensionPeriodAction.cs            # Undo/Redoアクション：中断期間追加
 │   │   ├── 📄 DeleteConnectionAction.cs               # Undo/Redoアクション：接続線削除
 │   │   ├── 📄 DeleteNodeAction.cs                     # Undo/Redoアクション：ノード削除
+│   │   ├── 📄 DeleteSuspensionPeriodAction.cs         # Undo/Redoアクション：中断期間削除
 │   │   ├── 📄 EditNodeDetailPropertyAction.cs         # Undo/Redoアクション：ノード詳細プロパティ編集
+│   │   ├── 📄 EditSuspensionPeriodPropertyAction.cs   # Undo/Redoアクション：中断期間プロパティ編集
 │   │   └── 📄 MoveNodeAction.cs                       # Undo/Redoアクション：ノード移動
 │   │
 │   ├── 📂 Converters                                  # XAMLバインディング用コンバータ
@@ -75,7 +79,8 @@
 │   │   ├── 📄 NodeEditorViewModel.cs                  # ノードエディタ全体の状態管理(ズーム・パン・Undo/Redo)
 │   │   ├── 📄 NodeViewModel.cs                        # ノード1個の状態・編集ロジック
 │   │   ├── 📄 PortViewModel.cs                        # ポート(入出力端子)の状態
-│   │   └── 📄 ProjectViewModel.cs                     # 1つのプロジェクト全体の管理
+│   │   ├── 📄 ProjectViewModel.cs                     # 1つのプロジェクト全体の管理
+│   │   └── 📄 SuspensionPeriodViewModel.cs            # タスク中断期間の状態・編集ロジック
 │   │
 │   ├── 📂 Service
 │   │   ├── 📄 ColorPickerService.cs                   # 色編集ダイアログを開くサービス(UI呼び出し)
