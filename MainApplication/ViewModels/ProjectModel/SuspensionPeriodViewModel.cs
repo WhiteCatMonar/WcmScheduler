@@ -52,6 +52,7 @@ namespace MainApplication.ViewModels.ProjectModel
             set => SetProperty(
                 ref _startDateTime,
                 value,
+                [nameof(IsIgnoredForNormalization)],
                 CreateHooksFromValue(
                     value,
                     pre: (oldValue, newValue) =>
@@ -82,6 +83,7 @@ namespace MainApplication.ViewModels.ProjectModel
             set => SetProperty(
                 ref _endDateTime,
                 value,
+                [nameof(IsIgnoredForNormalization)],
                 CreateHooksFromValue(
                     value,
                     pre: (oldValue, newValue) =>
@@ -116,6 +118,31 @@ namespace MainApplication.ViewModels.ProjectModel
         /// 中断期間削除コマンド。
         /// </summary>
         public ICommand DeleteCommand { get; }
+
+        /// <summary>
+        /// 正規化済み中断期間の算定対象から除外されるかどうか。
+        /// </summary>
+        public bool IsIgnoredForNormalization => StartDateTime == null || EndDateTime == null;
+
+        /// <summary>
+        /// 中断開始日時が他の中断期間と重複しているかどうか。
+        /// </summary>
+        public bool IsStartDateTimeOverlapping => _owner.IsSuspensionPeriodStartOverlapping(this);
+
+        /// <summary>
+        /// 中断終了日時が他の中断期間と重複しているかどうか。
+        /// </summary>
+        public bool IsEndDateTimeOverlapping => _owner.IsSuspensionPeriodEndOverlapping(this);
+
+        /// <summary>
+        /// 正規化または重複状態に関するプロパティ変更通知を行う。
+        /// </summary>
+        public void NotifyNormalizationStateChanged()
+        {
+            OnPropertyChangedA(nameof(IsIgnoredForNormalization));
+            OnPropertyChangedA(nameof(IsStartDateTimeOverlapping));
+            OnPropertyChangedA(nameof(IsEndDateTimeOverlapping));
+        }
 
         /// <summary>
         /// 中断開始日時を設定できるかどうかを判定する。

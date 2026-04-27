@@ -145,6 +145,21 @@
                 <Button Content="中断期間追加"
                         Command="{Binding Detail.AddSuspensionPeriodCommand}"
                         Margin="0,0,0,4"/>
+                <TextBlock Text="{Binding Detail.SuspensionPeriodWarningText}"
+                           Foreground="{DynamicResource NodeStatusPendingBrush}"
+                           TextWrapping="Wrap"
+                           Margin="0,0,0,4">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Detail.SuspensionPeriodWarningText}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
                 <ItemsControl ItemsSource="{Binding Detail.SuspensionPeriods}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
@@ -161,8 +176,21 @@
                                                 Width="40"/>
                                         <TextBlock Text="{Binding StartDateTime, Converter={StaticResource DateTimeDisplayConverter}}"
                                                    VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource WindowTextBrush}"
-                                                   FontFamily="Consolas"/>
+                                                   FontFamily="Consolas">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource WindowTextBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsIgnoredForNormalization}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource NodeStatusPendingBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsStartDateTimeOverlapping}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource NodeStatusPendingBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </DockPanel>
                                     <DockPanel LastChildFill="True" Margin="0,0,0,2">
                                         <Button DockPanel.Dock="Right"
@@ -171,8 +199,21 @@
                                                 Width="40"/>
                                         <TextBlock Text="{Binding EndDateTime, Converter={StaticResource DateTimeDisplayConverter}}"
                                                    VerticalAlignment="Center"
-                                                   Foreground="{DynamicResource WindowTextBrush}"
-                                                   FontFamily="Consolas"/>
+                                                   FontFamily="Consolas">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="{DynamicResource WindowTextBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsIgnoredForNormalization}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource NodeStatusPendingBrush}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsEndDateTimeOverlapping}" Value="True">
+                                                            <Setter Property="Foreground" Value="{DynamicResource NodeStatusPendingBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </DockPanel>
                                     <Button Content="削除"
                                             Command="{Binding DeleteCommand}"/>

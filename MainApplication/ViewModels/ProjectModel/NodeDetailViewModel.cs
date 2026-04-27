@@ -1,6 +1,7 @@
 using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
+using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
@@ -72,6 +73,8 @@ namespace MainApplication.ViewModels.ProjectModel
                 new EditableField<string?>("Comment",  () => Comment,  v => Comment = v),
                 new EditableField<int?>("WorkEstimateMinutes", () => WorkEstimateMinutes, v => WorkEstimateMinutes = v)
             ];
+
+            SuspensionPeriods.CollectionChanged += OnSuspensionPeriodsChanged;
         }
 
         /* ---------------------------------------------------------
@@ -123,6 +126,42 @@ namespace MainApplication.ViewModels.ProjectModel
         /// 中断期間一覧。
         /// </summary>
         public ObservableCollection<SuspensionPeriodViewModel> SuspensionPeriods { get; } = [];
+
+        /// <summary>
+        /// 中断期間に重複区間があるかどうか。
+        /// </summary>
+        public bool HasOverlappingSuspensionPeriods => ContainsMergeableSuspensionPeriods(false);
+
+        /// <summary>
+        /// 中断期間に重複または連続区間があるかどうか。
+        /// </summary>
+        public bool HasMergeableSuspensionPeriods => ContainsMergeableSuspensionPeriods(true);
+
+        /// <summary>
+        /// 中断期間の補助表示文。
+        /// </summary>
+        public string SuspensionPeriodWarningText
+        {
+            get
+            {
+                if (HasOverlappingSuspensionPeriods)
+                {
+                    return "中断期間に重複があります。ガントチャート算定時に統合されます。";
+                }
+
+                if (HasMergeableSuspensionPeriods)
+                {
+                    return "連続する中断期間があります。ガントチャート算定時に統合されます。";
+                }
+
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// ガントチャート算定用に正規化した中断期間一覧。
+        /// </summary>
+        public IReadOnlyList<SuspensionPeriodRange> NormalizedSuspensionPeriods => GetNormalizedSuspensionPeriods();
 
         private DateTime? _startDateTime;
         [DisplayName("開始日時")]
@@ -345,6 +384,197 @@ namespace MainApplication.ViewModels.ProjectModel
         public void RemoveSuspensionPeriodDirect(SuspensionPeriodViewModel period)
         {
             SuspensionPeriods.Remove(period);
+        }
+
+        /// <summary>
+        /// 指定した中断期間の開始日時が他の中断期間と重複しているかどうかを判定する。
+        /// </summary>
+        /// <param name="target">判定対象の中断期間。</param>
+        /// <returns>開始日時が他の中断期間内にある場合はtrue。</returns>
+        public bool IsSuspensionPeriodStartOverlapping(SuspensionPeriodViewModel target)
+        {
+            return IsDateTimeOverlapping(target, target.StartDateTime, true);
+        }
+
+        /// <summary>
+        /// 指定した中断期間の終了日時が他の中断期間と重複しているかどうかを判定する。
+        /// </summary>
+        /// <param name="target">判定対象の中断期間。</param>
+        /// <returns>終了日時が他の中断期間内にある場合はtrue。</returns>
+        public bool IsSuspensionPeriodEndOverlapping(SuspensionPeriodViewModel target)
+        {
+            return IsDateTimeOverlapping(target, target.EndDateTime, false);
+        }
+
+        /// <summary>
+        /// 中断期間一覧変更時に監視対象を更新する。
+        /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">変更内容。</param>
+        private void OnSuspensionPeriodsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (SuspensionPeriodViewModel period in e.OldItems)
+                {
+                    period.PropertyChanged -= OnSuspensionPeriodPropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (SuspensionPeriodViewModel period in e.NewItems)
+                {
+                    period.PropertyChanged += OnSuspensionPeriodPropertyChanged;
+                }
+            }
+
+            NotifySuspensionPeriodStateChanged();
+        }
+
+        /// <summary>
+        /// 中断期間の日時変更時に正規化状態を更新する。
+        /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">変更内容。</param>
+        private void OnSuspensionPeriodPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName is nameof(SuspensionPeriodViewModel.StartDateTime) or nameof(SuspensionPeriodViewModel.EndDateTime))
+            {
+                NotifySuspensionPeriodStateChanged();
+            }
+        }
+
+        /// <summary>
+        /// 中断期間の検出結果と正規化結果の変更通知を行う。
+        /// </summary>
+        private void NotifySuspensionPeriodStateChanged()
+        {
+            OnPropertyChangedA(nameof(HasOverlappingSuspensionPeriods));
+            OnPropertyChangedA(nameof(HasMergeableSuspensionPeriods));
+            OnPropertyChangedA(nameof(SuspensionPeriodWarningText));
+            OnPropertyChangedA(nameof(NormalizedSuspensionPeriods));
+
+            foreach (var period in SuspensionPeriods)
+            {
+                period.NotifyNormalizationStateChanged();
+            }
+        }
+
+        /// <summary>
+        /// 指定日時が他の中断期間内に含まれるかどうかを判定する。
+        /// </summary>
+        /// <param name="target">判定対象の中断期間。</param>
+        /// <param name="dateTime">判定対象日時。</param>
+        /// <param name="isStartDateTime">開始日時として判定する場合はtrue。</param>
+        /// <returns>他の中断期間内に含まれる場合はtrue。</returns>
+        private bool IsDateTimeOverlapping(SuspensionPeriodViewModel target, DateTime? dateTime, bool isStartDateTime)
+        {
+            if (dateTime == null || target.StartDateTime == null || target.EndDateTime == null)
+            {
+                return false;
+            }
+
+            foreach (var period in SuspensionPeriods)
+            {
+                if (ReferenceEquals(period, target))
+                {
+                    continue;
+                }
+
+                if (period.StartDateTime == null || period.EndDateTime == null)
+                {
+                    continue;
+                }
+
+                if (isStartDateTime)
+                {
+                    if (period.StartDateTime <= dateTime && dateTime < period.EndDateTime)
+                    {
+                        return true;
+                    }
+                }
+                else if (period.StartDateTime < dateTime && dateTime <= period.EndDateTime)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 重複または連続して統合可能な中断期間があるかどうかを判定する。
+        /// </summary>
+        /// <param name="includeAdjacent">連続区間を統合可能として扱う場合はtrue。</param>
+        /// <returns>統合可能な中断期間がある場合はtrue。</returns>
+        private bool ContainsMergeableSuspensionPeriods(bool includeAdjacent)
+        {
+            var periods = GetCompleteSuspensionPeriods();
+
+            for (var i = 1; i < periods.Count; i++)
+            {
+                if (includeAdjacent)
+                {
+                    if (periods[i].StartDateTime <= periods[i - 1].EndDateTime)
+                    {
+                        return true;
+                    }
+                }
+                else if (periods[i].StartDateTime < periods[i - 1].EndDateTime)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// ガントチャート算定用に中断期間の重複と連続区間を統合する。
+        /// </summary>
+        /// <returns>正規化済み中断期間一覧。</returns>
+        private IReadOnlyList<SuspensionPeriodRange> GetNormalizedSuspensionPeriods()
+        {
+            var periods = GetCompleteSuspensionPeriods();
+            var normalized = new List<SuspensionPeriodRange>();
+
+            foreach (var period in periods)
+            {
+                if (normalized.Count == 0)
+                {
+                    normalized.Add(period);
+                    continue;
+                }
+
+                var last = normalized[^1];
+                if (period.StartDateTime <= last.EndDateTime)
+                {
+                    normalized[^1] = new SuspensionPeriodRange(
+                        last.StartDateTime,
+                        period.EndDateTime > last.EndDateTime ? period.EndDateTime : last.EndDateTime
+                    );
+                    continue;
+                }
+
+                normalized.Add(period);
+            }
+
+            return normalized;
+        }
+
+        /// <summary>
+        /// 開始日時と終了日時が設定済みの中断期間を開始日時順に取得する。
+        /// </summary>
+        /// <returns>入力済み中断期間一覧。</returns>
+        private List<SuspensionPeriodRange> GetCompleteSuspensionPeriods()
+        {
+            return SuspensionPeriods
+                .Where(period => period.StartDateTime != null && period.EndDateTime != null)
+                .Select(period => new SuspensionPeriodRange(period.StartDateTime!.Value, period.EndDateTime!.Value))
+                .OrderBy(period => period.StartDateTime)
+                .ThenBy(period => period.EndDateTime)
+                .ToList();
         }
 
         /* ---------------------------------------------------------
