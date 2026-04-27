@@ -75,6 +75,20 @@
             </TextBox>
         </DockPanel>
         <DockPanel LastChildFill="True">
+            <TextBlock DockPanel.Dock="Left"
+                       Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=Comment}"
+                       FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
+            <TextBox DockPanel.Dock="Left" Text="{Binding Detail.Comment, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5"
+                     AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                     MaxHeight="100" VerticalAlignment="Top">
+                <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="TextChanged">
+                        <i:InvokeCommandAction Command="{Binding Detail.NotifyEditedCommand}" />
+                    </i:EventTrigger>
+                </i:Interaction.Triggers>
+            </TextBox>
+        </DockPanel>
+        <DockPanel LastChildFill="True">
             <Button DockPanel.Dock="Right" Content="編集" Command="{Binding Detail.EditStartDateTimeCommand}" Width="40"/>
             <DockPanel LastChildFill="True">
                 <TextBlock DockPanel.Dock="Left"
@@ -137,11 +151,13 @@
                 <RepeatButton Content="+60" Command="{Binding Detail.IncreaseWorkEstimateHourCommand}" Width="36" Margin="2,0,0,0"/>
             </StackPanel>
         </Grid>
-        <Expander Header="中断期間"
-                  Margin="0,0,0,5"
-                  Foreground="{DynamicResource WindowTextBrush}"
-                  Background="{DynamicResource SidePanelBackgroundBrush}">
-            <StackPanel Margin="0,4,0,0">
+        <StackPanel Margin="0,0,0,5"
+                    Background="{DynamicResource SidePanelBackgroundBrush}"
+                    TextElement.Foreground="{DynamicResource WindowTextBrush}">
+            <TextBlock Text="中断期間"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource TaskEditorHeadingTextBrush}"
+                       Margin="0,0,0,5"/>
                 <Button Content="中断期間追加"
                         Command="{Binding Detail.AddSuspensionPeriodCommand}"
                         Margin="0,0,0,4"/>
@@ -222,21 +238,6 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-            </StackPanel>
-        </Expander>
-        <DockPanel LastChildFill="True">
-            <TextBlock DockPanel.Dock="Left"
-                       Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=Comment}"
-                       FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
-            <TextBox DockPanel.Dock="Left" Text="{Binding Detail.Comment, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5"
-                     AcceptsReturn="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
-                     MaxHeight="100" VerticalAlignment="Top">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="TextChanged">
-                        <i:InvokeCommandAction Command="{Binding Detail.NotifyEditedCommand}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </TextBox>
-        </DockPanel>
+        </StackPanel>
     </StackPanel>
 </UserControl>
