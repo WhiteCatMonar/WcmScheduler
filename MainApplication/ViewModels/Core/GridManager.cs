@@ -178,11 +178,11 @@ namespace MainApplication.ViewModels.Core
             /* ノード配置可能な位置はノードサイズの影響を受けるため、配置可能エリアを計算 */
             Point nodeAreaEnd = CanvasViewAreaEnd.Sub(node.Width, node.Height);
 
-            /* 座標を配置可能エリアでクリップする */
-            Point clamped = Position.Clamp(CanvasViewAreaStart, nodeAreaEnd);
+            /* 座標を配置可能エリアでクリップし、グリッドにスナップさせる */
+            Point snapped = Position.Clamp(CanvasViewAreaStart, nodeAreaEnd).RoundSnap(GridSize);
 
-            /* グリッドにスナップさせた座標を返す */
-            return clamped.RoundSnap(GridSize);
+            /* スナップにより表示領域外へ丸められる場合があるため、最後に再度クリップする */
+            return snapped.Clamp(CanvasViewAreaStart, nodeAreaEnd);
         }
 
         /* ---------------------------------------------------------

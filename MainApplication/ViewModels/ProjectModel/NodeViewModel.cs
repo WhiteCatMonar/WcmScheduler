@@ -1,8 +1,7 @@
-﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Runtime.InteropServices.Swift;
 using System.Windows;
 
 namespace MainApplication.ViewModels.ProjectModel
@@ -16,6 +15,17 @@ namespace MainApplication.ViewModels.ProjectModel
     /// <param name="dateTimeEditor">ノードが利用する時刻編集サービス</param>
     public class NodeViewModel(UndoRedoManager undoRedo, IDateTimeEditorService dateTimeEditor) : ViewModelBase
     {
+        /// <summary>
+        /// タスクの状態。
+        /// </summary>
+        public enum TaskStatus
+        {
+            Ready,
+            Pending,
+            InProgress,
+            Done
+        }
+
         /* ---------------------------------------------------------
          * ノード種別
          * --------------------------------------------------------- */
@@ -79,6 +89,17 @@ namespace MainApplication.ViewModels.ProjectModel
         {
             get => _isSelected;
             set => SetProperty(ref _isSelected, value);
+        }
+
+        private TaskStatus _status = TaskStatus.Ready;
+
+        /// <summary>
+        /// 現在のタスク状態。
+        /// </summary>
+        public TaskStatus Status
+        {
+            get => _status;
+            set => SetProperty(ref _status, value);
         }
 
         /* ---------------------------------------------------------

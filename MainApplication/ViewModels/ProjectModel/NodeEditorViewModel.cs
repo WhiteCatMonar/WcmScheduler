@@ -3,9 +3,12 @@ using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using MainApplication.Views.NodeEditorTab.Controls;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace MainApplication.ViewModels.ProjectModel
 {
@@ -15,6 +18,8 @@ namespace MainApplication.ViewModels.ProjectModel
     /// </summary>
     public class NodeEditorViewModel : ViewModelBase
     {
+        private readonly DispatcherTimer _statusTimer;
+
         /* ---------------------------------------------------------
          * 基本プロパティ(UIの表示状態)
          * --------------------------------------------------------- */
@@ -257,6 +262,7 @@ namespace MainApplication.ViewModels.ProjectModel
         {
             Nodes.UpdateAllNodes();
             Connections.UpdateAllConnections();
+            RefreshTaskStatuses();
         }
 
         /// <summary>
@@ -265,6 +271,225 @@ namespace MainApplication.ViewModels.ProjectModel
         public void CommitCurrentNodeEdits()
         {
             Nodes.SelectedNode?.Detail.CommitEdits();
+        }
+
+        /// <summary>
+        /// すべてのタスク状態を再計算する。
+        /// </summary>
+        public void RefreshTaskStatuses()
+        {
+            foreach (var node in Nodes.Nodes)
+            {
+                node.Status = CalculateTaskStatus(node);
+            }
+        }
+
+        /// <summary>
+        /// 指定タスクの状態を算出する。
+        /// </summary>
+        /// <param name="node">算出対象のノード。</param>
+        /// <returns>算出されたタスク状態。</returns>
+        private NodeViewModel.TaskStatus CalculateTaskStatus(NodeViewModel node)
+        {
+            var now = DateTime.Now;
+
+            if (node.Detail.EndDateTime != null && node.Detail.EndDateTime <= now)
+            {
+                return NodeViewModel.TaskStatus.Done;
+            }
+
+            if (IsInSuspensionPeriod(node, now) || GetUpstreamNodes(node).Any(upstream => !IsDone(upstream, now)))
+            {
+                return NodeViewModel.TaskStatus.Pending;
+            }
+
+            if (node.Detail.StartDateTime != null && node.Detail.StartDateTime <= now)
+            {
+                return NodeViewModel.TaskStatus.InProgress;
+            }
+
+            return NodeViewModel.TaskStatus.Ready;
+        }
+
+        /// <summary>
+        /// 指定タスクが完了済みかどうかを判定する。
+        /// </summary>
+        /// <param name="node">判定対象のノード。</param>
+        /// <param name="now">現在日時。</param>
+        /// <returns>完了済みならtrue。</returns>
+        private static bool IsDone(NodeViewModel node, DateTime now)
+        {
+            return node.Detail.EndDateTime != null && node.Detail.EndDateTime <= now;
+        }
+
+        /// <summary>
+        /// 指定タスクが現在中断期間中かどうかを判定する。
+        /// </summary>
+        /// <param name="node">判定対象のノード。</param>
+        /// <param name="now">現在日時。</param>
+        /// <returns>中断期間中ならtrue。</returns>
+        private static bool IsInSuspensionPeriod(NodeViewModel node, DateTime now)
+        {
+            return node.Detail.SuspensionPeriods.Any(period =>
+                period.StartDateTime != null &&
+                period.EndDateTime != null &&
+                period.StartDateTime <= now &&
+                now <= period.EndDateTime
+            );
+        }
+
+        /// <summary>
+        /// 入力ポートへ接続している前段タスクを取得する。
+        /// </summary>
+        /// <param name="node">取得対象のノード。</param>
+        /// <returns>前段タスク一覧。</returns>
+        private IEnumerable<NodeViewModel> GetUpstreamNodes(NodeViewModel node)
+        {
+            foreach (var connection in Connections.Connections)
+            {
+                var toNode = FindNodeByPort(connection.ToPort);
+                if (!ReferenceEquals(toNode, node))
+                {
+                    continue;
+                }
+
+                var fromNode = FindNodeByPort(connection.FromPort);
+                if (fromNode != null)
+                {
+                    yield return fromNode;
+                }
+            }
+        }
+
+        /// <summary>
+        /// ポートの所属ノードを取得する。
+        /// </summary>
+        /// <param name="port">検索対象ポート。</param>
+        /// <returns>所属ノード。見つからない場合はnull。</returns>
+        private NodeViewModel? FindNodeByPort(PortViewModel port)
+        {
+            return NodePorts.FirstOrDefault(kv => kv.Value.Contains(port)).Key;
+        }
+
+        /// <summary>
+        /// ノードを状態再計算の監視対象として登録する。
+        /// </summary>
+        /// <param name="node">登録対象ノード。</param>
+        private void RegisterNodeForStatusRefresh(NodeViewModel node)
+        {
+            node.Detail.PropertyChanged -= OnNodeDetailStatusPropertyChanged;
+            node.Detail.PropertyChanged += OnNodeDetailStatusPropertyChanged;
+            node.Detail.SuspensionPeriods.CollectionChanged -= OnSuspensionPeriodsChanged;
+            node.Detail.SuspensionPeriods.CollectionChanged += OnSuspensionPeriodsChanged;
+
+            foreach (var period in node.Detail.SuspensionPeriods)
+            {
+                period.PropertyChanged -= OnSuspensionPeriodStatusPropertyChanged;
+                period.PropertyChanged += OnSuspensionPeriodStatusPropertyChanged;
+            }
+        }
+
+        /// <summary>
+        /// ノードを状態再計算の監視対象から解除する。
+        /// </summary>
+        /// <param name="node">解除対象ノード。</param>
+        private void UnregisterNodeForStatusRefresh(NodeViewModel node)
+        {
+            node.Detail.PropertyChanged -= OnNodeDetailStatusPropertyChanged;
+            node.Detail.SuspensionPeriods.CollectionChanged -= OnSuspensionPeriodsChanged;
+
+            foreach (var period in node.Detail.SuspensionPeriods)
+            {
+                period.PropertyChanged -= OnSuspensionPeriodStatusPropertyChanged;
+            }
+        }
+
+        /// <summary>
+        /// ノード一覧変更時に状態再計算の監視対象を更新する。
+        /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">変更内容。</param>
+        private void OnNodesCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (NodeViewModel node in e.OldItems)
+                {
+                    UnregisterNodeForStatusRefresh(node);
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (NodeViewModel node in e.NewItems)
+                {
+                    RegisterNodeForStatusRefresh(node);
+                }
+            }
+
+            RefreshTaskStatuses();
+        }
+
+        /// <summary>
+        /// 接続線一覧変更時にタスク状態を再計算する。
+        /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">変更内容。</param>
+        private void OnConnectionsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RefreshTaskStatuses();
+        }
+
+        /// <summary>
+        /// ノード詳細変更時にタスク状態を再計算する。
+        /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">変更内容。</param>
+        private void OnNodeDetailStatusPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName is nameof(NodeDetailViewModel.StartDateTime) or nameof(NodeDetailViewModel.EndDateTime))
+            {
+                RefreshTaskStatuses();
+            }
+        }
+
+        /// <summary>
+        /// 中断期間一覧変更時に監視対象を更新し、タスク状態を再計算する。
+        /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">変更内容。</param>
+        private void OnSuspensionPeriodsChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (SuspensionPeriodViewModel period in e.OldItems)
+                {
+                    period.PropertyChanged -= OnSuspensionPeriodStatusPropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (SuspensionPeriodViewModel period in e.NewItems)
+                {
+                    period.PropertyChanged += OnSuspensionPeriodStatusPropertyChanged;
+                }
+            }
+
+            RefreshTaskStatuses();
+        }
+
+        /// <summary>
+        /// 中断期間変更時にタスク状態を再計算する。
+        /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">変更内容。</param>
+        private void OnSuspensionPeriodStatusPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName is nameof(SuspensionPeriodViewModel.StartDateTime) or nameof(SuspensionPeriodViewModel.EndDateTime))
+            {
+                RefreshTaskStatuses();
+            }
         }
 
         private Point _start;
@@ -387,6 +612,7 @@ namespace MainApplication.ViewModels.ProjectModel
             }
             node.Width = Math.Max(NodeViewModel.MinWidth, newSize.Width);
             node.Height = Math.Max(NodeViewModel.MinHeight, newSize.Height);
+            node.Position = Grid.ClampNodePosition(node.Position, node);
             
             node.UpdateAllPortPositions();
             ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
@@ -596,6 +822,7 @@ namespace MainApplication.ViewModels.ProjectModel
         {
             Nodes.Nodes.Clear();
             Connections.Connections.Clear();
+            NodePorts.Clear();
             NodeEditorViewModel loadedData = NodeEditorMapper.ToViewModel(data, this);
 
 
@@ -615,6 +842,7 @@ namespace MainApplication.ViewModels.ProjectModel
             }
 
             RefreshNodeAndConnectionPositions();
+            RefreshTaskStatuses();
 
             /* 表示領域をリセット */
             Zoom = 1.0;
@@ -649,6 +877,15 @@ namespace MainApplication.ViewModels.ProjectModel
             Nodes = new NodeCollectionViewModel(UndoRedo, DateTimeEditor, this);
             Connections = new ConnectionCollectionViewModel(UndoRedo, this);
             Grid = new GridManager();
+            _statusTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMinutes(1)
+            };
+            _statusTimer.Tick += (s, e) => RefreshTaskStatuses();
+            _statusTimer.Start();
+
+            Nodes.Nodes.CollectionChanged += OnNodesCollectionChanged;
+            Connections.Connections.CollectionChanged += OnConnectionsCollectionChanged;
 
             UndoCommand = new RelayCommand(() =>
             {

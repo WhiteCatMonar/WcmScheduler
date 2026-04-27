@@ -3,6 +3,7 @@ using MainApplication.ViewModels.ProjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace MainApplication.Views.NodeEditorTab.Controls
 {
@@ -49,6 +50,8 @@ namespace MainApplication.Views.NodeEditorTab.Controls
             /* VisualTreeをキャッシュ */
             _editor = VisualTreeUtils.FindAncestor<NodeEditorControl>(this);
             _editorVM = VisualTreeUtils.FindParentViewModel<NodeEditorViewModel>(this);
+
+            UpdateVisualBoundsSize();
         }
 
         /* ---------------------------------------------------------
@@ -64,7 +67,7 @@ namespace MainApplication.Views.NodeEditorTab.Controls
             _editorVM?.RequestSelectNode(DataContext);
 
             /* Undo/Redo用に開始位置を記録 */
-            _editorVM?.RequestBeginNodeDrag(DataContext, e.GetPosition(_editor?.NodeEditorArea));
+            _editorVM?.RequestBeginNodeDrag(DataContext, e.GetPosition(_editor?.NodeEditorCanvas));
 
             CaptureMouse();
             e.Handled = true;
@@ -117,7 +120,29 @@ namespace MainApplication.Views.NodeEditorTab.Controls
         /// </summary>
         private void NodeControl_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            _editorVM?.RequestNodeSizeChanged(DataContext, e.NewSize);
+            UpdateVisualBoundsSize();
+        }
+
+        /// <summary>
+        /// ノードの実描画範囲をViewModelのサイズへ反映する。
+        /// </summary>
+        private void UpdateVisualBoundsSize()
+        {
+            if (_editorVM == null)
+            {
+                return;
+            }
+
+            Rect layoutBounds = new(new Point(0.0, 0.0), RenderSize);
+            Rect descendantBounds = VisualTreeHelper.GetDescendantBounds(this);
+            Rect visualBounds = descendantBounds.IsEmpty ? layoutBounds : Rect.Union(layoutBounds, descendantBounds);
+
+            var visualBoundsSize = new Size(
+                visualBounds.Right - Math.Min(0.0, visualBounds.Left),
+                visualBounds.Bottom - Math.Min(0.0, visualBounds.Top)
+            );
+
+            _editorVM?.RequestNodeSizeChanged(DataContext, visualBoundsSize);
         }
 
         /// <summary>

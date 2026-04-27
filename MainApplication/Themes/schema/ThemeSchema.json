@@ -86,6 +86,22 @@
           "description": "ノード枠線",
           "$ref": "#/$defs/argbColor"
         },
+        "node-status-ready": {
+          "description": "Ready状態ノード表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-status-pending": {
+          "description": "Pending状態ノード表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-status-in-progress": {
+          "description": "InProgress状態ノード表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-status-done": {
+          "description": "Done状態ノード表示",
+          "$ref": "#/$defs/argbColor"
+        },
         "node-text": {
           "description": "ノード内テキスト",
           "$ref": "#/$defs/argbColor"
