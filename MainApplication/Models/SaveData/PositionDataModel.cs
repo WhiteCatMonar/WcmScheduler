@@ -1,19 +1,22 @@
-﻿namespace MainApplication.Models.SaveData
+using System.Text.Json.Serialization;
+
+namespace MainApplication.Models.SaveData
 {
+    /// <summary>
+    /// ノード座標の保存データ。
+    /// </summary>
     public class PositionDataModel
     {
-        /* ---------------------------------------------------------
-         * データプロパティ(ノード座標)
-         * --------------------------------------------------------- */
-
         /// <summary>
-        /// X座標(Canvas上の位置)
+        /// X座標。
         /// </summary>
+        [JsonPropertyName("x")]
         public double X { get; set; }
 
         /// <summary>
-        /// Y座標(Canvas上の位置)
+        /// Y座標。
         /// </summary>
+        [JsonPropertyName("y")]
         public double Y { get; set; }
     }
 }

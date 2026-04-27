@@ -1,22 +1,31 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace MainApplication.Models.SaveData
 {
+    /// <summary>
+    /// タスク編集機能の保存データ。
+    /// </summary>
     public class TaskEditorDataModel
     {
-        /* ---------------------------------------------------------
-         * データプロパティ(タスクエディタ全体の保存データ)
-         * --------------------------------------------------------- */
+        /// <summary>
+        /// 対象プロジェクトのID。
+        /// </summary>
+        [JsonPropertyName("project-id")]
+        public Guid ProjectId { get; set; }
 
         /// <summary>
-        /// エディタ内に存在するすべてのノード
+        /// エディタ内に存在するすべてのノード。
         /// </summary>
-        public List<NodeDataModel> Nodes { get; set; } = new List<NodeDataModel>();
+        [JsonPropertyName("nodes")]
+        public List<NodeDataModel> Nodes { get; set; } = [];
 
         /// <summary>
-        /// エディタ内に存在するすべてのノード間接続情報
+        /// エディタ内に存在するすべてのノード間接続情報。
         /// </summary>
-        public List<ConnectionDataModel> Connections { get; set; } = new List<ConnectionDataModel>();
+        [JsonPropertyName("connections")]
+        public List<ConnectionDataModel> Connections { get; set; } = [];
     }
 }
 

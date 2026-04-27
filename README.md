@@ -27,8 +27,11 @@
 │   │   ├── 📄 ConnectionDataModel.cs                  # 接続線管理用情報
 │   │   ├── 📄 NodeDataModel.cs                        # ノード管理用情報
 │   │   ├── 📄 NodeDetailsDataModel.cs                 # ノードごとの詳細情報
+│   │   ├── 📄 MemberDataModel.cs                      # チームメンバー保存情報
 │   │   ├── 📄 PortDataModel.cs                        # ノード内ポート管理用情報
 │   │   ├── 📄 PositionDataModel.cs                    # 座標管理用情報
+│   │   ├── 📄 ProjectMemberParticipationDataModel.cs  # プロジェクト別メンバー参加期間保存情報
+│   │   ├── 📄 ProjectMemberWorkTimeDataModel.cs       # プロジェクト別メンバー作業可能時間保存情報
 │   │   ├── 📄 RootSaveDataModel.cs                    # 保存するデータのルート情報
 │   │   ├── 📄 SuspensionPeriodDataModel.cs            # タスク中断期間の保存情報
 │   │   └── 📄 TaskEditorDataModel.cs                  # タスク編集機能についての情報
@@ -92,6 +95,16 @@
 │   │   ├── 📄 ThemeMenuItemViewModel.cs               # テーマ関連メニューの1項目
 │   │   └── 📄 ThemeSettingViewModel.cs                # テーマ編集画面のViewModel
 │   │
+│   ├── 📂 TeamModel
+│   │   ├── 📄 CollaboratorSelectionViewModel.cs       # 作業協力者選択行
+│   │   ├── 📄 CollaboratorOptionViewModel.cs          # 作業協力者選択肢
+│   │   ├── 📄 MemberOptionViewModel.cs                # メンバー選択肢
+│   │   ├── 📄 MemberWorkCalendarDayViewModel.cs       # メンバー作業可能時間カレンダーの日付単位表示
+│   │   ├── 📄 ProjectMemberParticipationViewModel.cs  # プロジェクト別メンバー参加期間
+│   │   ├── 📄 ProjectMemberWorkTimeViewModel.cs       # プロジェクト別日付別作業可能時間
+│   │   ├── 📄 TeamMemberViewModel.cs                  # チームメンバー
+│   │   └── 📄 TeamSettingsViewModel.cs                # チーム設定画面のViewModel
+│   │
 │   ├── 📄 ColorPickerViewModel.cs                     # 色編集ダイアログのViewModel(UI入力ロジック)
 │   ├── 📄 DateTimeEditorViewModel.cs                  # 日時編集ダイアログのViewModel(UI入力ロジック)
 │   ├── 📄 SchedulerViewModel.cs                       # アプリケーション全体の状態管理
@@ -135,6 +148,8 @@
 │   ├── 📄 ProjectView.xaml.cs
 │   ├── 📄 TeamProjectsView.xaml                       # チーム内プロジェクト情報(複数のプロジェクトの管理用View)
 │   ├── 📄 TeamProjectsView.xaml.cs
+│   ├── 📄 TeamSettingsView.xaml                       # チーム設定View
+│   ├── 📄 TeamSettingsView.xaml.cs
 │   ├── 📄 ThemeSettingWindow.xaml                     # テーマ編集ウィンドウ(View)
 │   └── 📄 ThemeSettingWindow.xaml.cs                  # テーマ編集ウィンドウのコードビハインド
 │
@@ -151,3 +166,9 @@
 タスクエディタの構成、主要クラス、依存関係図は以下にまとめています。
 
 - [タスクエディタ仕様](documentation/task_editor_spec.md)
+
+## メンバー管理仕様
+
+メンバー管理、タスク担当者、作業協力者、日次作業可能時間設定に関する仕様は以下にまとめています。
+
+- [メンバー管理仕様](documentation/member_manager.md)

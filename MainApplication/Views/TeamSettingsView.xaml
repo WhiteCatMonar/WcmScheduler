@@ -1,0 +1,324 @@
+<UserControl x:Class="MainApplication.Views.TeamSettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="PlaceholderTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost"/>
+                                <TextBlock x:Name="PlaceholderText"
+                                           Text="{TemplateBinding Tag}"
+                                           Foreground="Gray"
+                                           IsHitTestVisible="False"
+                                           HorizontalAlignment="Right"
+                                           VerticalAlignment="Center"
+                                           Margin="2,0,2,0"
+                                           Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Text" Value="">
+                                <Setter TargetName="PlaceholderText" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.65"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource WindowBackgroundBrush}"
+          TextElement.Foreground="{DynamicResource WindowTextBrush}"
+          Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="190"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="150"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel Grid.Row="0" Margin="0,0,0,6">
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button Content="追加" Command="{Binding AddMemberCommand}" Width="56" Margin="0,0,4,0"/>
+                <Button Content="削除" Command="{Binding DeleteMemberCommand}" Width="56" Margin="0,0,4,0"/>
+                <Button Content="上へ" Command="{Binding MoveMemberUpCommand}" Width="56" Margin="0,0,4,0"/>
+                <Button Content="下へ" Command="{Binding MoveMemberDownCommand}" Width="56"/>
+            </StackPanel>
+            <TextBlock Text="メンバー"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource TaskEditorHeadingTextBrush}"
+                       VerticalAlignment="Center"/>
+        </DockPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="86"/>
+                    <ColumnDefinition Width="86"/>
+                    <ColumnDefinition Width="86"/>
+                    <ColumnDefinition Width="86"/>
+                    <ColumnDefinition Width="86"/>
+                    <ColumnDefinition Width="86"/>
+                    <ColumnDefinition Width="86"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="名前" FontWeight="Bold"/>
+                <TextBlock Grid.Column="1" Text="日" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="2" Text="月" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="3" Text="火" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="4" Text="水" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="5" Text="木" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="6" Text="金" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="7" Text="土" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="8" Text="表示" FontWeight="Bold"/>
+            </Grid>
+
+            <ListBox Grid.Row="1"
+                     ItemsSource="{Binding Members}"
+                     SelectedItem="{Binding SelectedMember}"
+                     Background="{DynamicResource SidePanelBackgroundBrush}"
+                     Foreground="{DynamicResource WindowTextBrush}"
+                     BorderBrush="{DynamicResource NodeEditorBorderBrush}"
+                     HorizontalContentAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="86"/>
+                                <ColumnDefinition Width="86"/>
+                                <ColumnDefinition Width="86"/>
+                                <ColumnDefinition Width="86"/>
+                                <ColumnDefinition Width="86"/>
+                                <ColumnDefinition Width="86"/>
+                                <ColumnDefinition Width="86"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,6,0"/>
+                            <StackPanel Grid.Column="1" Margin="0,0,4,0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                    <TextBox Text="{Binding SundayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding SundayWorkTimeDurationText}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="0,0,4,0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                    <TextBox Text="{Binding MondayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding MondayWorkTimeDurationText}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3" Margin="0,0,4,0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                    <TextBox Text="{Binding TuesdayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding TuesdayWorkTimeDurationText}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4" Margin="0,0,4,0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                    <TextBox Text="{Binding WednesdayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding WednesdayWorkTimeDurationText}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="5" Margin="0,0,4,0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                    <TextBox Text="{Binding ThursdayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding ThursdayWorkTimeDurationText}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="6" Margin="0,0,4,0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                    <TextBox Text="{Binding FridayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding FridayWorkTimeDurationText}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="7" Margin="0,0,6,0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                    <TextBox Text="{Binding SaturdayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding SaturdayWorkTimeDurationText}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="8"
+                                       Text="{Binding DisplayText}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <TextBlock Grid.Row="2"
+                       Text="{Binding SelectedMemberReferenceText}"
+                       Margin="0,4,0,0"
+                       TextWrapping="Wrap"/>
+        </Grid>
+
+        <Grid Grid.Row="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Text="プロジェクト参加期間"
+                       FontWeight="Bold"
+                       Foreground="{DynamicResource TaskEditorHeadingTextBrush}"
+                       Margin="0,0,0,6"/>
+
+            <ListBox Grid.Row="1"
+                     ItemsSource="{Binding ProjectParticipations}"
+                     Background="{DynamicResource SidePanelBackgroundBrush}"
+                     Foreground="{DynamicResource WindowTextBrush}"
+                     BorderBrush="{DynamicResource NodeEditorBorderBrush}"
+                     HorizontalContentAlignment="Stretch">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="0,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="132"/>
+                                <ColumnDefinition Width="132"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="{Binding Project.ProjectName}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"
+                                       Margin="0,0,6,0"/>
+                            <DatePicker Grid.Column="1"
+                                        SelectedDate="{Binding ParticipationStartDateTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Margin="0,0,6,0"/>
+                            <DatePicker Grid.Column="2"
+                                        SelectedDate="{Binding ParticipationEndDateTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Margin="0,0,6,0"/>
+                            <TextBlock Grid.Column="3"
+                                       Text="{Binding DisplayText}"
+                                       VerticalAlignment="Center"
+                                       TextTrimming="CharacterEllipsis"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+
+        <Grid Grid.Row="5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="0,0,0,6">
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="前へ" Command="{Binding PreviousCalendarCommand}" Width="56" Margin="0,0,4,0"/>
+                    <Button Content="今日" Command="{Binding TodayCalendarCommand}" Width="56" Margin="0,0,4,0"/>
+                    <Button Content="次へ" Command="{Binding NextCalendarCommand}" Width="56"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="作業可能時間カレンダー"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource TaskEditorHeadingTextBrush}"
+                               VerticalAlignment="Center"
+                               Margin="0,0,12,0"/>
+                    <TextBlock Text="{Binding CalendarRangeText}"
+                               VerticalAlignment="Center"
+                               FontWeight="Bold"/>
+                </StackPanel>
+            </DockPanel>
+
+            <ScrollViewer Grid.Row="1"
+                          HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          Background="{DynamicResource SidePanelBackgroundBrush}">
+                <ItemsControl ItemsSource="{Binding WorkCalendarDays}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="1" Columns="7"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{DynamicResource NodeEditorBorderBrush}"
+                                    BorderThickness="1"
+                                    Padding="6"
+                                    Margin="0,0,6,0"
+                                    MinWidth="150"
+                                    Background="{DynamicResource HistoryListBackgroundBrush}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding DateText}"
+                                               FontWeight="Bold"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="{Binding DayOfWeekText}"
+                                               HorizontalAlignment="Center"
+                                               Margin="0,0,0,6"/>
+                                    <ItemsControl ItemsSource="{Binding ProjectWorkTimes}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,0,0,4">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="58"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Project.ProjectName}"
+                                                               VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                    <StackPanel Grid.Column="1"
+                                                                Grid.ColumnSpan="2">
+                                                        <DockPanel>
+                                                            <TextBlock DockPanel.Dock="Right"
+                                                                       Text="分"
+                                                                       VerticalAlignment="Center"
+                                                                       Margin="3,0,0,0"/>
+                                                            <TextBox Text="{Binding WorkTimeMinutes, UpdateSourceTrigger=PropertyChanged, TargetNullValue=''}"
+                                                                     Tag="{Binding PlaceholderText}"
+                                                                     Style="{StaticResource PlaceholderTextBoxStyle}"
+                                                                     IsEnabled="{Binding IsParticipating}"
+                                                                     HorizontalContentAlignment="Right"
+                                                                     ToolTip="{Binding DisplayText}"/>
+                                                        </DockPanel>
+                                                        <TextBlock Text="{Binding DurationText}"
+                                                                   HorizontalAlignment="Right"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

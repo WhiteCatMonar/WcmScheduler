@@ -1,26 +1,29 @@
-﻿using System;
+using System;
+using System.Text.Json.Serialization;
 
 namespace MainApplication.Models.SaveData
 {
+    /// <summary>
+    /// ポート情報の保存データ。
+    /// </summary>
     public class PortDataModel
     {
-        /* ---------------------------------------------------------
-         * データプロパティ(ポート情報)
-         * --------------------------------------------------------- */
-
         /// <summary>
-        /// ポートの一意識別子
+        /// ポートの一意識別子。
         /// </summary>
+        [JsonPropertyName("id")]
         public string Id { get; set; } = Guid.NewGuid().ToString();
 
         /// <summary>
-        /// ポート名(例：In,Out,Triggerなど)
+        /// ポート名。
         /// </summary>
+        [JsonPropertyName("name")]
         public required string Name { get; set; }
 
         /// <summary>
-        /// ポート種別(Input/Outputなど)
+        /// ポート種別。
         /// </summary>
+        [JsonPropertyName("type")]
         public required string Type { get; set; }
     }
 }

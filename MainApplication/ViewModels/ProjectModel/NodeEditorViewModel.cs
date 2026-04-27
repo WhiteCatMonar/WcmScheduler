@@ -1,7 +1,9 @@
-﻿using MainApplication.Mappers;
+using MainApplication.Mappers;
 using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
+using MainApplication.ViewModels.TeamModel;
+using System.Collections.ObjectModel;
 using MainApplication.Views.NodeEditorTab.Controls;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -246,6 +248,24 @@ namespace MainApplication.ViewModels.ProjectModel
         /// ノードの追加・削除・選択・移動などの操作を提供する。
         /// </summary>
         public NodeCollectionViewModel Nodes { get; }
+
+        /// <summary>
+        /// タスク詳細で参照するチームメンバー一覧。
+        /// </summary>
+        public ObservableCollection<TeamMemberViewModel>? TeamMembers { get; private set; }
+
+        /// <summary>
+        /// タスク詳細で参照するチームメンバー一覧を設定する。
+        /// </summary>
+        /// <param name="members">チームメンバー一覧。</param>
+        public void SetTeamMembers(ObservableCollection<TeamMemberViewModel> members)
+        {
+            TeamMembers = members;
+            foreach (var node in Nodes.Nodes)
+            {
+                node.Detail.SetMembers(members);
+            }
+        }
         
         /// <summary>
         /// ノードとそのポート一覧を関連付ける辞書。
@@ -829,6 +849,11 @@ namespace MainApplication.ViewModels.ProjectModel
             foreach (var loadedNodes in loadedData.Nodes.Nodes)
             {
                 Nodes.Nodes.Add(loadedNodes);
+            }
+
+            if (TeamMembers != null)
+            {
+                SetTeamMembers(TeamMembers);
             }
 
             foreach (var loadedNodePort in loadedData.NodePorts)

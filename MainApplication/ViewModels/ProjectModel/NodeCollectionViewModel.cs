@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels.Actions;
+using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using System.Collections.ObjectModel;
@@ -134,6 +134,10 @@ namespace MainApplication.ViewModels.ProjectModel
             {
                 NodeGuid = Guid.NewGuid()
             };
+            if (_editor.TeamMembers != null)
+            {
+                node.Detail.SetMembers(_editor.TeamMembers);
+            }
 
             var input = new PortViewModel
             {

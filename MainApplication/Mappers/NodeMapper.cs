@@ -26,7 +26,9 @@ namespace MainApplication.Mappers
                 Details = new NodeDetailsDataModel
                 {
                     TaskName = vm.Detail.TaskName,
-                    Person = vm.Detail.Person,
+                    Person = null,
+                    AssigneeMemberId = vm.Detail.AssigneeMemberId,
+                    CollaboratorMemberIds = [.. vm.Detail.CollaboratorMemberIds],
                     StartDateTime = vm.Detail.StartDateTime,
                     EndDateTime = vm.Detail.EndDateTime,
                     WorkEstimateMinutes = vm.Detail.WorkEstimateMinutes,
@@ -66,7 +68,13 @@ namespace MainApplication.Mappers
                 Position = new Point(data.Position.X, data.Position.Y)
             };
             loadedNode.Detail.TaskName = data.Details.TaskName;
-            loadedNode.Detail.Person = data.Details.Person;
+            loadedNode.Detail.Person = null;
+            loadedNode.Detail.AssigneeMemberId = data.Details.AssigneeMemberId;
+            loadedNode.Detail.CollaboratorMemberIds = data.Details.CollaboratorMemberIds;
+            if (editor.TeamMembers != null)
+            {
+                loadedNode.Detail.SetMembers(editor.TeamMembers);
+            }
             loadedNode.Detail.StartDateTime = data.Details.StartDateTime;
             loadedNode.Detail.EndDateTime = data.Details.EndDateTime;
             loadedNode.Detail.WorkEstimateMinutes = data.Details.WorkEstimateMinutes;

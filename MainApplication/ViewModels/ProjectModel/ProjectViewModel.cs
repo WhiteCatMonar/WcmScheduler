@@ -1,4 +1,5 @@
-﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.TeamModel;
 using System.Collections.ObjectModel;
 
 namespace MainApplication.ViewModels.ProjectModel
@@ -23,6 +24,11 @@ namespace MainApplication.ViewModels.ProjectModel
             get => _projectName;
             set => SetProperty(ref _projectName, value);
         }
+
+        /// <summary>
+        /// プロジェクトID。
+        /// </summary>
+        public Guid ProjectId { get; set; } = Guid.NewGuid();
 
         /* ---------------------------------------------------------
          * 子 ViewModel(タスク編集機能)
@@ -66,12 +72,16 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <summary>
         /// ProjectViewModelを生成し、子ViewModelやサービスを初期化する。
         /// </summary>
-        public ProjectViewModel(string name)
+        public ProjectViewModel(string name, ObservableCollection<TeamMemberViewModel>? members = null)
         {
             ProjectName = name;
 
             /* 子となるViewModelの生成 */
             NodeEditor = new NodeEditorViewModel();
+            if (members != null)
+            {
+                NodeEditor.SetTeamMembers(members);
+            }
 
             /* タブ管理 */
             var nodeEditorTab = new TabInfo("タスク編集", NodeEditor);

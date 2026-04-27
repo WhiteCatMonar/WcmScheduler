@@ -1,6 +1,7 @@
 using MainApplication.Infrastructure;
 using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.TeamModel;
 using MainApplication.ViewModels.ThemeModel;
 using MainApplication.Views;
 using System.Collections.ObjectModel;
@@ -19,6 +20,11 @@ namespace MainApplication.ViewModels
          * --------------------------------------------------------- */
 
         public TeamProjectsViewModel TeamProjects { get; }
+
+        /// <summary>
+        /// チーム設定。
+        /// </summary>
+        public TeamSettingsViewModel TeamSettings { get; }
 
         /* ---------------------------------------------------------
          * 保存・読み込み関連定義
@@ -112,14 +118,18 @@ namespace MainApplication.ViewModels
             _fileService = new FileService();
 
             /* 子となるViewModelの生成 */
-            TeamProjects = new TeamProjectsViewModel();
+            var teamMembers = new ObservableCollection<TeamMemberViewModel>();
+            TeamProjects = new TeamProjectsViewModel(teamMembers);
+            TeamSettings = new TeamSettingsViewModel(TeamProjects, teamMembers);
             /* TODO:タブごとの機能追加 */
 
             /* タブ管理 */
             var teamTab = new TabInfo("チーム内プロジェクト", TeamProjects);
+            var teamSettingsTab = new TabInfo("チーム設定", TeamSettings);
             Tabs = new ObservableCollection<object>
             {
-                teamTab
+                teamTab,
+                teamSettingsTab
                 /* TODO:タブごとの機能追加 */
             };
 
@@ -174,6 +184,13 @@ namespace MainApplication.ViewModels
         {
             if (root.TaskEditor != null)
             {
+                if (root.TaskEditor.ProjectId != Guid.Empty && TeamProjects.SelectedProject != null)
+                {
+                    TeamProjects.SelectedProject.ProjectId = root.TaskEditor.ProjectId;
+                }
+
+                TeamSettings.LoadFromDataModels(root.Members, root.ProjectMemberWorkTimes, root.ProjectMemberParticipations);
+
                 TeamProjects.SelectedProject?.
                     NodeEditor.LoadFromTaskEditorDataModel(root.TaskEditor);
 
@@ -235,10 +252,17 @@ namespace MainApplication.ViewModels
 
             /* ユーザー：タスク、開発者：ノードという呼称にするため、名称をここで変更 */
             TeamProjects.SelectedProject?.NodeEditor.SaveToTaskEditorDataModel(out taskEditor);
+            if (TeamProjects.SelectedProject != null)
+            {
+                taskEditor.ProjectId = TeamProjects.SelectedProject.ProjectId;
+            }
 
             RootSaveDataModel save_data = new()
             {
-                TaskEditor = taskEditor
+                TaskEditor = taskEditor,
+                Members = TeamSettings.ToMemberDataModels(),
+                ProjectMemberWorkTimes = TeamSettings.ToProjectMemberWorkTimeDataModels(),
+                ProjectMemberParticipations = TeamSettings.ToProjectMemberParticipationDataModels()
             };
 
             /* TODO: タブごとの機能追加 */

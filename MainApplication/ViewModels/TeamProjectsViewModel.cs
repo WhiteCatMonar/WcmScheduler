@@ -1,5 +1,6 @@
-﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
+using MainApplication.ViewModels.TeamModel;
 using System.Collections.ObjectModel;
 
 namespace MainApplication.ViewModels
@@ -71,10 +72,10 @@ namespace MainApplication.ViewModels
         /// <summary>
         /// TeamProjectsViewModel を初期化し、プロジェクト一覧を生成する。
         /// </summary>
-        public TeamProjectsViewModel()
+        public TeamProjectsViewModel(ObservableCollection<TeamMemberViewModel> members)
         {
             Projects = [];
-            var project = new ProjectViewModel("New Project");
+            var project = new ProjectViewModel("New Project", members);
             Projects.Add(project);
 
             /* タブ管理 */

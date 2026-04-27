@@ -1,6 +1,7 @@
 using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
+using MainApplication.ViewModels.TeamModel;
 using System.Collections.Specialized;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -27,6 +28,9 @@ namespace MainApplication.ViewModels.ProjectModel
 
         private readonly DispatcherTimer _editTimer;
         private readonly List<IEditableField> _editableFields;
+        private ObservableCollection<TeamMemberViewModel>? _members;
+        private bool _isRefreshingCollaboratorSelections;
+        private bool _isUpdatingCollaboratorSelectionValue;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -52,6 +56,7 @@ namespace MainApplication.ViewModels.ProjectModel
             IncreaseWorkEstimateHourCommand = new RelayCommand(IncreaseWorkEstimateHour);
             DecreaseWorkEstimateHourCommand = new RelayCommand(DecreaseWorkEstimateHour);
             AddSuspensionPeriodCommand = new RelayCommand(AddSuspensionPeriod);
+            AddCollaboratorCommand = new RelayCommand(AddCollaborator);
             NotifyEditedCommand = new RelayCommand(() => NotifyEdited());
 
             /* 編集遅延コミット用タイマー */
@@ -69,7 +74,6 @@ namespace MainApplication.ViewModels.ProjectModel
             _editableFields =
             [
                 new EditableField<string?>("TaskName", () => TaskName, v => TaskName = v),
-                new EditableField<string?>("Person",   () => Person,   v => Person = v),
                 new EditableField<string?>("Comment",  () => Comment,  v => Comment = v),
                 new EditableField<int?>("WorkEstimateMinutes", () => WorkEstimateMinutes, v => WorkEstimateMinutes = v)
             ];
@@ -95,6 +99,500 @@ namespace MainApplication.ViewModels.ProjectModel
         {
             get => _person;
             set => SetProperty(ref _person, value);
+        }
+
+        private Guid? _assigneeMemberId;
+        [DisplayName("担当者")]
+        public Guid? AssigneeMemberId
+        {
+            get => _assigneeMemberId;
+            set => SetProperty(
+                ref _assigneeMemberId,
+                value,
+                [
+                    nameof(HasInvalidAssigneeMember),
+                    nameof(AssigneeWarningText)
+                ],
+                CreateHooksFromValue(
+                    value,
+                    pre: (oldValue, newValue) =>
+                    {
+                        if (!_undoRedo.IsApplyingHistory)
+                        {
+                            _undoRedo.Execute(
+                                new EditNodeDetailPropertyAction(
+                                    this,
+                                    nameof(AssigneeMemberId),
+                                    _assigneeMemberId,
+                                    newValue
+                                )
+                            );
+                        }
+                    },
+                    chain: OnAssigneeMemberChanged
+                )
+            );
+        }
+
+        private List<Guid> _collaboratorMemberIds = [];
+        [DisplayName("作業協力者")]
+        public List<Guid> CollaboratorMemberIds
+        {
+            get => _collaboratorMemberIds;
+            set => SetProperty(
+                ref _collaboratorMemberIds,
+                NormalizeCollaboratorMemberIds(value),
+                [
+                    nameof(HasInvalidCollaboratorMember),
+                    nameof(CollaboratorWarningText)
+                ],
+                CreateHooksFromValue(
+                    value,
+                    chain: OnCollaboratorMemberIdsChanged
+                )
+            );
+        }
+
+        /// <summary>
+        /// 担当者選択肢。
+        /// </summary>
+        public ObservableCollection<MemberOptionViewModel> AssigneeOptions { get; } = [];
+
+        /// <summary>
+        /// 作業協力者選択肢。
+        /// </summary>
+        public ObservableCollection<CollaboratorOptionViewModel> CollaboratorOptions { get; } = [];
+
+        /// <summary>
+        /// 作業協力者の選択行一覧。
+        /// </summary>
+        public ObservableCollection<CollaboratorSelectionViewModel> CollaboratorSelections { get; } = [];
+
+        /// <summary>
+        /// 担当者が無効または存在しないメンバーを参照しているかどうか。
+        /// </summary>
+        public bool HasInvalidAssigneeMember =>
+            AssigneeMemberId != null && !IsActiveMember(AssigneeMemberId.Value);
+
+        /// <summary>
+        /// 作業協力者が無効または存在しないメンバーを参照しているかどうか。
+        /// </summary>
+        public bool HasInvalidCollaboratorMember =>
+            CollaboratorMemberIds.Any(memberId => !IsActiveMember(memberId));
+
+        /// <summary>
+        /// 担当者警告表示文字列。
+        /// </summary>
+        public string AssigneeWarningText => HasInvalidAssigneeMember
+            ? "担当者が無効または存在しないメンバーを参照しています。"
+            : "";
+
+        /// <summary>
+        /// 作業協力者警告表示文字列。
+        /// </summary>
+        public string CollaboratorWarningText => HasInvalidCollaboratorMember
+            ? "協力者が無効または存在しないメンバーを参照しています。"
+            : "";
+
+        /// <summary>
+        /// メンバー選択に使用するチームメンバー一覧を設定する。
+        /// </summary>
+        /// <param name="members">チームメンバー一覧。</param>
+        public void SetMembers(ObservableCollection<TeamMemberViewModel> members)
+        {
+            if (_members != null)
+            {
+                _members.CollectionChanged -= OnMembersCollectionChanged;
+                foreach (var member in _members)
+                {
+                    member.PropertyChanged -= OnMemberPropertyChanged;
+                }
+            }
+
+            _members = members;
+            _members.CollectionChanged += OnMembersCollectionChanged;
+            foreach (var member in _members)
+            {
+                member.PropertyChanged += OnMemberPropertyChanged;
+            }
+
+            RefreshMemberOptions();
+        }
+
+        /// <summary>
+        /// 担当者変更に伴い、担当者と重複する作業協力者を除外する。
+        /// </summary>
+        private void OnAssigneeMemberChanged()
+        {
+            SetCollaboratorMemberIdsWithHistory(
+                CollaboratorMemberIds.ToList(),
+                CollaboratorMemberIds.ToList()
+            );
+            RefreshCollaboratorSelections();
+        }
+
+        /// <summary>
+        /// 作業協力者を追加する。
+        /// </summary>
+        private void AddCollaborator()
+        {
+            var nextMemberId = GetNextAvailableCollaboratorMemberId();
+            if (nextMemberId == null)
+            {
+                return;
+            }
+
+            var oldValue = CollaboratorMemberIds.ToList();
+            var newValue = CollaboratorMemberIds.Append(nextMemberId.Value).ToList();
+            SetCollaboratorMemberIdsWithHistory(oldValue, newValue);
+        }
+
+        /// <summary>
+        /// 作業協力者選択行を削除する。
+        /// </summary>
+        /// <param name="selection">削除対象の選択行。</param>
+        private void RemoveCollaborator(CollaboratorSelectionViewModel selection)
+        {
+            var oldValue = CollaboratorMemberIds.ToList();
+            var newValue = CollaboratorSelections
+                .Where(item => !ReferenceEquals(item, selection))
+                .Select(item => item.SelectedMemberId)
+                .Where(memberId => memberId != null && memberId != Guid.Empty)
+                .Select(memberId => memberId!.Value)
+                .Distinct()
+                .ToList();
+            if (oldValue.SequenceEqual(newValue))
+            {
+                CollaboratorSelections.Remove(selection);
+                return;
+            }
+
+            SetCollaboratorMemberIdsWithHistory(oldValue, newValue);
+        }
+
+        /// <summary>
+        /// 作業協力者選択行の選択値を保存値へ反映する。
+        /// </summary>
+        private void UpdateCollaboratorMemberIdsFromSelections()
+        {
+            if (_isRefreshingCollaboratorSelections)
+            {
+                return;
+            }
+
+            var oldValue = CollaboratorMemberIds.ToList();
+            var newValue = CollaboratorSelections
+                .Select(item => item.SelectedMemberId)
+                .Where(memberId => memberId != null && memberId != Guid.Empty)
+                .Select(memberId => memberId!.Value)
+                .Distinct()
+                .ToList();
+            _isUpdatingCollaboratorSelectionValue = true;
+            try
+            {
+                SetCollaboratorMemberIdsWithHistory(oldValue, newValue);
+            }
+            finally
+            {
+                _isUpdatingCollaboratorSelectionValue = false;
+            }
+        }
+
+        /// <summary>
+        /// 作業協力者ID一覧を履歴対象として更新する。
+        /// </summary>
+        /// <param name="oldValue">変更前の値。</param>
+        /// <param name="newValue">変更後の値。</param>
+        private void SetCollaboratorMemberIdsWithHistory(List<Guid> oldValue, List<Guid> newValue)
+        {
+            newValue = NormalizeCollaboratorMemberIds(newValue);
+            if (oldValue.SequenceEqual(newValue))
+            {
+                RefreshCollaboratorSelections();
+                return;
+            }
+
+            if (_undoRedo.IsApplyingHistory)
+            {
+                CollaboratorMemberIds = newValue;
+                return;
+            }
+
+            _undoRedo.Execute(
+                new EditNodeDetailPropertyAction(
+                    this,
+                    nameof(CollaboratorMemberIds),
+                    oldValue,
+                    newValue
+                )
+            );
+        }
+
+        /// <summary>
+        /// 作業協力者の選択状態を更新する。
+        /// </summary>
+        /// <param name="option">変更された選択肢。</param>
+        /// <param name="isSelected">選択済みにする場合はtrue。</param>
+        private void SetCollaboratorSelected(CollaboratorOptionViewModel option, bool isSelected)
+        {
+            var oldValue = CollaboratorMemberIds.ToList();
+            var newValue = CollaboratorMemberIds.ToList();
+
+            if (isSelected)
+            {
+                if (!newValue.Contains(option.MemberId))
+                {
+                    newValue.Add(option.MemberId);
+                }
+            }
+            else
+            {
+                newValue.Remove(option.MemberId);
+            }
+
+            if (oldValue.SequenceEqual(newValue))
+            {
+                return;
+            }
+
+            if (_undoRedo.IsApplyingHistory)
+            {
+                CollaboratorMemberIds = newValue;
+                return;
+            }
+
+            _undoRedo.Execute(
+                new EditNodeDetailPropertyAction(
+                    this,
+                    nameof(CollaboratorMemberIds),
+                    oldValue,
+                    newValue
+                )
+            );
+        }
+
+        /// <summary>
+        /// メンバー一覧変更時に選択肢を更新する。
+        /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">変更内容。</param>
+        private void OnMembersCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (TeamMemberViewModel member in e.OldItems)
+                {
+                    member.PropertyChanged -= OnMemberPropertyChanged;
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (TeamMemberViewModel member in e.NewItems)
+                {
+                    member.PropertyChanged += OnMemberPropertyChanged;
+                }
+            }
+
+            RefreshMemberOptions();
+        }
+
+        /// <summary>
+        /// メンバー情報変更時に選択肢を更新する。
+        /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">変更内容。</param>
+        private void OnMemberPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            RefreshMemberOptions();
+        }
+
+        /// <summary>
+        /// 担当者と協力者の選択肢を更新する。
+        /// </summary>
+        private void RefreshMemberOptions()
+        {
+            RefreshAssigneeOptions();
+            RefreshCollaboratorOptions();
+            RefreshCollaboratorSelections();
+            OnPropertyChangedA(nameof(HasInvalidAssigneeMember));
+            OnPropertyChangedA(nameof(HasInvalidCollaboratorMember));
+            OnPropertyChangedA(nameof(AssigneeWarningText));
+            OnPropertyChangedA(nameof(CollaboratorWarningText));
+        }
+
+        /// <summary>
+        /// 担当者選択肢を更新する。
+        /// </summary>
+        private void RefreshAssigneeOptions()
+        {
+            AssigneeOptions.Clear();
+            AssigneeOptions.Add(new MemberOptionViewModel());
+
+            foreach (var member in GetSelectableMembers(AssigneeMemberId))
+            {
+                AssigneeOptions.Add(new MemberOptionViewModel(member));
+            }
+        }
+
+        /// <summary>
+        /// 協力者選択肢を更新する。
+        /// </summary>
+        private void RefreshCollaboratorOptions()
+        {
+            CollaboratorOptions.Clear();
+
+            foreach (var member in GetSelectableMembers(null, CollaboratorMemberIds))
+            {
+                CollaboratorOptions.Add(
+                    new CollaboratorOptionViewModel(
+                        member,
+                        CollaboratorMemberIds.Contains(member.MemberId),
+                        SetCollaboratorSelected
+                    )
+                );
+            }
+        }
+
+        /// <summary>
+        /// 作業協力者の選択行を更新する。
+        /// </summary>
+        private void RefreshCollaboratorSelections()
+        {
+            _isRefreshingCollaboratorSelections = true;
+            CollaboratorSelections.Clear();
+
+            foreach (var memberId in CollaboratorMemberIds)
+            {
+                CollaboratorSelections.Add(
+                    new CollaboratorSelectionViewModel(
+                        CreateCollaboratorOptions(memberId),
+                        memberId == Guid.Empty ? null : memberId,
+                        UpdateCollaboratorMemberIdsFromSelections,
+                        RemoveCollaborator
+                    )
+                );
+            }
+
+            _isRefreshingCollaboratorSelections = false;
+        }
+
+        /// <summary>
+        /// 作業協力者ID一覧の変更後に協力者選択行を更新する。
+        /// </summary>
+        private void OnCollaboratorMemberIdsChanged()
+        {
+            if (_isUpdatingCollaboratorSelectionValue)
+            {
+                Dispatcher.CurrentDispatcher.BeginInvoke(RefreshCollaboratorSelections);
+                return;
+            }
+
+            RefreshCollaboratorSelections();
+        }
+
+        /// <summary>
+        /// 次に追加できる作業協力者のメンバーIDを取得する。
+        /// </summary>
+        /// <returns>追加可能なメンバーID。追加できない場合はnull。</returns>
+        private Guid? GetNextAvailableCollaboratorMemberId()
+        {
+            var excludedMemberIds = CollaboratorMemberIds
+                .Append(AssigneeMemberId ?? Guid.Empty)
+                .Where(memberId => memberId != Guid.Empty)
+                .ToHashSet();
+
+            return _members?
+                .Where(member => member.IsActive)
+                .Where(member => !excludedMemberIds.Contains(member.MemberId))
+                .Select(member => member.MemberId)
+                .Cast<Guid?>()
+                .FirstOrDefault();
+        }
+
+        /// <summary>
+        /// 作業協力者1行分の選択肢を生成する。
+        /// </summary>
+        /// <param name="selectedMemberId">選択中メンバーID。</param>
+        /// <returns>選択肢一覧。</returns>
+        private ObservableCollection<MemberOptionViewModel> CreateCollaboratorOptions(Guid selectedMemberId)
+        {
+            Guid? selected = selectedMemberId == Guid.Empty ? null : selectedMemberId;
+            var excludedMemberIds = CollaboratorMemberIds
+                .Where(memberId => selected == null || memberId != selected.Value)
+                .Append(AssigneeMemberId ?? Guid.Empty)
+                .Where(memberId => memberId != Guid.Empty)
+                .ToHashSet();
+            var options = new ObservableCollection<MemberOptionViewModel>();
+
+            foreach (var member in GetSelectableMembers(selected, excludedMemberIds: excludedMemberIds))
+            {
+                options.Add(new MemberOptionViewModel(member));
+            }
+
+            return options;
+        }
+
+        /// <summary>
+        /// 選択肢として表示するメンバーを取得する。
+        /// </summary>
+        /// <param name="selectedMemberId">単一選択中メンバーID。</param>
+        /// <param name="selectedMemberIds">複数選択中メンバーID。</param>
+        /// <returns>表示対象メンバー一覧。</returns>
+        private IEnumerable<TeamMemberViewModel> GetSelectableMembers(
+            Guid? selectedMemberId,
+            IEnumerable<Guid>? selectedMemberIds = null,
+            IEnumerable<Guid>? excludedMemberIds = null
+        )
+        {
+            if (_members == null)
+            {
+                yield break;
+            }
+
+            var selectedIds = new HashSet<Guid>(selectedMemberIds ?? []);
+            if (selectedMemberId != null)
+            {
+                selectedIds.Add(selectedMemberId.Value);
+            }
+            var excludedIds = new HashSet<Guid>(excludedMemberIds ?? []);
+
+            foreach (var member in _members)
+            {
+                if (excludedIds.Contains(member.MemberId) && !selectedIds.Contains(member.MemberId))
+                {
+                    continue;
+                }
+
+                if (member.IsActive || selectedIds.Contains(member.MemberId))
+                {
+                    yield return member;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 作業協力者ID一覧から未選択、担当者、重複を除外する。
+        /// </summary>
+        /// <param name="memberIds">正規化対象のメンバーID一覧。</param>
+        /// <returns>正規化済みメンバーID一覧。</returns>
+        private List<Guid> NormalizeCollaboratorMemberIds(IEnumerable<Guid> memberIds)
+        {
+            return memberIds
+                .Where(memberId => memberId != Guid.Empty)
+                .Where(memberId => AssigneeMemberId == null || memberId != AssigneeMemberId.Value)
+                .Distinct()
+                .ToList();
+        }
+
+        /// <summary>
+        /// 指定メンバーが有効メンバーとして存在するかどうかを判定する。
+        /// </summary>
+        /// <param name="memberId">対象メンバーID。</param>
+        /// <returns>有効メンバーの場合はtrue。</returns>
+        private bool IsActiveMember(Guid memberId)
+        {
+            return _members?.Any(member => member.MemberId == memberId && member.IsActive) == true;
         }
 
         private string? _comment;
@@ -230,6 +728,7 @@ namespace MainApplication.ViewModels.ProjectModel
         public ICommand IncreaseWorkEstimateHourCommand { get; }
         public ICommand DecreaseWorkEstimateHourCommand { get; }
         public ICommand AddSuspensionPeriodCommand { get; }
+        public ICommand AddCollaboratorCommand { get; }
 
         private void EditDateTime(bool isStart)
         {

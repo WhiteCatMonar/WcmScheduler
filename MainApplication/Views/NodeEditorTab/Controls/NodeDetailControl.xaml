@@ -64,15 +64,79 @@
         </DockPanel>
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Left"
-                       Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=Person}"
+                       Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=AssigneeMemberId}"
                        FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
-            <TextBox DockPanel.Dock="Left" Text="{Binding Detail.Person, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,0,5">
-                <i:Interaction.Triggers>
-                    <i:EventTrigger EventName="TextChanged">
-                        <i:InvokeCommandAction Command="{Binding Detail.NotifyEditedCommand}" />
-                    </i:EventTrigger>
-                </i:Interaction.Triggers>
-            </TextBox>
+            <StackPanel DockPanel.Dock="Left" Margin="0,0,0,5">
+                <ComboBox ItemsSource="{Binding Detail.AssigneeOptions}"
+                          DisplayMemberPath="DisplayName"
+                          SelectedValuePath="MemberId"
+                          SelectedValue="{Binding Detail.AssigneeMemberId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <ComboBox.Style>
+                        <Style TargetType="ComboBox">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Detail.HasInvalidAssigneeMember}" Value="True">
+                                    <Setter Property="Foreground" Value="{DynamicResource NodeStatusPendingBrush}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ComboBox.Style>
+                </ComboBox>
+                <TextBlock Text="{Binding Detail.AssigneeWarningText}"
+                           Foreground="{DynamicResource NodeStatusPendingBrush}"
+                           TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Detail.AssigneeWarningText}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+        </DockPanel>
+        <DockPanel LastChildFill="True">
+            <TextBlock DockPanel.Dock="Left"
+                       Text="{Binding Detail, Converter={StaticResource DisplayNameConverter}, ConverterParameter=CollaboratorMemberIds}"
+                       FontWeight="Bold" Width="60" Margin="0,0,0,5"/>
+            <StackPanel DockPanel.Dock="Left" Margin="0,0,0,5">
+                <Button Content="追加"
+                        Command="{Binding Detail.AddCollaboratorCommand}"
+                        Margin="0,0,0,4"/>
+                <ItemsControl ItemsSource="{Binding Detail.CollaboratorSelections}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <DockPanel LastChildFill="True" Margin="0,0,0,2">
+                                <Button DockPanel.Dock="Right"
+                                        Content="削除"
+                                        Command="{Binding RemoveCommand}"
+                                        Width="40"
+                                        Margin="4,0,0,0"/>
+                                <ComboBox ItemsSource="{Binding Options}"
+                                          DisplayMemberPath="DisplayName"
+                                          SelectedValuePath="MemberId"
+                                          SelectedValue="{Binding SelectedMemberId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Text="{Binding Detail.CollaboratorWarningText}"
+                           Foreground="{DynamicResource NodeStatusPendingBrush}"
+                           TextWrapping="Wrap">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Detail.CollaboratorWarningText}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
         </DockPanel>
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Left"
