@@ -182,21 +182,10 @@ namespace MainApplication.ViewModels
         /// </summary>
         private void ApplyRootDataModel(RootSaveDataModel root)
         {
-            if (root.TaskEditor != null)
-            {
-                if (root.TaskEditor.ProjectId != Guid.Empty && TeamProjects.SelectedProject != null)
-                {
-                    TeamProjects.SelectedProject.ProjectId = root.TaskEditor.ProjectId;
-                }
-
-                TeamSettings.LoadFromDataModels(root.Members, root.ProjectMemberWorkTimes, root.ProjectMemberParticipations);
-
-                TeamProjects.SelectedProject?.
-                    NodeEditor.LoadFromTaskEditorDataModel(root.TaskEditor);
-
-                /* TODO: タブごとの機能追加  */
-            }
+            TeamProjects.LoadFromDataModels(root.Projects);
+            TeamSettings.LoadFromDataModels(root.Members, root.Projects);
         }
+
 
         /* ---------------------------------------------------------
          * 保存処理
@@ -248,27 +237,29 @@ namespace MainApplication.ViewModels
         /// </summary>
         private RootSaveDataModel ToRootDataModel()
         {
-            TaskEditorDataModel taskEditor = new();
-
-            /* ユーザー：タスク、開発者：ノードという呼称にするため、名称をここで変更 */
-            TeamProjects.SelectedProject?.NodeEditor.SaveToTaskEditorDataModel(out taskEditor);
-            if (TeamProjects.SelectedProject != null)
-            {
-                taskEditor.ProjectId = TeamProjects.SelectedProject.ProjectId;
-            }
-
             RootSaveDataModel save_data = new()
             {
-                TaskEditor = taskEditor,
                 Members = TeamSettings.ToMemberDataModels(),
-                ProjectMemberWorkTimes = TeamSettings.ToProjectMemberWorkTimeDataModels(),
-                ProjectMemberParticipations = TeamSettings.ToProjectMemberParticipationDataModels()
+                Projects =
+                [
+                    ..
+                    TeamProjects.Projects.Select(project =>
+                    {
+                        project.NodeEditor.SaveToTaskEditorDataModel(out var taskEditor);
+                        return new ProjectDataModel
+                        {
+                            ProjectId = project.ProjectId,
+                            ProjectName = project.ProjectName,
+                            TaskEditor = taskEditor,
+                            MemberInfo = TeamSettings.ToProjectMemberInfoDataModels(project.ProjectId)
+                        };
+                    })
+                ]
             };
-
-            /* TODO: タブごとの機能追加 */
 
             return save_data;
         }
+
 
         /* ---------------------------------------------------------
          * ViewModel → Viewへの依頼イベント

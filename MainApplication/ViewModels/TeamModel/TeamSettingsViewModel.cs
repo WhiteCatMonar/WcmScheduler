@@ -157,12 +157,10 @@ namespace MainApplication.ViewModels.TeamModel
         /// 保存データを適用する
         /// </summary>
         /// <param name="members">メンバー保存データ。</param>
-        /// <param name="workTimes">作業可能時間保存データ。</param>
-        /// <param name="participations">プロジェクト参加期間保存データ。</param>
+        /// <param name="projects">プロジェクト保存データ一覧</param>
         public void LoadFromDataModels(
             IEnumerable<MemberDataModel> members,
-            IEnumerable<ProjectMemberWorkTimeDataModel> workTimes,
-            IEnumerable<ProjectMemberParticipationDataModel> participations
+            IEnumerable<ProjectDataModel> projects
         )
         {
             _isLoading = true;
@@ -177,16 +175,19 @@ namespace MainApplication.ViewModels.TeamModel
                 Members.Add(new TeamMemberViewModel(member));
             }
 
-            foreach (var workTime in workTimes)
+            foreach (var project in projects)
             {
-                _workTimeOverrides[(workTime.ProjectId, workTime.MemberId, workTime.WorkDate)] =
-                    Math.Max(0, workTime.WorkTimeMinutes);
-            }
+                foreach (var memberInfo in project.MemberInfo)
+                {
+                    _projectParticipations[(project.ProjectId, memberInfo.MemberId)] =
+                        (memberInfo.ParticipationStartDate, memberInfo.ParticipationEndDate);
 
-            foreach (var participation in participations)
-            {
-                _projectParticipations[(participation.ProjectId, participation.MemberId)] =
-                    (participation.ParticipationStartDate, participation.ParticipationEndDate);
+                    foreach (var workTime in memberInfo.WorkTimes)
+                    {
+                        _workTimeOverrides[(project.ProjectId, memberInfo.MemberId, workTime.WorkDate)] =
+                            Math.Max(0, workTime.WorkTimeMinutes);
+                    }
+                }
             }
 
             _isLoading = false;
@@ -204,42 +205,49 @@ namespace MainApplication.ViewModels.TeamModel
         }
 
         /// <summary>
-        /// 作業可能時間保存データへ変換する
+        /// プロジェクト内メンバー情報の保存データへ変換する
         /// </summary>
-        /// <returns>作業可能時間保存データ一覧。</returns>
-        public List<ProjectMemberWorkTimeDataModel> ToProjectMemberWorkTimeDataModels()
+        /// <param name="projectId">対象プロジェクトID</param>
+        /// <returns>プロジェクト内メンバー情報一覧</returns>
+        public List<ProjectMemberInfoDataModel> ToProjectMemberInfoDataModels(Guid projectId)
         {
+            var memberIds = _projectParticipations.Keys
+                .Where(key => key.ProjectId == projectId)
+                .Select(key => key.MemberId)
+                .Concat(
+                    _workTimeOverrides.Keys
+                        .Where(key => key.ProjectId == projectId)
+                        .Select(key => key.MemberId)
+                )
+                .Distinct();
+
             return
             [
                 ..
-                _workTimeOverrides.Select(item => new ProjectMemberWorkTimeDataModel
+                memberIds.Select(memberId =>
                 {
-                    ProjectId = item.Key.ProjectId,
-                    MemberId = item.Key.MemberId,
-                    WorkDate = item.Key.WorkDate,
-                    WorkTimeMinutes = item.Value
+                    _projectParticipations.TryGetValue((projectId, memberId), out var participation);
+                    return new ProjectMemberInfoDataModel
+                    {
+                        MemberId = memberId,
+                        ParticipationStartDate = participation.StartDate,
+                        ParticipationEndDate = participation.EndDate,
+                        WorkTimes =
+                        [
+                            ..
+                            _workTimeOverrides
+                                .Where(item => item.Key.ProjectId == projectId && item.Key.MemberId == memberId)
+                                .Select(item => new MemberWorkTimeDataModel
+                                {
+                                    WorkDate = item.Key.WorkDate,
+                                    WorkTimeMinutes = item.Value
+                                })
+                        ]
+                    };
                 })
             ];
         }
 
-        /// <summary>
-        /// プロジェクト参加期間保存データへ変換する
-        /// </summary>
-        /// <returns>プロジェクト参加期間保存データ一覧。</returns>
-        public List<ProjectMemberParticipationDataModel> ToProjectMemberParticipationDataModels()
-        {
-            return
-            [
-                ..
-                _projectParticipations.Select(item => new ProjectMemberParticipationDataModel
-                {
-                    ProjectId = item.Key.ProjectId,
-                    MemberId = item.Key.MemberId,
-                    ParticipationStartDate = item.Value.StartDate,
-                    ParticipationEndDate = item.Value.EndDate
-                })
-            ];
-        }
 
         /// <summary>
         /// メンバーを追加する

@@ -1,6 +1,7 @@
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
 using MainApplication.ViewModels.TeamModel;
+using MainApplication.Models.SaveData;
 using System.Collections.ObjectModel;
 
 namespace MainApplication.ViewModels
@@ -15,6 +16,7 @@ namespace MainApplication.ViewModels
          * --------------------------------------------------------- */
 
         public ObservableCollection<ProjectViewModel> Projects { get; }
+        private readonly ObservableCollection<TeamMemberViewModel> _members;
 
         /* ---------------------------------------------------------
          * 選択中のプロジェクト(UIのタブ切り替えなどで使用)
@@ -74,6 +76,7 @@ namespace MainApplication.ViewModels
         /// </summary>
         public TeamProjectsViewModel(ObservableCollection<TeamMemberViewModel> members)
         {
+            _members = members;
             Projects = [];
             var project = new ProjectViewModel("New Project", members);
             Projects.Add(project);
@@ -87,6 +90,36 @@ namespace MainApplication.ViewModels
             ];
 
             /* 初期選択タブの設定 */
+            SelectedTab = Tabs[0];
+        }
+
+        /// <summary>
+        /// 保存データからプロジェクト一覧を復元する
+        /// </summary>
+        /// <param name="projects">プロジェクト保存データ一覧</param>
+        public void LoadFromDataModels(IEnumerable<ProjectDataModel> projects)
+        {
+            Projects.Clear();
+            Tabs.Clear();
+
+            foreach (var projectData in projects)
+            {
+                var project = new ProjectViewModel(projectData.ProjectName ?? string.Empty, _members)
+                {
+                    ProjectId = projectData.ProjectId == Guid.Empty ? Guid.NewGuid() : projectData.ProjectId
+                };
+                project.NodeEditor.LoadFromTaskEditorDataModel(projectData.TaskEditor ?? new TaskEditorDataModel());
+                Projects.Add(project);
+                Tabs.Add(new TabInfo(project.ProjectName ?? string.Empty, project));
+            }
+
+            if (Projects.Count == 0)
+            {
+                var project = new ProjectViewModel("New Project", _members);
+                Projects.Add(project);
+                Tabs.Add(new TabInfo(project.ProjectName ?? string.Empty, project));
+            }
+
             SelectedTab = Tabs[0];
         }
     }

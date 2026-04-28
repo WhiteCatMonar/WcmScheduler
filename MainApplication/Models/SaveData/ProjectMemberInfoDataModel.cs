@@ -1,21 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace MainApplication.Models.SaveData
 {
     /// <summary>
-    /// プロジェクト単位のメンバー参加期間保存データ
+    /// プロジェクト内メンバー情報の保存データ
     /// </summary>
-    public class ProjectMemberParticipationDataModel
+    public class ProjectMemberInfoDataModel
     {
         /// <summary>
-        /// 対象プロジェクトのID
-        /// </summary>
-        [JsonPropertyName("project-id")]
-        public Guid ProjectId { get; set; }
-
-        /// <summary>
-        /// 対象メンバーのID
+        /// 対象メンバーID
         /// </summary>
         [JsonPropertyName("member-id")]
         public Guid MemberId { get; set; }
@@ -31,6 +26,12 @@ namespace MainApplication.Models.SaveData
         /// </summary>
         [JsonPropertyName("participation-end-date")]
         public DateOnly? ParticipationEndDate { get; set; }
+
+        /// <summary>
+        /// 日付別作業可能時間上書き値一覧
+        /// </summary>
+        [JsonPropertyName("work-times")]
+        public List<MemberWorkTimeDataModel> WorkTimes { get; set; } = [];
     }
 }
 
