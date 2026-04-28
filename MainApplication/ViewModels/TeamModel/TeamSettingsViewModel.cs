@@ -1,5 +1,6 @@
 using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.ProjectModel;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -33,6 +34,7 @@ namespace MainApplication.ViewModels.TeamModel
             _teamProjects = teamProjects;
             Members = members;
             Members.CollectionChanged += OnMembersCollectionChanged;
+            _teamProjects.Projects.CollectionChanged += OnProjectsCollectionChanged;
 
             AddMemberCommand = new RelayCommand(AddMember);
             DeleteMemberCommand = new RelayCommand(DeleteSelectedMember, () => SelectedMember != null);
@@ -360,6 +362,27 @@ namespace MainApplication.ViewModels.TeamModel
         }
 
         /// <summary>
+        /// プロジェクト一覧変更時にプロジェクト関連表示を更新する
+        /// </summary>
+        /// <param name="sender">イベント発行元</param>
+        /// <param name="e">変更内容</param>
+        private void OnProjectsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (ProjectViewModel project in e.OldItems)
+                {
+                    RemoveProjectData(project.ProjectId);
+                }
+            }
+
+            if (!_isLoading)
+            {
+                RebuildSelectedMemberViews();
+            }
+        }
+
+        /// <summary>
         /// メンバー変更時に関連表示を更新する
         /// </summary>
         /// <param name="sender">イベント発行元。</param>
@@ -527,6 +550,23 @@ namespace MainApplication.ViewModels.TeamModel
             }
 
             foreach (var key in _projectParticipations.Keys.Where(key => key.MemberId == memberId).ToList())
+            {
+                _projectParticipations.Remove(key);
+            }
+        }
+
+        /// <summary>
+        /// 指定プロジェクトのメンバー関連データを削除する
+        /// </summary>
+        /// <param name="projectId">対象プロジェクトID</param>
+        private void RemoveProjectData(Guid projectId)
+        {
+            foreach (var key in _workTimeOverrides.Keys.Where(key => key.ProjectId == projectId).ToList())
+            {
+                _workTimeOverrides.Remove(key);
+            }
+
+            foreach (var key in _projectParticipations.Keys.Where(key => key.ProjectId == projectId).ToList())
             {
                 _projectParticipations.Remove(key);
             }
