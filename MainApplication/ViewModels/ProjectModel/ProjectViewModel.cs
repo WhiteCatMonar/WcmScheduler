@@ -1,23 +1,20 @@
 using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.GanttChartModel;
 using MainApplication.ViewModels.TeamModel;
 using System.Collections.ObjectModel;
 
 namespace MainApplication.ViewModels.ProjectModel
 {
     /// <summary>
-    /// 1つのプロジェクトを表すViewModel。
-    /// /// プロジェクト内のタブ管理もここで行う。
+    /// 1つのプロジェクトを表すViewModel
     /// </summary>
     public class ProjectViewModel : ViewModelBase
     {
-        /* ---------------------------------------------------------
-         * プロジェクト全体の基本情報
-         * --------------------------------------------------------- */
-
         private string? _projectName;
+        private TabInfo? _selectedTab;
 
         /// <summary>
-        /// プロジェクト名(画面タイトルやタブ名として使用)。
+        /// プロジェクト名
         /// </summary>
         public string? ProjectName
         {
@@ -26,30 +23,24 @@ namespace MainApplication.ViewModels.ProjectModel
         }
 
         /// <summary>
-        /// プロジェクトID。
+        /// プロジェクトID
         /// </summary>
         public Guid ProjectId { get; set; } = Guid.NewGuid();
 
-        /* ---------------------------------------------------------
-         * 子 ViewModel(タスク編集機能)
-         * --------------------------------------------------------- */
-
         /// <summary>
-        /// ノードエディタ(タスク編集機能)のViewModel。
+        /// ノードエディタViewModel
         /// </summary>
-
         public NodeEditorViewModel NodeEditor { get; }
 
-        /* ---------------------------------------------------------
-         * タブ管理
-         * --------------------------------------------------------- */
+        /// <summary>
+        /// プロジェクトスケジュール用ガントチャートViewModel
+        /// </summary>
+        public GanttChartViewModel GanttChart { get; }
 
         /// <summary>
         /// 表示中のタブ一覧
         /// </summary>
         public ObservableCollection<TabInfo> Tabs { get; }
-
-        private TabInfo? _selectedTab;
 
         /// <summary>
         /// 現在選択されているタブ
@@ -57,7 +48,21 @@ namespace MainApplication.ViewModels.ProjectModel
         public TabInfo? SelectedTab
         {
             get => _selectedTab;
-            set => SetProperty(ref _selectedTab, value, [nameof(IsNodeEditor)]);
+            set => SetProperty(
+                ref _selectedTab,
+                value,
+                [nameof(IsNodeEditor)],
+                CreateHooksFromValue(
+                    value,
+                    post: (oldValue, newValue) =>
+                    {
+                        if (newValue?.Content == GanttChart)
+                        {
+                            GanttChart.Refresh();
+                        }
+                    }
+                )
+            );
         }
 
         /// <summary>
@@ -65,31 +70,29 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public bool IsNodeEditor => SelectedTab?.Content == NodeEditor;
 
-        /* ---------------------------------------------------------
-         * コンストラクタ
-         * --------------------------------------------------------- */
-
         /// <summary>
-        /// ProjectViewModelを生成し、子ViewModelやサービスを初期化する。
+        /// ProjectViewModelを生成し、子ViewModelやサービスを初期化する
         /// </summary>
+        /// <param name="name">プロジェクト名</param>
+        /// <param name="members">チームメンバー一覧</param>
         public ProjectViewModel(string name, ObservableCollection<TeamMemberViewModel>? members = null)
         {
             ProjectName = name;
-
-            /* 子となるViewModelの生成 */
             NodeEditor = new NodeEditorViewModel();
             if (members != null)
             {
                 NodeEditor.SetTeamMembers(members);
             }
 
-            /* タブ管理 */
+            GanttChart = new GanttChartViewModel(NodeEditor);
+
             var nodeEditorTab = new TabInfo("タスク編集", NodeEditor);
-            Tabs = new ObservableCollection<TabInfo>
-            {
-                nodeEditorTab
-                /* TODO:タブごとの機能追加 */
-            };
+            var ganttChartTab = new TabInfo("プロジェクトスケジュール", GanttChart);
+            Tabs =
+            [
+                nodeEditorTab,
+                ganttChartTab
+            ];
 
             SelectedTab = nodeEditorTab;
         }

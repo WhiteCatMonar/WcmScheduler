@@ -25,13 +25,14 @@
 ├── 📂 Models
 │   ├── 📂 SaveData                                    # 保存するデータのモデル
 │   │   ├── 📄 ConnectionDataModel.cs                  # 接続線管理用情報
+│   │   ├── 📄 MemberDataModel.cs                      # チームメンバー保存情報
+│   │   ├── 📄 MemberWorkTimeDataModel.cs              # メンバーの日付別作業可能時間保存情報
 │   │   ├── 📄 NodeDataModel.cs                        # ノード管理用情報
 │   │   ├── 📄 NodeDetailsDataModel.cs                 # ノードごとの詳細情報
-│   │   ├── 📄 MemberDataModel.cs                      # チームメンバー保存情報
 │   │   ├── 📄 PortDataModel.cs                        # ノード内ポート管理用情報
 │   │   ├── 📄 PositionDataModel.cs                    # 座標管理用情報
-│   │   ├── 📄 ProjectMemberParticipationDataModel.cs  # プロジェクト別メンバー参加期間保存情報
-│   │   ├── 📄 ProjectMemberWorkTimeDataModel.cs       # プロジェクト別メンバー作業可能時間保存情報
+│   │   ├── 📄 ProjectDataModel.cs                     # プロジェクト単位の保存情報
+│   │   ├── 📄 ProjectMemberInfoDataModel.cs           # プロジェクト内メンバー情報
 │   │   ├── 📄 RootSaveDataModel.cs                    # 保存するデータのルート情報
 │   │   ├── 📄 SuspensionPeriodDataModel.cs            # タスク中断期間の保存情報
 │   │   └── 📄 TaskEditorDataModel.cs                  # タスク編集機能についての情報
@@ -73,6 +74,14 @@
 │   │   ├── 📄 UndoRedoManager.cs                      # Undo/Redo管理
 │   │   └── 📄 ViewModelBase.cs                        # ViewModelの基底クラス
 │   │
+│   ├── 📂 GanttChartModel                             # ガントチャート表示用ViewModel
+│   │   ├── 📄 GanttChartService.cs                    # 予定期間算定・表示用データ生成
+│   │   ├── 📄 GanttChartViewModel.cs                  # ガントチャート全体の状態管理
+│   │   ├── 📄 GanttDependencyLineViewModel.cs         # タスク依存関係線の描画情報
+│   │   ├── 📄 GanttSuspensionItemViewModel.cs         # 中断期間表示情報
+│   │   ├── 📄 GanttTaskItemViewModel.cs               # ガントチャート上のタスク1件の状態
+│   │   └── 📄 GanttTimelineDayViewModel.cs            # 時間軸の日付単位表示情報
+│   │
 │   ├── 📂 ProjectModel
 │   │   ├── 📄 ConnectionCollectionViewModel.cs        # 接続線の一覧管理
 │   │   ├── 📄 ConnectionViewModel.cs                  # 接続線1本の状態
@@ -83,6 +92,7 @@
 │   │   ├── 📄 NodeViewModel.cs                        # ノード1個の状態・編集ロジック
 │   │   ├── 📄 PortViewModel.cs                        # ポート(入出力端子)の状態
 │   │   ├── 📄 ProjectViewModel.cs                     # 1つのプロジェクト全体の管理
+│   │   ├── 📄 SuspensionPeriodRange.cs                # 中断期間の正規化済み範囲
 │   │   └── 📄 SuspensionPeriodViewModel.cs            # タスク中断期間の状態・編集ロジック
 │   │
 │   ├── 📂 Service
@@ -144,6 +154,8 @@
 │   ├── 📄 ColorPickerWindow.xaml.cs                   # 色編集ダイアログのコードビハインド
 │   ├── 📄 DateTimeEditorWindow.xaml                   # 日時編集ダイアログ(View)
 │   ├── 📄 DateTimeEditorWindow.xaml.cs                # 日時編集ダイアログのコードビハインド
+│   ├── 📄 GanttChartView.xaml                         # ガントチャートView
+│   ├── 📄 GanttChartView.xaml.cs                      # ガントチャートViewのコードビハインド
 │   ├── 📄 ProjectView.xaml                            # プロジェクト単体情報
 │   ├── 📄 ProjectView.xaml.cs
 │   ├── 📄 TeamProjectsView.xaml                       # チーム内プロジェクト情報(複数のプロジェクトの管理用View)
@@ -172,6 +184,12 @@
 メンバー管理、タスク担当者、作業協力者、日次作業可能時間設定に関する仕様は以下にまとめています。
 
 - [メンバー管理仕様](documentation/member_manager.md)
+
+## ガントチャート仕様
+
+プロジェクトスケジュール、チームスケジュール、予定期間算定、依存関係表示に関する仕様は以下にまとめています。
+
+- [ガントチャート仕様](documentation/gantt_chart.md)
 
 ## 保存データ仕様
 

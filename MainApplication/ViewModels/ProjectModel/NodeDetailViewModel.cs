@@ -29,6 +29,7 @@ namespace MainApplication.ViewModels.ProjectModel
         private readonly DispatcherTimer _editTimer;
         private readonly List<IEditableField> _editableFields;
         private ObservableCollection<TeamMemberViewModel>? _members;
+        private bool _isRefreshingMemberOptions;
         private bool _isRefreshingCollaboratorSelections;
         private bool _isUpdatingCollaboratorSelectionValue;
 
@@ -106,32 +107,40 @@ namespace MainApplication.ViewModels.ProjectModel
         public Guid? AssigneeMemberId
         {
             get => _assigneeMemberId;
-            set => SetProperty(
-                ref _assigneeMemberId,
-                value,
-                [
-                    nameof(HasInvalidAssigneeMember),
-                    nameof(AssigneeWarningText)
-                ],
-                CreateHooksFromValue(
+            set
+            {
+                if (_isRefreshingMemberOptions && value == null && _assigneeMemberId != null)
+                {
+                    return;
+                }
+
+                SetProperty(
+                    ref _assigneeMemberId,
                     value,
-                    pre: (oldValue, newValue) =>
-                    {
-                        if (!_undoRedo.IsApplyingHistory)
+                    [
+                        nameof(HasInvalidAssigneeMember),
+                        nameof(AssigneeWarningText)
+                    ],
+                    CreateHooksFromValue(
+                        value,
+                        pre: (oldValue, newValue) =>
                         {
-                            _undoRedo.Execute(
-                                new EditNodeDetailPropertyAction(
-                                    this,
-                                    nameof(AssigneeMemberId),
-                                    _assigneeMemberId,
-                                    newValue
-                                )
-                            );
-                        }
-                    },
-                    chain: OnAssigneeMemberChanged
-                )
-            );
+                            if (!_undoRedo.IsApplyingHistory)
+                            {
+                                _undoRedo.Execute(
+                                    new EditNodeDetailPropertyAction(
+                                        this,
+                                        nameof(AssigneeMemberId),
+                                        _assigneeMemberId,
+                                        newValue
+                                    )
+                                );
+                            }
+                        },
+                        chain: OnAssigneeMemberChanged
+                    )
+                );
+            }
         }
 
         private List<Guid> _collaboratorMemberIds = [];
@@ -412,13 +421,21 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         private void RefreshMemberOptions()
         {
-            RefreshAssigneeOptions();
-            RefreshCollaboratorOptions();
-            RefreshCollaboratorSelections();
-            OnPropertyChangedA(nameof(HasInvalidAssigneeMember));
-            OnPropertyChangedA(nameof(HasInvalidCollaboratorMember));
-            OnPropertyChangedA(nameof(AssigneeWarningText));
-            OnPropertyChangedA(nameof(CollaboratorWarningText));
+            _isRefreshingMemberOptions = true;
+            try
+            {
+                RefreshAssigneeOptions();
+                RefreshCollaboratorOptions();
+                RefreshCollaboratorSelections();
+                OnPropertyChangedA(nameof(HasInvalidAssigneeMember));
+                OnPropertyChangedA(nameof(HasInvalidCollaboratorMember));
+                OnPropertyChangedA(nameof(AssigneeWarningText));
+                OnPropertyChangedA(nameof(CollaboratorWarningText));
+            }
+            finally
+            {
+                _isRefreshingMemberOptions = false;
+            }
         }
 
         /// <summary>
