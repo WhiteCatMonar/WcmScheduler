@@ -56,7 +56,16 @@ namespace MainApplication.Models.Settings
             { "date-time-editor-text", "#FF1E1E1E" },
             { "theme-setting-background", "#FFF5F5F5" },
             { "theme-setting-text", "#FF1E1E1E" },
-            { "color-preview-border", "#FF808080" }
+            { "color-preview-border", "#FF808080" },
+            { "gantt-chart-background", "#FFFFFFFF" },
+            { "gantt-chart-border", "#FFD0D0D0" },
+            { "gantt-header-background", "#FFF5F5F5" },
+            { "gantt-header-text", "#FF1E1E1E" },
+            { "gantt-row-header-background", "#FFFFFFFF" },
+            { "gantt-grid-line", "#FFE5E5E5" },
+            { "gantt-warning-text", "#FFF9A825" },
+            { "gantt-suspension-background", "#FF808080" },
+            { "gantt-dependency-line", "#FF606060" }
         };
     }
 }

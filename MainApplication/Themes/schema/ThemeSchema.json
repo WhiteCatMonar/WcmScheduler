@@ -185,6 +185,42 @@
         "color-preview-border": {
           "description": "色プレビュー枠線",
           "$ref": "#/$defs/argbColor"
+        },
+        "gantt-chart-background": {
+          "description": "ガントチャート表示領域背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-chart-border": {
+          "description": "ガントチャート表示領域枠線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-header-background": {
+          "description": "ガントチャート日付ヘッダー背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-header-text": {
+          "description": "ガントチャート日付ヘッダー文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-row-header-background": {
+          "description": "ガントチャートタスク列背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-grid-line": {
+          "description": "ガントチャートグリッド線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-warning-text": {
+          "description": "ガントチャート警告文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-suspension-background": {
+          "description": "ガントチャート中断期間表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-dependency-line": {
+          "description": "ガントチャート依存関係線",
+          "$ref": "#/$defs/argbColor"
         }
       }
     }

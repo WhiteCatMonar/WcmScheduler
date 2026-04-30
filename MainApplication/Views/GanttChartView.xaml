@@ -8,7 +8,7 @@
             <Setter Property="Foreground" Value="{DynamicResource WindowTextBrush}"/>
             <Style.Triggers>
                 <DataTrigger Binding="{Binding HasWarning}" Value="True">
-                    <Setter Property="Foreground" Value="{DynamicResource NodeStatusPendingBrush}"/>
+                    <Setter Property="Foreground" Value="{DynamicResource GanttWarningTextBrush}"/>
                     <Setter Property="FontWeight" Value="Bold"/>
                 </DataTrigger>
             </Style.Triggers>
@@ -60,9 +60,9 @@
         </DockPanel>
 
         <Border Grid.Row="2"
-                BorderBrush="{DynamicResource NodeEditorBorderBrush}"
+                BorderBrush="{DynamicResource GanttChartBorderBrush}"
                 BorderThickness="1"
-                Background="{DynamicResource NodeEditorCanvasBackgroundBrush}">
+                Background="{DynamicResource GanttChartBackgroundBrush}">
             <ScrollViewer x:Name="ChartScrollViewer"
                           HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Auto"
@@ -79,8 +79,9 @@
 
                     <Border Grid.Row="0"
                             Grid.Column="0"
-                            BorderBrush="{DynamicResource NodeEditorBorderBrush}"
+                            BorderBrush="{DynamicResource GanttChartBorderBrush}"
                             BorderThickness="0,0,1,1"
+                            Background="{DynamicResource GanttHeaderBackgroundBrush}"
                             Padding="6">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -89,10 +90,12 @@
                             </Grid.ColumnDefinitions>
                             <TextBlock Grid.Column="0"
                                        Text="タスク"
+                                       Foreground="{DynamicResource GanttHeaderTextBrush}"
                                        FontWeight="Bold"
                                        VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1"
                                        Text="担当者"
+                                       Foreground="{DynamicResource GanttHeaderTextBrush}"
                                        FontWeight="Bold"
                                        VerticalAlignment="Center"/>
                         </Grid>
@@ -117,14 +120,17 @@
                             <DataTemplate DataType="{x:Type gantt:GanttTimelineDayViewModel}">
                                 <Border Width="{Binding Width}"
                                         Height="42"
-                                        BorderBrush="{DynamicResource NodeEditorBorderBrush}"
+                                        BorderBrush="{DynamicResource GanttChartBorderBrush}"
                                         BorderThickness="0,0,1,1"
+                                        Background="{DynamicResource GanttHeaderBackgroundBrush}"
                                         Padding="4">
                                     <StackPanel>
                                         <TextBlock Text="{Binding DateText}"
+                                                   Foreground="{DynamicResource GanttHeaderTextBrush}"
                                                    FontWeight="Bold"
                                                    HorizontalAlignment="Center"/>
                                         <TextBlock Text="{Binding DayOfWeekText}"
+                                                   Foreground="{DynamicResource GanttHeaderTextBrush}"
                                                    FontSize="11"
                                                    HorizontalAlignment="Center"/>
                                     </StackPanel>
@@ -144,8 +150,9 @@
                                         <ColumnDefinition Width="320"/>
                                     </Grid.ColumnDefinitions>
 
-                                    <Border BorderBrush="{DynamicResource NodeEditorBorderBrush}"
+                                    <Border BorderBrush="{DynamicResource GanttChartBorderBrush}"
                                             BorderThickness="0,0,1,1"
+                                            Background="{DynamicResource GanttRowHeaderBackgroundBrush}"
                                             Padding="6">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -162,7 +169,7 @@
                                                     <StackPanel>
                                                         <TextBlock Text="{Binding TaskName}" FontWeight="Bold"/>
                                                         <TextBlock Text="{Binding ErrorText}"
-                                                                   Foreground="{DynamicResource NodeStatusPendingBrush}"/>
+                                                                   Foreground="{DynamicResource GanttWarningTextBrush}"/>
                                                     </StackPanel>
                                                 </ToolTipService.ToolTip>
                                             </TextBlock>
@@ -217,7 +224,7 @@
                                                 <DataTemplate DataType="{x:Type gantt:GanttTimelineDayViewModel}">
                                                     <Border Width="{Binding Width}"
                                                             Height="48"
-                                                            BorderBrush="{DynamicResource NodeEditorBorderBrush}"
+                                                            BorderBrush="{DynamicResource GanttGridLineBrush}"
                                                             BorderThickness="0,0,1,1"
                                                             Opacity="0.35"/>
                                                 </DataTemplate>
@@ -245,7 +252,7 @@
                                                         <DataTemplate DataType="{x:Type gantt:GanttSuspensionItemViewModel}">
                                                             <Border Width="{Binding Width}"
                                                                     Height="20"
-                                                                    Background="Gray"
+                                                                    Background="{DynamicResource GanttSuspensionBackgroundBrush}"
                                                                     Opacity="0.65"/>
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>
@@ -276,11 +283,11 @@
                                 <DataTemplate DataType="{x:Type gantt:GanttDependencyLineViewModel}">
                                     <Canvas>
                                         <Path Data="{Binding Geometry}"
-                                              Stroke="{DynamicResource WindowTextBrush}"
+                                              Stroke="{DynamicResource GanttDependencyLineBrush}"
                                               StrokeThickness="1.5"
                                               Opacity="0.75"/>
                                         <Polygon Points="{Binding ArrowPoints}"
-                                                 Fill="{DynamicResource WindowTextBrush}"
+                                                 Fill="{DynamicResource GanttDependencyLineBrush}"
                                                  Opacity="0.75"/>
                                     </Canvas>
                                 </DataTemplate>

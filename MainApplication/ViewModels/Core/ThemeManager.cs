@@ -62,7 +62,16 @@ namespace MainApplication.ViewModels.Core
             { "date-time-editor-text", "DateTimeEditorTextBrush" },
             { "theme-setting-background", "ThemeSettingBackgroundBrush" },
             { "theme-setting-text", "ThemeSettingTextBrush" },
-            { "color-preview-border", "ColorPreviewBorderBrush" }
+            { "color-preview-border", "ColorPreviewBorderBrush" },
+            { "gantt-chart-background", "GanttChartBackgroundBrush" },
+            { "gantt-chart-border", "GanttChartBorderBrush" },
+            { "gantt-header-background", "GanttHeaderBackgroundBrush" },
+            { "gantt-header-text", "GanttHeaderTextBrush" },
+            { "gantt-row-header-background", "GanttRowHeaderBackgroundBrush" },
+            { "gantt-grid-line", "GanttGridLineBrush" },
+            { "gantt-warning-text", "GanttWarningTextBrush" },
+            { "gantt-suspension-background", "GanttSuspensionBackgroundBrush" },
+            { "gantt-dependency-line", "GanttDependencyLineBrush" }
         };
 
         /// <summary>

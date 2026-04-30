@@ -43,6 +43,15 @@
     "date-time-editor-text": "#FFF1F1F1",
     "theme-setting-background": "#FF252526",
     "theme-setting-text": "#FFF1F1F1",
-    "color-preview-border": "#FF808080"
+    "color-preview-border": "#FF808080",
+    "gantt-chart-background": "#FF1E1E1E",
+    "gantt-chart-border": "#FF3F3F46",
+    "gantt-header-background": "#FF252526",
+    "gantt-header-text": "#FFF1F1F1",
+    "gantt-row-header-background": "#FF252526",
+    "gantt-grid-line": "#FF3F3F46",
+    "gantt-warning-text": "#FFDCDCAA",
+    "gantt-suspension-background": "#FF707070",
+    "gantt-dependency-line": "#FFD4D4D4"
   }
 }
