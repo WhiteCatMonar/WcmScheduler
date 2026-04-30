@@ -3,6 +3,10 @@
 このドキュメントは、WcmScheduler の保存ファイルJSON構造について整理したものです。
 JSONキーは kebab-case を基本とします。
 
+JSON Schema は以下に定義します。
+
+- [保存データJSON Schema](save_data.schema.json)
+
 ## 概要
 
 保存ファイルは、プロジェクト一覧とチームメンバー一覧を1つのJSONとして保持します。

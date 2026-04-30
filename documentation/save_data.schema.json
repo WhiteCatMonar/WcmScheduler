@@ -1,0 +1,432 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/WhiteCatMonar/WcmScheduler/documentation/save_data.schema.json",
+  "title": "WcmScheduler Save Data",
+  "description": "WcmScheduler save file schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "projects",
+    "members"
+  ],
+  "properties": {
+    "projects": {
+      "type": "array",
+      "description": "Project list.",
+      "items": {
+        "$ref": "#/$defs/project"
+      }
+    },
+    "members": {
+      "type": "array",
+      "description": "Team member master list. Array order is used as the display order.",
+      "items": {
+        "$ref": "#/$defs/member"
+      }
+    }
+  },
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "nullable-uuid": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "nullable-string": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "nullable-date": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/date"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "date-time": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})?$",
+      "description": "Date and time string serialized by System.Text.Json DateTime. Time zone offset is optional."
+    },
+    "nullable-date-time": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "non-negative-integer": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project-id",
+        "project-name",
+        "task-editor",
+        "member-info"
+      ],
+      "properties": {
+        "project-id": {
+          "$ref": "#/$defs/uuid",
+          "description": "Project ID."
+        },
+        "project-name": {
+          "$ref": "#/$defs/nullable-string",
+          "description": "Project display name."
+        },
+        "task-editor": {
+          "$ref": "#/$defs/task-editor",
+          "description": "Task editor data owned by this project."
+        },
+        "member-info": {
+          "type": "array",
+          "description": "Project-specific member settings.",
+          "items": {
+            "$ref": "#/$defs/project-member-info"
+          }
+        }
+      }
+    },
+    "task-editor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodes",
+        "connections"
+      ],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "description": "Task node list.",
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        },
+        "connections": {
+          "type": "array",
+          "description": "Connection list between node ports.",
+          "items": {
+            "$ref": "#/$defs/connection"
+          }
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "position",
+        "details",
+        "ports"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid",
+          "description": "Node ID."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "TaskNode"
+          ],
+          "description": "Node type."
+        },
+        "position": {
+          "$ref": "#/$defs/position",
+          "description": "Node position on the editor canvas."
+        },
+        "details": {
+          "$ref": "#/$defs/node-details",
+          "description": "Task detail data."
+        },
+        "ports": {
+          "type": "array",
+          "description": "Input and output port list.",
+          "items": {
+            "$ref": "#/$defs/port"
+          }
+        }
+      }
+    },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "type": "number",
+          "description": "X coordinate."
+        },
+        "y": {
+          "type": "number",
+          "description": "Y coordinate."
+        }
+      }
+    },
+    "node-details": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "task-name",
+        "person",
+        "assignee-member-id",
+        "collaborator-member-ids",
+        "start-date-time",
+        "end-date-time",
+        "work-estimate-minutes",
+        "suspension-periods",
+        "comment"
+      ],
+      "properties": {
+        "task-name": {
+          "$ref": "#/$defs/nullable-string",
+          "description": "Task name."
+        },
+        "person": {
+          "$ref": "#/$defs/nullable-string",
+          "description": "Legacy assignee text. Kept for compatibility."
+        },
+        "assignee-member-id": {
+          "$ref": "#/$defs/nullable-uuid",
+          "description": "Assignee member ID."
+        },
+        "collaborator-member-ids": {
+          "type": "array",
+          "description": "Collaborator member ID list.",
+          "items": {
+            "$ref": "#/$defs/uuid"
+          },
+          "uniqueItems": true
+        },
+        "start-date-time": {
+          "$ref": "#/$defs/nullable-date-time",
+          "description": "Task start date and time."
+        },
+        "end-date-time": {
+          "$ref": "#/$defs/nullable-date-time",
+          "description": "Task end date and time."
+        },
+        "work-estimate-minutes": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/non-negative-integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Work estimate in minutes. 0 is treated as unset."
+        },
+        "suspension-periods": {
+          "type": "array",
+          "description": "Task suspension period list.",
+          "items": {
+            "$ref": "#/$defs/suspension-period"
+          }
+        },
+        "comment": {
+          "$ref": "#/$defs/nullable-string",
+          "description": "Task comment."
+        }
+      }
+    },
+    "suspension-period": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "start-date-time",
+        "end-date-time"
+      ],
+      "properties": {
+        "start-date-time": {
+          "$ref": "#/$defs/nullable-date-time",
+          "description": "Suspension start date and time."
+        },
+        "end-date-time": {
+          "$ref": "#/$defs/nullable-date-time",
+          "description": "Suspension end date and time."
+        }
+      }
+    },
+    "port": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid",
+          "description": "Port ID."
+        },
+        "name": {
+          "type": "string",
+          "description": "Port display name."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "Input",
+            "Output"
+          ],
+          "description": "Port type."
+        }
+      }
+    },
+    "connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "from-port-id",
+        "to-port-id"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/uuid",
+          "description": "Connection ID."
+        },
+        "from-port-id": {
+          "$ref": "#/$defs/uuid",
+          "description": "Source port ID."
+        },
+        "to-port-id": {
+          "$ref": "#/$defs/uuid",
+          "description": "Destination port ID."
+        }
+      }
+    },
+    "member": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "member-id",
+        "display-name",
+        "sunday-work-time-minutes",
+        "monday-work-time-minutes",
+        "tuesday-work-time-minutes",
+        "wednesday-work-time-minutes",
+        "thursday-work-time-minutes",
+        "friday-work-time-minutes",
+        "saturday-work-time-minutes"
+      ],
+      "properties": {
+        "member-id": {
+          "$ref": "#/$defs/uuid",
+          "description": "Member ID."
+        },
+        "display-name": {
+          "$ref": "#/$defs/nullable-string",
+          "description": "Member display name."
+        },
+        "sunday-work-time-minutes": {
+          "$ref": "#/$defs/non-negative-integer",
+          "description": "Default Sunday work time in minutes."
+        },
+        "monday-work-time-minutes": {
+          "$ref": "#/$defs/non-negative-integer",
+          "description": "Default Monday work time in minutes."
+        },
+        "tuesday-work-time-minutes": {
+          "$ref": "#/$defs/non-negative-integer",
+          "description": "Default Tuesday work time in minutes."
+        },
+        "wednesday-work-time-minutes": {
+          "$ref": "#/$defs/non-negative-integer",
+          "description": "Default Wednesday work time in minutes."
+        },
+        "thursday-work-time-minutes": {
+          "$ref": "#/$defs/non-negative-integer",
+          "description": "Default Thursday work time in minutes."
+        },
+        "friday-work-time-minutes": {
+          "$ref": "#/$defs/non-negative-integer",
+          "description": "Default Friday work time in minutes."
+        },
+        "saturday-work-time-minutes": {
+          "$ref": "#/$defs/non-negative-integer",
+          "description": "Default Saturday work time in minutes."
+        }
+      }
+    },
+    "project-member-info": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "member-id",
+        "participation-start-date",
+        "participation-end-date",
+        "work-times"
+      ],
+      "properties": {
+        "member-id": {
+          "$ref": "#/$defs/uuid",
+          "description": "Target member ID."
+        },
+        "participation-start-date": {
+          "$ref": "#/$defs/nullable-date",
+          "description": "Project participation start date."
+        },
+        "participation-end-date": {
+          "$ref": "#/$defs/nullable-date",
+          "description": "Project participation end date."
+        },
+        "work-times": {
+          "type": "array",
+          "description": "Date-specific work time override list.",
+          "items": {
+            "$ref": "#/$defs/member-work-time"
+          }
+        }
+      }
+    },
+    "member-work-time": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "work-date",
+        "work-time-minutes"
+      ],
+      "properties": {
+        "work-date": {
+          "$ref": "#/$defs/date",
+          "description": "Target date."
+        },
+        "work-time-minutes": {
+          "$ref": "#/$defs/non-negative-integer",
+          "description": "Work time in minutes."
+        }
+      }
+    }
+  }
+}
