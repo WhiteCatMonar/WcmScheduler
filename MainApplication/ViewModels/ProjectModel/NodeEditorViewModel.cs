@@ -632,8 +632,7 @@ namespace MainApplication.ViewModels.ProjectModel
             }
             node.Width = Math.Max(NodeViewModel.MinWidth, newSize.Width);
             node.Height = Math.Max(NodeViewModel.MinHeight, newSize.Height);
-            node.Position = Grid.ClampNodePosition(node.Position, node);
-            
+
             node.UpdateAllPortPositions();
             ConnectionCollectionViewModel.UpdateConnectionsForNode(node);
         }

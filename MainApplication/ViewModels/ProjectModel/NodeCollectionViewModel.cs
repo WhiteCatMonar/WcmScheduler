@@ -115,8 +115,7 @@ namespace MainApplication.ViewModels.ProjectModel
         {
             var node = CreateDefaultNode();
 
-            /* 初期位置をクランプして配置 */
-            node.Position = _editor.Grid.ClampNodePosition(new(20, 20), node);
+            node.Position = new(20, 20);
 
             var action = new AddNodeAction(Nodes, node);
             _undoRedo.Execute(action);
@@ -187,7 +186,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public void UpdateNodePosition(NodeViewModel node, Point newPosition)
         {
-            node.Position = _editor.Grid.ClampNodePosition(newPosition, node);
+            node.Position = newPosition;
         }
 
         /// <summary>
@@ -195,10 +194,9 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         public void MoveNode(NodeViewModel node, Point oldPosition, Point newPosition)
         {
-            var clamped = _editor.Grid.ClampNodePosition(newPosition, node);
-            if (!oldPosition.Equals(clamped))
+            if (!oldPosition.Equals(newPosition))
             {
-                var action = new MoveNodeAction(node, oldPosition, clamped);
+                var action = new MoveNodeAction(node, oldPosition, newPosition);
                 _undoRedo.Execute(action);
             }
         }
