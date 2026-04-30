@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels;
+using MainApplication.ViewModels;
 using System.Windows;
 
 namespace MainApplication.Views
@@ -6,7 +6,7 @@ namespace MainApplication.Views
     /// <summary>
     /// 日時入力用のモーダルダイアログ。
     /// DateTimeEditorViewModelをDataContextとし、
-    /// 入力完了(Result変更)をトリガーにバリデーションとDialogResultの設定を行う。
+    /// 入力完了要求をトリガーにバリデーションとDialogResultの設定を行う。
     /// </summary>
     public partial class DateTimeEditorWindow : Window
     {
@@ -50,7 +50,7 @@ namespace MainApplication.Views
             {
                 vm.PropertyChanged += (s, ev) =>
                 {
-                    if (ev.PropertyName == nameof(DateTimeEditorViewModel.Result))
+                    if (ev.PropertyName == nameof(DateTimeEditorViewModel.ResultRequestCount))
                     {
                         /* バリデーションが設定されている場合はチェック */
                         if (_validate != null && !_validate(vm.Result))

@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.Core;
 using System.Windows.Input;
 
 namespace MainApplication.ViewModels
@@ -16,6 +16,7 @@ namespace MainApplication.ViewModels
         private DateTime? _selectedDate;
         private int _hour;
         private int _minute;
+        private int _resultRequestCount;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -33,19 +34,21 @@ namespace MainApplication.ViewModels
             Hour = baseDateTime.Hour;
             Minute = baseDateTime.Minute;
 
-            /* OK(確定) */
             ConfirmCommand = new RelayCommand(
-                () => Result = Composed,    /* 結果を確定する */
-                () => SelectedDate.HasValue /* 確定可能かどうか */
+                () => {
+                    Result = Composed;
+                    ResultRequestCount++;
+                },
+                () => SelectedDate.HasValue
             );
 
-            /* クリア(null に戻す) */
             ClearCommand = new RelayCommand(
                 () => {
                     SelectedDate = null;
                     Hour = 0;
                     Minute = 0;
                     Result = null;
+                    ResultRequestCount++;
                 }
             );
 
@@ -133,6 +136,16 @@ namespace MainApplication.ViewModels
         public DateTime? Result {
             get => _result;
             private set => SetProperty(ref _result, value);
+        }
+
+        /// <summary>
+        /// 結果確定要求の発行回数
+        /// 回数自体ではなく、値変更によるPropertyChanged発火を目的とする
+        /// </summary>
+        public int ResultRequestCount
+        {
+            get => _resultRequestCount;
+            private set => SetProperty(ref _resultRequestCount, value);
         }
     }
 }
