@@ -38,6 +38,21 @@
                 </DataTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="GanttStatusColorBarStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource NodeStatusReadyBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static projectModel:NodeViewModel+TaskStatus.Pending}">
+                    <Setter Property="Background" Value="{DynamicResource NodeStatusPendingBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static projectModel:NodeViewModel+TaskStatus.InProgress}">
+                    <Setter Property="Background" Value="{DynamicResource NodeStatusInProgressBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static projectModel:NodeViewModel+TaskStatus.Done}">
+                    <Setter Property="Background" Value="{DynamicResource NodeStatusDoneBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </UserControl.Resources>
 
     <Grid Background="{DynamicResource WindowBackgroundBrush}"
@@ -245,15 +260,16 @@
                             Padding="6">
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="200"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="190"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBlock Grid.Column="0"
+                            <TextBlock Grid.Column="1"
                                        Text="タスク"
                                        Foreground="{DynamicResource GanttHeaderTextBrush}"
                                        FontWeight="Bold"
                                        VerticalAlignment="Center"/>
-                            <TextBlock Grid.Column="1"
+                            <TextBlock Grid.Column="2"
                                        Text="担当者"
                                        Foreground="{DynamicResource GanttHeaderTextBrush}"
                                        FontWeight="Bold"
@@ -278,10 +294,15 @@
                                             Padding="6">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="200"/>
+                                                <ColumnDefinition Width="10"/>
+                                                <ColumnDefinition Width="190"/>
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0"
+                                            <Border Grid.Column="0"
+                                                    Width="5"
+                                                    HorizontalAlignment="Left"
+                                                    Style="{StaticResource GanttStatusColorBarStyle}"/>
+                                            <TextBlock Grid.Column="1"
                                                        Text="{Binding TaskName}"
                                                        Style="{StaticResource TaskNameTextStyle}"
                                                        VerticalAlignment="Center"
@@ -295,7 +316,7 @@
                                                     </StackPanel>
                                                 </ToolTipService.ToolTip>
                                             </TextBlock>
-                                            <TextBlock Grid.Column="1"
+                                            <TextBlock Grid.Column="2"
                                                        Text="{Binding AssigneeName}"
                                                        Opacity="0.8"
                                                        VerticalAlignment="Center"
