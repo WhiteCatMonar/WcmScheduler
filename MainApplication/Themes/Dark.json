@@ -52,6 +52,12 @@
     "gantt-grid-line": "#FF3F3F46",
     "gantt-warning-text": "#FFDCDCAA",
     "gantt-suspension-background": "#FF707070",
-    "gantt-dependency-line": "#FFD4D4D4"
+    "gantt-dependency-line": "#FFD4D4D4",
+    "gantt-saturday-background": "#FF172A3A",
+    "gantt-saturday-text": "#FF9CDCFE",
+    "gantt-sunday-background": "#FF331F24",
+    "gantt-sunday-text": "#FFFFA0A0",
+    "gantt-special-holiday-background": "#FF322A17",
+    "gantt-special-holiday-text": "#FFFFD080"
   }
 }

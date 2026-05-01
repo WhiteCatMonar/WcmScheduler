@@ -65,7 +65,13 @@ namespace MainApplication.Models.Settings
             { "gantt-grid-line", "#FFE5E5E5" },
             { "gantt-warning-text", "#FFF9A825" },
             { "gantt-suspension-background", "#FF808080" },
-            { "gantt-dependency-line", "#FF606060" }
+            { "gantt-dependency-line", "#FF606060" },
+            { "gantt-saturday-background", "#FFEAF4FF" },
+            { "gantt-saturday-text", "#FF0066B3" },
+            { "gantt-sunday-background", "#FFFFEEEE" },
+            { "gantt-sunday-text", "#FFB00020" },
+            { "gantt-special-holiday-background", "#FFFFF4D6" },
+            { "gantt-special-holiday-text", "#FF8A5A00" }
         };
     }
 }

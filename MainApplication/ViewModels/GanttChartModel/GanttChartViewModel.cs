@@ -210,7 +210,13 @@ namespace MainApplication.ViewModels.GanttChartModel
 
             for (var index = 0; index < dayCount; index++)
             {
-                TimelineDays.Add(new GanttTimelineDayViewModel(startDate.AddDays(index), index * DayWidth, DayWidth));
+                var date = startDate.AddDays(index);
+                TimelineDays.Add(new GanttTimelineDayViewModel(
+                    date,
+                    index * DayWidth,
+                    DayWidth,
+                    _specialHolidays.Contains(date)
+                ));
             }
         }
 

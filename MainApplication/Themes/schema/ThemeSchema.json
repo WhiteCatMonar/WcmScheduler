@@ -221,6 +221,30 @@
         "gantt-dependency-line": {
           "description": "ガントチャート依存関係線",
           "$ref": "#/$defs/argbColor"
+        },
+        "gantt-saturday-background": {
+          "description": "ガントチャート土曜日背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-saturday-text": {
+          "description": "ガントチャート土曜日文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-sunday-background": {
+          "description": "ガントチャート日曜日背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-sunday-text": {
+          "description": "ガントチャート日曜日文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-special-holiday-background": {
+          "description": "ガントチャート特別休日背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-special-holiday-text": {
+          "description": "ガントチャート特別休日文字",
+          "$ref": "#/$defs/argbColor"
         }
       }
     }

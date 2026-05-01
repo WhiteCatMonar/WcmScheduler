@@ -14,6 +14,51 @@
             </Style.Triggers>
         </Style>
 
+        <Style x:Key="GanttDayHeaderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource GanttHeaderBackgroundBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSaturday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSaturdayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSunday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSundayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSpecialHoliday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSpecialHolidayBackgroundBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="GanttDayHeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GanttHeaderTextBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSaturday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource GanttSaturdayTextBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSunday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource GanttSundayTextBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSpecialHoliday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource GanttSpecialHolidayTextBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="GanttDayCellStyle" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSaturday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSaturdayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSunday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSundayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSpecialHoliday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSpecialHolidayBackgroundBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="GanttTaskBarStyle" TargetType="Border">
             <Setter Property="Visibility" Value="Visible"/>
             <Setter Property="Background" Value="{DynamicResource NodeStatusReadyBrush}"/>
@@ -125,15 +170,15 @@
                                                 Height="42"
                                                 BorderBrush="{DynamicResource GanttChartBorderBrush}"
                                                 BorderThickness="0,0,1,1"
-                                                Background="{DynamicResource GanttHeaderBackgroundBrush}"
-                                                Padding="4">
+                                                Padding="4"
+                                                Style="{StaticResource GanttDayHeaderStyle}">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding DateText}"
-                                                           Foreground="{DynamicResource GanttHeaderTextBrush}"
+                                                           Style="{StaticResource GanttDayHeaderTextStyle}"
                                                            FontWeight="Bold"
                                                            HorizontalAlignment="Center"/>
                                                 <TextBlock Text="{Binding DayOfWeekText}"
-                                                           Foreground="{DynamicResource GanttHeaderTextBrush}"
+                                                           Style="{StaticResource GanttDayHeaderTextStyle}"
                                                            FontSize="11"
                                                            HorizontalAlignment="Center"/>
                                             </StackPanel>
@@ -181,6 +226,7 @@
                                                                     Height="48"
                                                                     BorderBrush="{DynamicResource GanttGridLineBrush}"
                                                                     BorderThickness="0,0,1,1"
+                                                                    Style="{StaticResource GanttDayCellStyle}"
                                                                     Opacity="0.35"/>
                                                         </DataTemplate>
                                                     </ItemsControl.ItemTemplate>

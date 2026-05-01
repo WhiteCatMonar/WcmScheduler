@@ -5,7 +5,7 @@ namespace MainApplication.ViewModels.GanttChartModel
     /// <summary>
     /// ガントチャート時間軸の日付1日分のViewModel
     /// </summary>
-    public class GanttTimelineDayViewModel(DateOnly date, double left, double width) : ViewModelBase
+    public class GanttTimelineDayViewModel(DateOnly date, double left, double width, bool isSpecialHoliday) : ViewModelBase
     {
         /// <summary>
         /// 対象日
@@ -31,6 +31,21 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 曜日表示文字列
         /// </summary>
         public string DayOfWeekText => Date.ToString("ddd");
+
+        /// <summary>
+        /// 土曜日かどうか
+        /// </summary>
+        public bool IsSaturday => Date.DayOfWeek == DayOfWeek.Saturday;
+
+        /// <summary>
+        /// 日曜日かどうか
+        /// </summary>
+        public bool IsSunday => Date.DayOfWeek == DayOfWeek.Sunday;
+
+        /// <summary>
+        /// 特別休日かどうか
+        /// </summary>
+        public bool IsSpecialHoliday { get; } = isSpecialHoliday;
     }
 }
 

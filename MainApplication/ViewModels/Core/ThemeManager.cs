@@ -71,7 +71,13 @@ namespace MainApplication.ViewModels.Core
             { "gantt-grid-line", "GanttGridLineBrush" },
             { "gantt-warning-text", "GanttWarningTextBrush" },
             { "gantt-suspension-background", "GanttSuspensionBackgroundBrush" },
-            { "gantt-dependency-line", "GanttDependencyLineBrush" }
+            { "gantt-dependency-line", "GanttDependencyLineBrush" },
+            { "gantt-saturday-background", "GanttSaturdayBackgroundBrush" },
+            { "gantt-saturday-text", "GanttSaturdayTextBrush" },
+            { "gantt-sunday-background", "GanttSundayBackgroundBrush" },
+            { "gantt-sunday-text", "GanttSundayTextBrush" },
+            { "gantt-special-holiday-background", "GanttSpecialHolidayBackgroundBrush" },
+            { "gantt-special-holiday-text", "GanttSpecialHolidayTextBrush" }
         };
 
         /// <summary>
