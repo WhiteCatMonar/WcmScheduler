@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -25,6 +26,7 @@ namespace MainApplication.Infrastructure
                 WriteIndented = true,
                 AllowTrailingCommas = true,
                 PropertyNameCaseInsensitive = true,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                 Converters =
                 {
                     new JsonStringEnumConverter()

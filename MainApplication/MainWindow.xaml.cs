@@ -1,4 +1,5 @@
-﻿using MainApplication.ViewModels;
+using MainApplication.ViewModels;
+using System.ComponentModel;
 using System.Windows;
 
 namespace MainApplication
@@ -31,11 +32,11 @@ namespace MainApplication
         {
             InitializeComponent();
 
-            /* 子ViewModel名の辞書を渡してSchedulerViewModelを生成 */
             SchedulerVM = new SchedulerViewModel();
             DataContext = SchedulerVM;
 
             Loaded += MainWindow_Loaded;
+            Closing += MainWindow_Closing;
         }
 
         /* ---------------------------------------------------------
@@ -46,6 +47,8 @@ namespace MainApplication
         /// ウィンドウがロードされたタイミングで、
         /// ViewModel → View への依頼イベントを購読する。
         /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">イベント情報。</param>
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             SchedulerVM.RequestLoad += OnRequestLoad;
@@ -79,9 +82,17 @@ namespace MainApplication
 
         /// <summary>
         /// ViewModelから「名前を付けて保存してほしい」と依頼されたときに呼ばれる。
-        /// SaveFileDialogを表示し、選択されたパスに保存する。
         /// </summary>
         private void OnRequestSaveAs()
+        {
+            ShowSaveAsDialog();
+        }
+
+        /// <summary>
+        /// SaveFileDialogを表示し、選択されたパスに保存する。
+        /// </summary>
+        /// <returns>保存に成功した場合はtrue。</returns>
+        private bool ShowSaveAsDialog()
         {
             var dialog = new Microsoft.Win32.SaveFileDialog
             {
@@ -90,8 +101,61 @@ namespace MainApplication
 
             if (dialog.ShowDialog() == true)
             {
-                SchedulerVM.SaveAs(dialog.FileName);
+                return SchedulerVM.SaveAs(dialog.FileName);
             }
+
+            return false;
+        }
+
+        /// <summary>
+        /// ウィンドウ終了時に未保存データがある場合は確認する。
+        /// </summary>
+        /// <param name="sender">イベント発行元。</param>
+        /// <param name="e">終了イベント情報。</param>
+        private void MainWindow_Closing(object? sender, CancelEventArgs e)
+        {
+            SchedulerVM.RefreshDirtyState();
+            if (!SchedulerVM.IsDirty)
+            {
+                return;
+            }
+
+            var result = MessageBox.Show(
+                this,
+                "未保存の変更があります。保存して終了しますか？",
+                "未保存データの確認",
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Warning
+            );
+
+            if (result == MessageBoxResult.Cancel)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            if (result == MessageBoxResult.No)
+            {
+                return;
+            }
+
+            var saved = !string.IsNullOrEmpty(SchedulerVM.CurrentFilePath)
+                ? SchedulerVM.Save()
+                : ShowSaveAsDialog();
+
+            if (saved)
+            {
+                return;
+            }
+
+            MessageBox.Show(
+                this,
+                "保存に失敗したため、終了を中止しました。",
+                "保存エラー",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error
+            );
+            e.Cancel = true;
         }
     }
 }

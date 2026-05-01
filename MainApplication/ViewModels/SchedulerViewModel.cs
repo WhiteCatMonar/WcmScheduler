@@ -6,6 +6,7 @@ using MainApplication.ViewModels.ThemeModel;
 using MainApplication.Views;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace MainApplication.ViewModels
 {
@@ -32,6 +33,9 @@ namespace MainApplication.ViewModels
 
         private readonly IJsonSerializerService _jsonSerializer;
         private readonly IFileService _fileService;
+        private readonly DispatcherTimer _dirtyRefreshTimer;
+        private string? _savedSnapshotJson;
+        private bool _isDirty;
 
         /// <summary>ファイル読み込みコマンド</summary>
         public ICommand LoadCommand { get; }
@@ -43,6 +47,25 @@ namespace MainApplication.ViewModels
         public ICommand SaveAsCommand { get; }
 
         private string? _currentFilePath;
+
+        /// <summary>
+        /// 現在読み込んでいる保存ファイルパス。
+        /// </summary>
+        public string? CurrentFilePath => _currentFilePath;
+
+        /// <summary>
+        /// 現在の状態が保存済みスナップショットから変更されているかどうか。
+        /// </summary>
+        public bool IsDirty
+        {
+            get => _isDirty;
+            private set => SetProperty(ref _isDirty, value, [nameof(WindowTitle)]);
+        }
+
+        /// <summary>
+        /// メインウィンドウタイトル。
+        /// </summary>
+        public string WindowTitle => IsDirty ? "WcmScheduler *" : "WcmScheduler";
 
         /* ---------------------------------------------------------
          * テーマ管理
@@ -153,6 +176,14 @@ namespace MainApplication.ViewModels
                 var win = new ThemeSettingWindow { DataContext = vm };
                 win.ShowDialog();
             });
+
+            _savedSnapshotJson = CreateCurrentSnapshot();
+            _dirtyRefreshTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            _dirtyRefreshTimer.Tick += (sender, args) => RefreshDirtyState();
+            _dirtyRefreshTimer.Start();
         }
 
         /* ---------------------------------------------------------
@@ -176,6 +207,8 @@ namespace MainApplication.ViewModels
             ApplyRootDataModel(root);
 
             _currentFilePath = path;
+            _savedSnapshotJson = CreateCurrentSnapshot();
+            RefreshDirtyState();
         }
 
         /// <summary>
@@ -196,37 +229,74 @@ namespace MainApplication.ViewModels
         /// 現在のファイルに上書き保存する。
         /// パスが未設定の場合はSaveAsを要求する。
         /// </summary>
-        public void Save()
+        public bool Save()
         {
             if (string.IsNullOrEmpty(_currentFilePath))
             {
                 RequestSaveAs?.Invoke();
-                return;
+                return false;
             }
 
-            SaveToFile(_currentFilePath);
+            return SaveToFile(_currentFilePath);
         }
 
         /// <summary>
         /// 指定パスに保存する。
         /// </summary>
-        public void SaveAs(string path)
+        public bool SaveAs(string path)
         {
             if (string.IsNullOrEmpty(path))
-                return;
+            {
+                return false;
+            }
 
-            SaveToFile(path);
+            if (!SaveToFile(path))
+            {
+                return false;
+            }
+
             _currentFilePath = path;
+            OnPropertyChangedA(nameof(CurrentFilePath));
+            return true;
         }
 
         /// <summary>
         /// 実際の保存処理(ファイル書き込み)
         /// </summary>
-        private void SaveToFile(string path)
+        private bool SaveToFile(string path)
+        {
+            try
+            {
+                var root = ToRootDataModel();
+                var json = _jsonSerializer.Serialize(root);
+                _fileService.SaveText(path, json);
+                _savedSnapshotJson = json;
+                RefreshDirtyState();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 現在の保存データと保存済みスナップショットを比較し、ダーティ状態を更新する。
+        /// </summary>
+        public void RefreshDirtyState()
+        {
+            var currentSnapshot = CreateCurrentSnapshot();
+            IsDirty = currentSnapshot != _savedSnapshotJson;
+        }
+
+        /// <summary>
+        /// 現在の保存データスナップショットを作成する。
+        /// </summary>
+        /// <returns>保存データJSON。</returns>
+        private string CreateCurrentSnapshot()
         {
             var root = ToRootDataModel();
-            var json = _jsonSerializer.Serialize(root);
-            _fileService.SaveText(path, json);
+            return _jsonSerializer.Serialize(root);
         }
 
         /* ---------------------------------------------------------
