@@ -1,10 +1,12 @@
 using MainApplication.Infrastructure;
 using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.SettingsModel;
 using MainApplication.ViewModels.TeamModel;
 using MainApplication.ViewModels.ThemeModel;
 using MainApplication.Views;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -35,6 +37,7 @@ namespace MainApplication.ViewModels
         private readonly IFileService _fileService;
         private readonly DispatcherTimer _dirtyRefreshTimer;
         private string? _savedSnapshotJson;
+        private string? _lastAutoSavedSnapshotJson;
         private bool _isDirty;
 
         /// <summary>ファイル読み込みコマンド</summary>
@@ -47,11 +50,17 @@ namespace MainApplication.ViewModels
         public ICommand SaveAsCommand { get; }
 
         private string? _currentFilePath;
+        private string? _currentEditFilePath;
 
         /// <summary>
         /// 現在読み込んでいる保存ファイルパス。
         /// </summary>
         public string? CurrentFilePath => _currentFilePath;
+
+        /// <summary>
+        /// 現在使用している編集作業ファイルパス。
+        /// </summary>
+        public string? CurrentEditFilePath => _currentEditFilePath;
 
         /// <summary>
         /// 現在の状態が保存済みスナップショットから変更されているかどうか。
@@ -76,6 +85,9 @@ namespace MainApplication.ViewModels
 
         /// <summary>テーマ編集コマンド</summary>
         public ICommand OpenThemeEditorCommand { get; }
+
+        /// <summary>アプリケーション設定編集コマンド</summary>
+        public ICommand OpenApplicationSettingsCommand { get; }
 
         public void RefreshThemeMenuItems()
         {
@@ -176,14 +188,30 @@ namespace MainApplication.ViewModels
                 var win = new ThemeSettingWindow { DataContext = vm };
                 win.ShowDialog();
             });
+            OpenApplicationSettingsCommand = new RelayCommand(OpenApplicationSettings);
 
             _savedSnapshotJson = CreateCurrentSnapshot();
             _dirtyRefreshTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-            _dirtyRefreshTimer.Tick += (sender, args) => RefreshDirtyState();
+            _dirtyRefreshTimer.Tick += (sender, args) => RefreshDirtyStateAndAutoSave();
             _dirtyRefreshTimer.Start();
+        }
+
+        /// <summary>
+        /// アプリケーション設定ウィンドウを開く。
+        /// </summary>
+        private void OpenApplicationSettings()
+        {
+            var viewModel = new ApplicationSettingsViewModel(AppSettingsManager.Current);
+            var window = new ApplicationSettingsWindow
+            {
+                DataContext = viewModel,
+                Owner = System.Windows.Application.Current.Windows.OfType<System.Windows.Window>().FirstOrDefault(window => window.IsActive)
+            };
+
+            window.ShowDialog();
         }
 
         /* ---------------------------------------------------------
@@ -193,22 +221,58 @@ namespace MainApplication.ViewModels
         /// <summary>
         /// 指定ファイルからデータを読み込み、ViewModelに適用する。
         /// </summary>
-        public void LoadFromFile(string path)
+        /// <param name="path">読み込み対象の正式保存ファイルパス。</param>
+        /// <param name="restoreEditFile">既存の編集作業ファイルを復元するかどうか。</param>
+        /// <returns>読み込みに成功した場合はtrue。</returns>
+        public bool LoadFromFile(string path, bool restoreEditFile = false)
         {
             if (string.IsNullOrEmpty(path))
-                return;
+            {
+                return false;
+            }
 
-            var json = _fileService.LoadText(path);
-            var root = _jsonSerializer.Deserialize<RootSaveDataModel>(json);
+            try
+            {
+                var formalPath = GetFormalFilePath(path);
+                var editPath = GetEditFilePath(formalPath);
+                var formalRoot = LoadRootDataModel(formalPath);
+                if (formalRoot == null)
+                {
+                    return false;
+                }
 
-            if (root == null)
-                return;
+                RootSaveDataModel? root;
+                if (restoreEditFile && File.Exists(editPath))
+                {
+                    root = LoadRootDataModel(editPath);
+                    if (root == null)
+                    {
+                        File.Copy(formalPath, editPath, true);
+                        root = formalRoot;
+                    }
+                }
+                else
+                {
+                    File.Copy(formalPath, editPath, true);
+                    root = formalRoot;
+                }
 
-            ApplyRootDataModel(root);
+                ApplyRootDataModel(root);
 
-            _currentFilePath = path;
-            _savedSnapshotJson = CreateCurrentSnapshot();
-            RefreshDirtyState();
+                _currentFilePath = formalPath;
+                _currentEditFilePath = editPath;
+                _savedSnapshotJson = _jsonSerializer.Serialize(formalRoot);
+                _lastAutoSavedSnapshotJson = CreateCurrentSnapshot();
+                SaveCurrentSnapshotToEditFile(_lastAutoSavedSnapshotJson);
+                OnPropertyChangedA(nameof(CurrentFilePath));
+                OnPropertyChangedA(nameof(CurrentEditFilePath));
+                RefreshDirtyState();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -250,13 +314,17 @@ namespace MainApplication.ViewModels
                 return false;
             }
 
-            if (!SaveToFile(path))
+            var formalPath = GetFormalFilePath(path);
+            _currentFilePath = formalPath;
+            _currentEditFilePath = GetEditFilePath(formalPath);
+            OnPropertyChangedA(nameof(CurrentFilePath));
+            OnPropertyChangedA(nameof(CurrentEditFilePath));
+
+            if (!SaveToFile(formalPath))
             {
                 return false;
             }
 
-            _currentFilePath = path;
-            OnPropertyChangedA(nameof(CurrentFilePath));
             return true;
         }
 
@@ -267,10 +335,24 @@ namespace MainApplication.ViewModels
         {
             try
             {
-                var root = ToRootDataModel();
-                var json = _jsonSerializer.Serialize(root);
-                _fileService.SaveText(path, json);
+                var formalPath = GetFormalFilePath(path);
+                var editPath = _currentEditFilePath ?? GetEditFilePath(formalPath);
+                var json = CreateCurrentSnapshot();
+                SaveCurrentSnapshotToEditFile(json);
+                CreateBackupFiles(formalPath);
+                if (File.Exists(formalPath))
+                {
+                    File.Delete(formalPath);
+                }
+
+                File.Move(editPath, formalPath);
+                File.Copy(formalPath, editPath, true);
+                _currentFilePath = formalPath;
+                _currentEditFilePath = editPath;
                 _savedSnapshotJson = json;
+                _lastAutoSavedSnapshotJson = json;
+                OnPropertyChangedA(nameof(CurrentFilePath));
+                OnPropertyChangedA(nameof(CurrentEditFilePath));
                 RefreshDirtyState();
                 return true;
             }
@@ -290,6 +372,71 @@ namespace MainApplication.ViewModels
         }
 
         /// <summary>
+        /// ダーティ状態を更新し、編集作業ファイルへ自動保存する。
+        /// </summary>
+        public void RefreshDirtyStateAndAutoSave()
+        {
+            var currentSnapshot = CreateCurrentSnapshot();
+            IsDirty = currentSnapshot != _savedSnapshotJson;
+            if (string.IsNullOrEmpty(_currentEditFilePath))
+            {
+                return;
+            }
+
+            if (currentSnapshot == _lastAutoSavedSnapshotJson)
+            {
+                return;
+            }
+
+            SaveCurrentSnapshotToEditFile(currentSnapshot);
+            _lastAutoSavedSnapshotJson = currentSnapshot;
+        }
+
+        /// <summary>
+        /// 非ダーティ状態の場合に編集作業ファイルを削除する。
+        /// </summary>
+        public void DeleteEditFileIfClean()
+        {
+            RefreshDirtyState();
+            if (IsDirty)
+            {
+                return;
+            }
+
+            DeleteEditFile();
+        }
+
+        /// <summary>
+        /// 編集作業ファイルを破棄する。
+        /// </summary>
+        public void DiscardEditFile()
+        {
+            DeleteEditFile();
+            _lastAutoSavedSnapshotJson = _savedSnapshotJson;
+            RefreshDirtyState();
+        }
+
+        /// <summary>
+        /// 指定保存ファイルに対応する編集作業ファイルが存在するかどうかを取得する。
+        /// </summary>
+        /// <param name="path">正式保存ファイルパス。</param>
+        /// <returns>編集作業ファイルが存在する場合はtrue。</returns>
+        public bool HasEditFile(string path)
+        {
+            return File.Exists(GetEditFilePath(GetFormalFilePath(path)));
+        }
+
+        /// <summary>
+        /// 指定保存ファイルに対応する編集作業ファイルのパスを取得する。
+        /// </summary>
+        /// <param name="path">正式保存ファイルパス。</param>
+        /// <returns>編集作業ファイルパス。</returns>
+        public string GetEditFilePathFor(string path)
+        {
+            return GetEditFilePath(GetFormalFilePath(path));
+        }
+
+        /// <summary>
         /// 現在の保存データスナップショットを作成する。
         /// </summary>
         /// <returns>保存データJSON。</returns>
@@ -297,6 +444,139 @@ namespace MainApplication.ViewModels
         {
             var root = ToRootDataModel();
             return _jsonSerializer.Serialize(root);
+        }
+
+        /// <summary>
+        /// 指定ファイルから保存データモデルを読み込む。
+        /// </summary>
+        /// <param name="path">読み込み元パス。</param>
+        /// <returns>保存データモデル。</returns>
+        private RootSaveDataModel? LoadRootDataModel(string path)
+        {
+            var json = _fileService.LoadText(path);
+            return _jsonSerializer.Deserialize<RootSaveDataModel>(json);
+        }
+
+        /// <summary>
+        /// 現在のスナップショットを編集作業ファイルへ保存する。
+        /// </summary>
+        /// <param name="json">保存データJSON。</param>
+        private void SaveCurrentSnapshotToEditFile(string json)
+        {
+            if (string.IsNullOrEmpty(_currentEditFilePath))
+            {
+                return;
+            }
+
+            var directory = Path.GetDirectoryName(_currentEditFilePath);
+            if (!string.IsNullOrEmpty(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            _fileService.SaveText(_currentEditFilePath, json);
+        }
+
+        /// <summary>
+        /// 編集作業ファイルを削除する。
+        /// </summary>
+        private void DeleteEditFile()
+        {
+            if (string.IsNullOrEmpty(_currentEditFilePath))
+            {
+                return;
+            }
+
+            if (File.Exists(_currentEditFilePath))
+            {
+                File.Delete(_currentEditFilePath);
+            }
+        }
+
+        /// <summary>
+        /// 正式保存ファイルパスを取得する。
+        /// </summary>
+        /// <param name="path">保存ファイルパス。</param>
+        /// <returns>正式保存ファイルパス。</returns>
+        private static string GetFormalFilePath(string path)
+        {
+            var directory = Path.GetDirectoryName(path) ?? string.Empty;
+            var fileName = Path.GetFileName(path);
+            if (fileName.EndsWith(".edit.json", StringComparison.OrdinalIgnoreCase))
+            {
+                fileName = fileName[..^".edit.json".Length] + ".json";
+            }
+
+            return Path.Combine(directory, fileName);
+        }
+
+        /// <summary>
+        /// 編集作業ファイルパスを取得する。
+        /// </summary>
+        /// <param name="formalPath">正式保存ファイルパス。</param>
+        /// <returns>編集作業ファイルパス。</returns>
+        private static string GetEditFilePath(string formalPath)
+        {
+            var directory = Path.GetDirectoryName(formalPath) ?? string.Empty;
+            var fileName = Path.GetFileNameWithoutExtension(formalPath);
+            return Path.Combine(directory, $"{fileName}.edit.json");
+        }
+
+        /// <summary>
+        /// バックアップファイルを作成する。
+        /// </summary>
+        /// <param name="formalPath">正式保存ファイルパス。</param>
+        private static void CreateBackupFiles(string formalPath)
+        {
+            if (!File.Exists(formalPath))
+            {
+                return;
+            }
+
+            var generationCount = Math.Max(0, AppSettingsManager.Current.AutoBackupGenerationCount);
+            if (generationCount <= 0)
+            {
+                return;
+            }
+
+            for (var generation = generationCount - 1; generation >= 1; generation--)
+            {
+                var source = GetBackupFilePath(formalPath, generation - 1);
+                var destination = GetBackupFilePath(formalPath, generation);
+                if (!File.Exists(source))
+                {
+                    continue;
+                }
+
+                if (File.Exists(destination))
+                {
+                    File.Delete(destination);
+                }
+
+                File.Move(source, destination);
+            }
+
+            var latestBackupPath = GetBackupFilePath(formalPath, 0);
+            if (File.Exists(latestBackupPath))
+            {
+                File.Delete(latestBackupPath);
+            }
+
+            File.Move(formalPath, latestBackupPath);
+        }
+
+        /// <summary>
+        /// バックアップファイルパスを取得する。
+        /// </summary>
+        /// <param name="formalPath">正式保存ファイルパス。</param>
+        /// <param name="generation">世代番号。</param>
+        /// <returns>バックアップファイルパス。</returns>
+        private static string GetBackupFilePath(string formalPath, int generation)
+        {
+            var directory = Path.GetDirectoryName(formalPath) ?? string.Empty;
+            var fileName = Path.GetFileNameWithoutExtension(formalPath);
+            var suffix = generation == 0 ? "backup" : $"backup.{generation}";
+            return Path.Combine(directory, $"{fileName}.{suffix}.json");
         }
 
         /* ---------------------------------------------------------

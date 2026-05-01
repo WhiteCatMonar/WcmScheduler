@@ -12,6 +12,12 @@ namespace MainApplication.Models.Settings
         /// </summary>
         [JsonPropertyName("last-theme-name")]
         public string? LastThemeName { get; set; }
+
+        /// <summary>
+        /// 自動バックアップ保持世代数。
+        /// </summary>
+        [JsonPropertyName("auto-backup-generation-count")]
+        public int AutoBackupGenerationCount { get; set; } = 3;
     }
 }
 

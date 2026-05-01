@@ -72,7 +72,38 @@ namespace MainApplication
 
             if (dialog.ShowDialog() == true)
             {
-                SchedulerVM.LoadFromFile(dialog.FileName);
+                var restoreEditFile = false;
+                if (SchedulerVM.HasEditFile(dialog.FileName))
+                {
+                    var editFilePath = SchedulerVM.GetEditFilePathFor(dialog.FileName);
+                    var fileTime = System.IO.File.GetLastWriteTime(dialog.FileName);
+                    var editTime = System.IO.File.GetLastWriteTime(editFilePath);
+                    var result = MessageBox.Show(
+                        this,
+                        $"編集作業ファイルが残っています。復元しますか？\n\n正式ファイル: {fileTime:yyyy/MM/dd HH:mm:ss}\n編集作業ファイル: {editTime:yyyy/MM/dd HH:mm:ss}",
+                        "編集作業ファイルの確認",
+                        MessageBoxButton.YesNoCancel,
+                        MessageBoxImage.Question
+                    );
+
+                    if (result == MessageBoxResult.Cancel)
+                    {
+                        return;
+                    }
+
+                    restoreEditFile = result == MessageBoxResult.Yes;
+                }
+
+                if (!SchedulerVM.LoadFromFile(dialog.FileName, restoreEditFile))
+                {
+                    MessageBox.Show(
+                        this,
+                        "ファイルの読み込みに失敗しました。",
+                        "読み込みエラー",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
+                }
             }
         }
 
@@ -117,6 +148,7 @@ namespace MainApplication
             SchedulerVM.RefreshDirtyState();
             if (!SchedulerVM.IsDirty)
             {
+                SchedulerVM.DeleteEditFileIfClean();
                 return;
             }
 
@@ -136,6 +168,7 @@ namespace MainApplication
 
             if (result == MessageBoxResult.No)
             {
+                SchedulerVM.DiscardEditFile();
                 return;
             }
 
@@ -145,6 +178,7 @@ namespace MainApplication
 
             if (saved)
             {
+                SchedulerVM.DeleteEditFileIfClean();
                 return;
             }
 

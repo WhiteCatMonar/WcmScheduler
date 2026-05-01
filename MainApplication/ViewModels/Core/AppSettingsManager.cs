@@ -1,6 +1,7 @@
 using MainApplication.Models.Settings;
 using System.IO;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 
 namespace MainApplication.ViewModels.Core
@@ -12,7 +13,8 @@ namespace MainApplication.ViewModels.Core
     {
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
-            WriteIndented = true
+            WriteIndented = true,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
         /// <summary>

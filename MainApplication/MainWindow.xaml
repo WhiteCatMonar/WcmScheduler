@@ -43,6 +43,9 @@
                     <MenuItem Header="テーマの編集..." Command="{Binding OpenThemeEditorCommand}" />
                 </MenuItem>
             </MenuItem>
+            <MenuItem Header="ツール">
+                <MenuItem Header="設定" Command="{Binding OpenApplicationSettingsCommand}" />
+            </MenuItem>
         </Menu>
         
         <!-- タブウィンドウ -->
