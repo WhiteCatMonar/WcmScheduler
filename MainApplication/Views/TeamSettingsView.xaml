@@ -69,7 +69,8 @@
 
             <Grid Grid.Row="0" Margin="0,0,0,4">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="220"/>
+                    <ColumnDefinition Width="110"/>
+                    <ColumnDefinition Width="110"/>
                     <ColumnDefinition Width="86"/>
                     <ColumnDefinition Width="86"/>
                     <ColumnDefinition Width="86"/>
@@ -78,18 +79,17 @@
                     <ColumnDefinition Width="86"/>
                     <ColumnDefinition Width="86"/>
                     <ColumnDefinition Width="96"/>
-                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="名前" FontWeight="Bold"/>
-                <TextBlock Grid.Column="1" Text="日" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Column="2" Text="月" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Column="3" Text="火" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Column="4" Text="水" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Column="5" Text="木" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Column="6" Text="金" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Column="7" Text="土" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Column="8" Text="特別休日" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Column="9" Text="表示" FontWeight="Bold"/>
+                <TextBlock Text="主名" FontWeight="Bold"/>
+                <TextBlock Grid.Column="1" Text="副名" FontWeight="Bold"/>
+                <TextBlock Grid.Column="2" Text="日" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="3" Text="月" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="4" Text="火" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="5" Text="水" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="6" Text="木" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="7" Text="金" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="8" Text="土" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="9" Text="特別休日" FontWeight="Bold" HorizontalAlignment="Center"/>
             </Grid>
 
             <ListBox Grid.Row="1"
@@ -103,7 +103,8 @@
                     <DataTemplate>
                         <Grid Margin="0,2">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="220"/>
+                                <ColumnDefinition Width="110"/>
+                                <ColumnDefinition Width="110"/>
                                 <ColumnDefinition Width="86"/>
                                 <ColumnDefinition Width="86"/>
                                 <ColumnDefinition Width="86"/>
@@ -112,11 +113,13 @@
                                 <ColumnDefinition Width="86"/>
                                 <ColumnDefinition Width="86"/>
                                 <ColumnDefinition Width="96"/>
-                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"
+                            <TextBox Text="{Binding PrimaryName, UpdateSourceTrigger=PropertyChanged}"
                                      Margin="0,0,6,0"/>
-                            <StackPanel Grid.Column="1" Margin="0,0,4,0">
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding SecondaryName, UpdateSourceTrigger=PropertyChanged}"
+                                     Margin="0,0,6,0"/>
+                            <StackPanel Grid.Column="2" Margin="0,0,4,0">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
                                     <TextBox Text="{Binding SundayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
@@ -124,7 +127,7 @@
                                 </DockPanel>
                                 <TextBlock Text="{Binding SundayWorkTimeDurationText}" HorizontalAlignment="Right"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="2" Margin="0,0,4,0">
+                            <StackPanel Grid.Column="3" Margin="0,0,4,0">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
                                     <TextBox Text="{Binding MondayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
@@ -132,7 +135,7 @@
                                 </DockPanel>
                                 <TextBlock Text="{Binding MondayWorkTimeDurationText}" HorizontalAlignment="Right"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="3" Margin="0,0,4,0">
+                            <StackPanel Grid.Column="4" Margin="0,0,4,0">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
                                     <TextBox Text="{Binding TuesdayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
@@ -140,7 +143,7 @@
                                 </DockPanel>
                                 <TextBlock Text="{Binding TuesdayWorkTimeDurationText}" HorizontalAlignment="Right"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="4" Margin="0,0,4,0">
+                            <StackPanel Grid.Column="5" Margin="0,0,4,0">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
                                     <TextBox Text="{Binding WednesdayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
@@ -148,7 +151,7 @@
                                 </DockPanel>
                                 <TextBlock Text="{Binding WednesdayWorkTimeDurationText}" HorizontalAlignment="Right"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="5" Margin="0,0,4,0">
+                            <StackPanel Grid.Column="6" Margin="0,0,4,0">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
                                     <TextBox Text="{Binding ThursdayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
@@ -156,7 +159,7 @@
                                 </DockPanel>
                                 <TextBlock Text="{Binding ThursdayWorkTimeDurationText}" HorizontalAlignment="Right"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="6" Margin="0,0,4,0">
+                            <StackPanel Grid.Column="7" Margin="0,0,4,0">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
                                     <TextBox Text="{Binding FridayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
@@ -164,7 +167,7 @@
                                 </DockPanel>
                                 <TextBlock Text="{Binding FridayWorkTimeDurationText}" HorizontalAlignment="Right"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="7" Margin="0,0,6,0">
+                            <StackPanel Grid.Column="8" Margin="0,0,6,0">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
                                     <TextBox Text="{Binding SaturdayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
@@ -172,7 +175,7 @@
                                 </DockPanel>
                                 <TextBlock Text="{Binding SaturdayWorkTimeDurationText}" HorizontalAlignment="Right"/>
                             </StackPanel>
-                            <StackPanel Grid.Column="8" Margin="0,0,6,0">
+                            <StackPanel Grid.Column="9" Margin="0,0,6,0">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
                                     <TextBox Text="{Binding SpecialHolidayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
@@ -180,10 +183,6 @@
                                 </DockPanel>
                                 <TextBlock Text="{Binding SpecialHolidayWorkTimeDurationText}" HorizontalAlignment="Right"/>
                             </StackPanel>
-                            <TextBlock Grid.Column="9"
-                                       Text="{Binding DisplayText}"
-                                       VerticalAlignment="Center"
-                                       TextTrimming="CharacterEllipsis"/>
                         </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>

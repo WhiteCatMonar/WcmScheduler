@@ -253,6 +253,18 @@
         "gantt-today-text": {
           "description": "ガントチャート現在日文字",
           "$ref": "#/$defs/argbColor"
+        },
+        "member-badge-background": {
+          "description": "担当者バッジ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "member-badge-text": {
+          "description": "担当者バッジ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "member-badge-border": {
+          "description": "担当者バッジ枠線",
+          "$ref": "#/$defs/argbColor"
         }
       }
     }

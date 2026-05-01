@@ -8,7 +8,8 @@ namespace MainApplication.ViewModels.TeamModel
     /// </summary>
     public class TeamMemberViewModel : ViewModelBase
     {
-        private string? _displayName;
+        private string? _primaryName;
+        private string? _secondaryName;
         private int _sundayWorkTimeMinutes = 480;
         private int _mondayWorkTimeMinutes = 480;
         private int _tuesdayWorkTimeMinutes = 480;
@@ -24,7 +25,8 @@ namespace MainApplication.ViewModels.TeamModel
         public TeamMemberViewModel()
         {
             MemberId = Guid.NewGuid();
-            DisplayName = "New Member";
+            PrimaryName = "New";
+            SecondaryName = "Member";
         }
 
         /// <summary>
@@ -34,7 +36,8 @@ namespace MainApplication.ViewModels.TeamModel
         public TeamMemberViewModel(MemberDataModel data)
         {
             MemberId = data.MemberId == Guid.Empty ? Guid.NewGuid() : data.MemberId;
-            DisplayName = data.DisplayName;
+            PrimaryName = data.PrimaryName;
+            SecondaryName = data.SecondaryName;
             SundayWorkTimeMinutes = data.SundayWorkTimeMinutes;
             MondayWorkTimeMinutes = data.MondayWorkTimeMinutes;
             TuesdayWorkTimeMinutes = data.TuesdayWorkTimeMinutes;
@@ -51,12 +54,21 @@ namespace MainApplication.ViewModels.TeamModel
         public Guid MemberId { get; }
 
         /// <summary>
-        /// UIに表示するメンバー名
+        /// メンバー名の主名
         /// </summary>
-        public string? DisplayName
+        public string? PrimaryName
         {
-            get => _displayName;
-            set => SetProperty(ref _displayName, value, [nameof(DisplayText)]);
+            get => _primaryName;
+            set => SetProperty(ref _primaryName, value, [nameof(DisplayText), nameof(Initials)]);
+        }
+
+        /// <summary>
+        /// メンバー名の副名
+        /// </summary>
+        public string? SecondaryName
+        {
+            get => _secondaryName;
+            set => SetProperty(ref _secondaryName, value, [nameof(DisplayText), nameof(Initials)]);
         }
 
         /// <summary>
@@ -213,7 +225,31 @@ namespace MainApplication.ViewModels.TeamModel
         /// </summary>
         public string DisplayText => DisplayNameOrFallback;
 
-        private string DisplayNameOrFallback => string.IsNullOrWhiteSpace(DisplayName) ? "(名称未設定)" : DisplayName;
+        /// <summary>
+        /// バッジ表示用イニシャル
+        /// </summary>
+        public string Initials
+        {
+            get
+            {
+                var primaryInitial = GetInitial(PrimaryName);
+                var secondaryInitial = GetInitial(SecondaryName);
+                var initials = primaryInitial + secondaryInitial;
+                return string.IsNullOrWhiteSpace(initials) ? "?" : initials;
+            }
+        }
+
+        private string DisplayNameOrFallback
+        {
+            get
+            {
+                var names = new[] { PrimaryName, SecondaryName }
+                    .Where(name => !string.IsNullOrWhiteSpace(name))
+                    .Select(name => name!.Trim());
+                var displayName = string.Join(" ", names);
+                return string.IsNullOrWhiteSpace(displayName) ? "(名称未設定)" : displayName;
+            }
+        }
 
         /// <summary>
         /// 指定曜日のデフォルト作業可能時間を取得する
@@ -270,7 +306,8 @@ namespace MainApplication.ViewModels.TeamModel
             return new MemberDataModel
             {
                 MemberId = MemberId,
-                DisplayName = DisplayName,
+                PrimaryName = PrimaryName,
+                SecondaryName = SecondaryName,
                 SundayWorkTimeMinutes = SundayWorkTimeMinutes,
                 MondayWorkTimeMinutes = MondayWorkTimeMinutes,
                 TuesdayWorkTimeMinutes = TuesdayWorkTimeMinutes,
@@ -280,6 +317,17 @@ namespace MainApplication.ViewModels.TeamModel
                 SaturdayWorkTimeMinutes = SaturdayWorkTimeMinutes,
                 SpecialHolidayWorkTimeMinutes = SpecialHolidayWorkTimeMinutes
             };
+        }
+
+        /// <summary>
+        /// 指定文字列の先頭1文字を取得する
+        /// </summary>
+        /// <param name="value">対象文字列。</param>
+        /// <returns>先頭1文字。空欄の場合は空文字。</returns>
+        private static string GetInitial(string? value)
+        {
+            var text = value?.Trim();
+            return string.IsNullOrEmpty(text) ? string.Empty : text[..1];
         }
     }
 }

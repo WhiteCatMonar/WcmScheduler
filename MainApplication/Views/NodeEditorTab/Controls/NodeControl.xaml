@@ -73,9 +73,38 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
+            <Border Grid.Row="0"
+                    Width="22"
+                    Height="22"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Background="{DynamicResource MemberBadgeBackgroundBrush}"
+                    BorderBrush="{DynamicResource MemberBadgeBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="11"
+                    Panel.ZIndex="1">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Detail.HasAssigneeBadge}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock Text="{Binding Detail.AssigneeInitials}"
+                           Foreground="{DynamicResource MemberBadgeTextBrush}"
+                           FontSize="10"
+                           FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Border>
+
             <!-- タスク名 -->
             <TextBlock Grid.Row="0"
                        Text="{Binding Detail.TaskName}"
+                       Margin="0,0,36,0"
                        HorizontalAlignment="Center"
                        VerticalAlignment="Top"
                        TextWrapping="Wrap"

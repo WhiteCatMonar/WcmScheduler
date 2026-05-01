@@ -340,7 +340,8 @@
       "additionalProperties": false,
       "required": [
         "member-id",
-        "display-name",
+        "primary-name",
+        "secondary-name",
         "sunday-work-time-minutes",
         "monday-work-time-minutes",
         "tuesday-work-time-minutes",
@@ -355,9 +356,13 @@
           "$ref": "#/$defs/uuid",
           "description": "Member ID."
         },
-        "display-name": {
+        "primary-name": {
           "$ref": "#/$defs/nullable-string",
-          "description": "Member display name."
+          "description": "Member primary name."
+        },
+        "secondary-name": {
+          "$ref": "#/$defs/nullable-string",
+          "description": "Member secondary name."
         },
         "sunday-work-time-minutes": {
           "$ref": "#/$defs/non-negative-integer",

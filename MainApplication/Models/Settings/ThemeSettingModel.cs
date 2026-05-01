@@ -73,7 +73,10 @@ namespace MainApplication.Models.Settings
             { "gantt-special-holiday-background", "#FFFFEAF5" },
             { "gantt-special-holiday-text", "#FFC2185B" },
             { "gantt-today-background", "#FFFFF8C4" },
-            { "gantt-today-text", "#FF7A5A00" }
+            { "gantt-today-text", "#FF7A5A00" },
+            { "member-badge-background", "#FF007ACC" },
+            { "member-badge-text", "#FFFFFFFF" },
+            { "member-badge-border", "#FFFFFFFF" }
         };
     }
 }

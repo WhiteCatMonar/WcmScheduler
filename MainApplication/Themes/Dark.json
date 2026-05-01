@@ -60,6 +60,9 @@
     "gantt-special-holiday-background": "#FF351C2A",
     "gantt-special-holiday-text": "#FFFF8DC7",
     "gantt-today-background": "#FF3A3212",
-    "gantt-today-text": "#FFFFE680"
+    "gantt-today-text": "#FFFFE680",
+    "member-badge-background": "#FF569CD6",
+    "member-badge-text": "#FF1E1E1E",
+    "member-badge-border": "#FFF1F1F1"
   }
 }

@@ -294,7 +294,8 @@ UndoまたはRedoによって正式な保存ファイルと編集作業ファイ
 | キー | 型 | 内容 |
 | --- | --- | --- |
 | `member-id` | string | メンバーID |
-| `display-name` | string/null | 表示名 |
+| `primary-name` | string/null | メンバー名の主名 |
+| `secondary-name` | string/null | メンバー名の副名 |
 | `sunday-work-time-minutes` | number | 日曜日のデフォルト作業可能時間 |
 | `monday-work-time-minutes` | number | 月曜日のデフォルト作業可能時間 |
 | `tuesday-work-time-minutes` | number | 火曜日のデフォルト作業可能時間 |
@@ -309,7 +310,8 @@ UndoまたはRedoによって正式な保存ファイルと編集作業ファイ
 ```json
 {
   "member-id": "00000000-0000-0000-0000-000000000000",
-  "display-name": "Alex",
+  "primary-name": "Alex",
+  "secondary-name": "",
   "sunday-work-time-minutes": 0,
   "monday-work-time-minutes": 480,
   "tuesday-work-time-minutes": 480,
@@ -501,7 +503,8 @@ UndoまたはRedoによって正式な保存ファイルと編集作業ファイ
   "members": [
     {
       "member-id": "22222222-2222-2222-2222-222222222222",
-      "display-name": "Alex",
+      "primary-name": "Alex",
+      "secondary-name": "",
       "sunday-work-time-minutes": 0,
       "monday-work-time-minutes": 480,
       "tuesday-work-time-minutes": 480,
@@ -513,7 +516,8 @@ UndoまたはRedoによって正式な保存ファイルと編集作業ファイ
     },
     {
       "member-id": "33333333-3333-3333-3333-333333333333",
-      "display-name": "Bob",
+      "primary-name": "Bob",
+      "secondary-name": "",
       "sunday-work-time-minutes": 0,
       "monday-work-time-minutes": 360,
       "tuesday-work-time-minutes": 360,

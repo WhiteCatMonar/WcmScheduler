@@ -79,7 +79,10 @@ namespace MainApplication.ViewModels.Core
             { "gantt-special-holiday-background", "GanttSpecialHolidayBackgroundBrush" },
             { "gantt-special-holiday-text", "GanttSpecialHolidayTextBrush" },
             { "gantt-today-background", "GanttTodayBackgroundBrush" },
-            { "gantt-today-text", "GanttTodayTextBrush" }
+            { "gantt-today-text", "GanttTodayTextBrush" },
+            { "member-badge-background", "MemberBadgeBackgroundBrush" },
+            { "member-badge-text", "MemberBadgeTextBrush" },
+            { "member-badge-border", "MemberBadgeBorderBrush" }
         };
 
         /// <summary>

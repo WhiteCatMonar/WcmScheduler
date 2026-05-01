@@ -119,7 +119,10 @@ namespace MainApplication.ViewModels.ProjectModel
                     value,
                     [
                         nameof(HasInvalidAssigneeMember),
-                        nameof(AssigneeWarningText)
+                        nameof(AssigneeWarningText),
+                        nameof(AssigneeDisplayName),
+                        nameof(AssigneeInitials),
+                        nameof(HasAssigneeBadge)
                     ],
                     CreateHooksFromValue(
                         value,
@@ -195,6 +198,21 @@ namespace MainApplication.ViewModels.ProjectModel
         public string AssigneeWarningText => HasInvalidAssigneeMember
             ? "担当者が無効または存在しないメンバーを参照しています。"
             : "";
+
+        /// <summary>
+        /// 担当者表示名
+        /// </summary>
+        public string AssigneeDisplayName => ResolveAssigneeMember()?.DisplayText ?? "(未担当)";
+
+        /// <summary>
+        /// 担当者バッジ表示文字列
+        /// </summary>
+        public string AssigneeInitials => ResolveAssigneeMember()?.Initials ?? "";
+
+        /// <summary>
+        /// 担当者バッジを表示するかどうか
+        /// </summary>
+        public bool HasAssigneeBadge => !string.IsNullOrWhiteSpace(AssigneeInitials);
 
         /// <summary>
         /// 作業協力者警告表示文字列。
@@ -431,6 +449,9 @@ namespace MainApplication.ViewModels.ProjectModel
                 OnPropertyChangedA(nameof(HasInvalidCollaboratorMember));
                 OnPropertyChangedA(nameof(AssigneeWarningText));
                 OnPropertyChangedA(nameof(CollaboratorWarningText));
+                OnPropertyChangedA(nameof(AssigneeDisplayName));
+                OnPropertyChangedA(nameof(AssigneeInitials));
+                OnPropertyChangedA(nameof(HasAssigneeBadge));
             }
             finally
             {
@@ -610,6 +631,17 @@ namespace MainApplication.ViewModels.ProjectModel
         private bool IsActiveMember(Guid memberId)
         {
             return _members?.Any(member => member.MemberId == memberId && member.IsActive) == true;
+        }
+
+        /// <summary>
+        /// 担当者メンバーを取得する
+        /// </summary>
+        /// <returns>担当者メンバー。未設定または未登録の場合はnull。</returns>
+        private TeamMemberViewModel? ResolveAssigneeMember()
+        {
+            return AssigneeMemberId == null || _members == null
+                ? null
+                : _members.FirstOrDefault(member => member.MemberId == AssigneeMemberId.Value);
         }
 
         private string? _comment;

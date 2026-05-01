@@ -15,10 +15,16 @@ namespace MainApplication.Models.SaveData
         public Guid MemberId { get; set; }
 
         /// <summary>
-        /// UIに表示するメンバー名
+        /// メンバー名の主名
         /// </summary>
-        [JsonPropertyName("display-name")]
-        public string? DisplayName { get; set; }
+        [JsonPropertyName("primary-name")]
+        public string? PrimaryName { get; set; }
+
+        /// <summary>
+        /// メンバー名の副名
+        /// </summary>
+        [JsonPropertyName("secondary-name")]
+        public string? SecondaryName { get; set; }
 
         /// <summary>
         /// 日曜日のデフォルト作業可能時間。単位は分

@@ -41,6 +41,7 @@ namespace MainApplication.ViewModels.GanttChartModel
                     Node = schedule.Node,
                     TaskName = string.IsNullOrWhiteSpace(schedule.Node.Detail.TaskName) ? "(New Task)" : schedule.Node.Detail.TaskName,
                     AssigneeName = ResolveAssigneeName(nodeEditor, schedule.Node.Detail.AssigneeMemberId),
+                    AssigneeInitials = ResolveAssigneeInitials(nodeEditor, schedule.Node.Detail.AssigneeMemberId),
                     StartDateTime = schedule.StartDateTime,
                     EndDateTime = schedule.EndDateTime,
                     Status = schedule.Node.Status,
@@ -387,6 +388,17 @@ namespace MainApplication.ViewModels.GanttChartModel
         private static string ResolveAssigneeName(NodeEditorViewModel nodeEditor, Guid? memberId)
         {
             return ResolveAssignee(nodeEditor, memberId)?.DisplayText ?? "(未担当)";
+        }
+
+        /// <summary>
+        /// 担当者イニシャルを解決する
+        /// </summary>
+        /// <param name="nodeEditor">対象ノードエディタ</param>
+        /// <param name="memberId">担当者ID</param>
+        /// <returns>担当者イニシャル</returns>
+        private static string ResolveAssigneeInitials(NodeEditorViewModel nodeEditor, Guid? memberId)
+        {
+            return ResolveAssignee(nodeEditor, memberId)?.Initials ?? "";
         }
 
         /// <summary>

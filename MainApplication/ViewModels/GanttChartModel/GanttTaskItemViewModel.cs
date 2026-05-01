@@ -25,6 +25,11 @@ namespace MainApplication.ViewModels.GanttChartModel
         public required string AssigneeName { get; init; }
 
         /// <summary>
+        /// 担当者バッジ表示文字列
+        /// </summary>
+        public required string AssigneeInitials { get; init; }
+
+        /// <summary>
         /// 予定開始日時
         /// </summary>
         public required DateTime StartDateTime { get; init; }
@@ -78,6 +83,11 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 予定期間表示文字列
         /// </summary>
         public string PeriodText => $"{StartDateTime:yyyy/MM/dd HH:mm} - {EndDateTime:yyyy/MM/dd HH:mm}";
+
+        /// <summary>
+        /// 担当者バッジを表示するかどうか
+        /// </summary>
+        public bool HasAssigneeBadge => !string.IsNullOrWhiteSpace(AssigneeInitials);
     }
 }
 

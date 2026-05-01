@@ -371,11 +371,42 @@
                                                     </StackPanel>
                                                 </ToolTipService.ToolTip>
                                             </TextBlock>
-                                            <TextBlock Grid.Column="2"
-                                                       Text="{Binding AssigneeName}"
-                                                       Opacity="0.8"
-                                                       VerticalAlignment="Center"
-                                                       TextTrimming="CharacterEllipsis"/>
+                                            <Grid Grid.Column="2">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Width="22"
+                                                        Height="22"
+                                                        Margin="0,0,6,0"
+                                                        VerticalAlignment="Center"
+                                                        Background="{DynamicResource MemberBadgeBackgroundBrush}"
+                                                        BorderBrush="{DynamicResource MemberBadgeBorderBrush}"
+                                                        BorderThickness="1"
+                                                        CornerRadius="11">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Visibility" Value="Visible"/>
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding HasAssigneeBadge}" Value="False">
+                                                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <TextBlock Text="{Binding AssigneeInitials}"
+                                                               Foreground="{DynamicResource MemberBadgeTextBrush}"
+                                                               FontSize="10"
+                                                               FontWeight="Bold"
+                                                               HorizontalAlignment="Center"
+                                                               VerticalAlignment="Center"/>
+                                                </Border>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding AssigneeName}"
+                                                           Opacity="0.8"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"/>
+                                            </Grid>
                                         </Grid>
                                     </Border>
 
