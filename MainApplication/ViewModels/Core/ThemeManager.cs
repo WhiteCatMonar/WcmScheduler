@@ -77,7 +77,9 @@ namespace MainApplication.ViewModels.Core
             { "gantt-sunday-background", "GanttSundayBackgroundBrush" },
             { "gantt-sunday-text", "GanttSundayTextBrush" },
             { "gantt-special-holiday-background", "GanttSpecialHolidayBackgroundBrush" },
-            { "gantt-special-holiday-text", "GanttSpecialHolidayTextBrush" }
+            { "gantt-special-holiday-text", "GanttSpecialHolidayTextBrush" },
+            { "gantt-today-background", "GanttTodayBackgroundBrush" },
+            { "gantt-today-text", "GanttTodayTextBrush" }
         };
 
         /// <summary>

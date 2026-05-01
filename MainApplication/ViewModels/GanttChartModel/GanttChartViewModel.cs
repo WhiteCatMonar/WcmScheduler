@@ -21,6 +21,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         private double _chartWidth = DefaultDayWidth * DefaultVisibleDays;
         private double _chartHeight = DefaultRowHeight;
         private double _viewportChartWidth = DefaultDayWidth * DefaultVisibleDays;
+        private int _scrollToTodayRequestCount;
 
         /// <summary>
         /// ガントチャートViewModelを生成する
@@ -67,6 +68,28 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 1行分の表示高さ
         /// </summary>
         public double RowHeight => DefaultRowHeight;
+
+        /// <summary>
+        /// 現在日付へ横スクロールする要求回数
+        /// </summary>
+        public int ScrollToTodayRequestCount
+        {
+            get => _scrollToTodayRequestCount;
+            private set => SetProperty(ref _scrollToTodayRequestCount, value);
+        }
+
+        /// <summary>
+        /// 現在日付を表示するための横スクロール位置
+        /// </summary>
+        public double TodayHorizontalOffset
+        {
+            get
+            {
+                var today = DateOnly.FromDateTime(DateTime.Today);
+                var todayItem = TimelineDays.FirstOrDefault(day => day.Date == today);
+                return todayItem == null ? 0.0 : Math.Max(0.0, todayItem.Left - DayWidth);
+            }
+        }
 
         /// <summary>
         /// チャート表示幅
@@ -141,6 +164,7 @@ namespace MainApplication.ViewModels.GanttChartModel
             ChartHeight = Math.Max(RowHeight, Tasks.Count * RowHeight);
             OnPropertyChangedA(nameof(TimelineRangeText));
             OnPropertyChangedA(nameof(HasNoTasks));
+            RequestScrollToToday();
         }
 
         /// <summary>
@@ -157,6 +181,7 @@ namespace MainApplication.ViewModels.GanttChartModel
             _viewportChartWidth = viewportChartWidth;
             RebuildTimeline(TimelineStartDate, _timelineEndDate);
             OnPropertyChangedA(nameof(TimelineRangeText));
+            RequestScrollToToday();
         }
 
         /// <summary>
@@ -218,6 +243,16 @@ namespace MainApplication.ViewModels.GanttChartModel
                     _specialHolidays.Contains(date)
                 ));
             }
+
+            OnPropertyChangedA(nameof(TodayHorizontalOffset));
+        }
+
+        /// <summary>
+        /// 現在日付へのスクロール要求を発行する
+        /// </summary>
+        private void RequestScrollToToday()
+        {
+            ScrollToTodayRequestCount++;
         }
 
         /// <summary>

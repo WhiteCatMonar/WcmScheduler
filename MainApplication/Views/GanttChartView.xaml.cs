@@ -1,5 +1,8 @@
+using System.ComponentModel;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows;
+using System.Windows.Threading;
 using MainApplication.ViewModels.GanttChartModel;
 
 namespace MainApplication.Views
@@ -9,12 +12,58 @@ namespace MainApplication.Views
     /// </summary>
     public partial class GanttChartView : UserControl
     {
+        private GanttChartViewModel? _subscribedViewModel;
+
         /// <summary>
         /// GanttChartViewを初期化する
         /// </summary>
         public GanttChartView()
         {
             InitializeComponent();
+            Loaded += GanttChartView_Loaded;
+            DataContextChanged += GanttChartView_DataContextChanged;
+        }
+
+        /// <summary>
+        /// 表示完了時に現在日付へスクロールする
+        /// </summary>
+        /// <param name="sender">イベント送信元</param>
+        /// <param name="e">イベント引数</param>
+        private void GanttChartView_Loaded(object sender, RoutedEventArgs e)
+        {
+            ScrollToToday();
+        }
+
+        /// <summary>
+        /// DataContext変更時にViewModelのスクロール要求を監視する
+        /// </summary>
+        /// <param name="sender">イベント送信元</param>
+        /// <param name="e">イベント引数</param>
+        private void GanttChartView_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (_subscribedViewModel != null)
+            {
+                _subscribedViewModel.PropertyChanged -= GanttChartViewModel_PropertyChanged;
+            }
+
+            _subscribedViewModel = e.NewValue as GanttChartViewModel;
+            if (_subscribedViewModel != null)
+            {
+                _subscribedViewModel.PropertyChanged += GanttChartViewModel_PropertyChanged;
+            }
+        }
+
+        /// <summary>
+        /// ViewModelからの現在日付スクロール要求を処理する
+        /// </summary>
+        /// <param name="sender">イベント送信元</param>
+        /// <param name="e">イベント引数</param>
+        private void GanttChartViewModel_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(GanttChartViewModel.ScrollToTodayRequestCount))
+            {
+                ScrollToToday();
+            }
         }
 
         /// <summary>
@@ -51,6 +100,22 @@ namespace MainApplication.Views
 
             VerticalScrollViewer.ScrollToVerticalOffset(VerticalScrollViewer.VerticalOffset - e.Delta);
             e.Handled = true;
+        }
+
+        /// <summary>
+        /// レイアウト完了後に現在日付へ横スクロールする
+        /// </summary>
+        private void ScrollToToday()
+        {
+            if (DataContext is not GanttChartViewModel viewModel)
+            {
+                return;
+            }
+
+            Dispatcher.BeginInvoke(
+                () => ChartScrollViewer.ScrollToHorizontalOffset(viewModel.TodayHorizontalOffset),
+                DispatcherPriority.Loaded
+            );
         }
     }
 }

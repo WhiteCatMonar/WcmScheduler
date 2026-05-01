@@ -46,6 +46,11 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 特別休日かどうか
         /// </summary>
         public bool IsSpecialHoliday { get; } = isSpecialHoliday;
+
+        /// <summary>
+        /// 現在日付かどうか
+        /// </summary>
+        public bool IsToday => Date == DateOnly.FromDateTime(DateTime.Today);
     }
 }
 

@@ -57,7 +57,9 @@
     "gantt-saturday-text": "#FF0066B3",
     "gantt-sunday-background": "#FFFFEEEE",
     "gantt-sunday-text": "#FFB00020",
-    "gantt-special-holiday-background": "#FFFFF4D6",
-    "gantt-special-holiday-text": "#FF8A5A00"
+    "gantt-special-holiday-background": "#FFFFEAF5",
+    "gantt-special-holiday-text": "#FFC2185B",
+    "gantt-today-background": "#FFFFF8C4",
+    "gantt-today-text": "#FF7A5A00"
   }
 }

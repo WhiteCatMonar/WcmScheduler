@@ -26,12 +26,18 @@
                 <DataTrigger Binding="{Binding IsSpecialHoliday}" Value="True">
                     <Setter Property="Background" Value="{DynamicResource GanttSpecialHolidayBackgroundBrush}"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttTodayBackgroundBrush}"/>
+                </DataTrigger>
             </Style.Triggers>
         </Style>
 
         <Style x:Key="GanttDayHeaderTextStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource GanttHeaderTextBrush}"/>
             <Style.Triggers>
+                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource GanttTodayTextBrush}"/>
+                </DataTrigger>
                 <DataTrigger Binding="{Binding IsSaturday}" Value="True">
                     <Setter Property="Foreground" Value="{DynamicResource GanttSaturdayTextBrush}"/>
                 </DataTrigger>
@@ -55,6 +61,9 @@
                 </DataTrigger>
                 <DataTrigger Binding="{Binding IsSpecialHoliday}" Value="True">
                     <Setter Property="Background" Value="{DynamicResource GanttSpecialHolidayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttTodayBackgroundBrush}"/>
                 </DataTrigger>
             </Style.Triggers>
         </Style>
