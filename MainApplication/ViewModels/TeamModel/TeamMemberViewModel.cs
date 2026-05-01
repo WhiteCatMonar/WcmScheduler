@@ -16,6 +16,7 @@ namespace MainApplication.ViewModels.TeamModel
         private int _thursdayWorkTimeMinutes = 480;
         private int _fridayWorkTimeMinutes = 480;
         private int _saturdayWorkTimeMinutes = 480;
+        private int _specialHolidayWorkTimeMinutes;
 
         /// <summary>
         /// 新規メンバーを生成する
@@ -41,6 +42,7 @@ namespace MainApplication.ViewModels.TeamModel
             ThursdayWorkTimeMinutes = data.ThursdayWorkTimeMinutes;
             FridayWorkTimeMinutes = data.FridayWorkTimeMinutes;
             SaturdayWorkTimeMinutes = data.SaturdayWorkTimeMinutes;
+            SpecialHolidayWorkTimeMinutes = data.SpecialHolidayWorkTimeMinutes;
         }
 
         /// <summary>
@@ -154,6 +156,19 @@ namespace MainApplication.ViewModels.TeamModel
         }
 
         /// <summary>
+        /// 特別休日のデフォルト作業可能時間。単位は分
+        /// </summary>
+        public int SpecialHolidayWorkTimeMinutes
+        {
+            get => _specialHolidayWorkTimeMinutes;
+            set => SetProperty(
+                ref _specialHolidayWorkTimeMinutes,
+                Math.Max(0, value),
+                [nameof(SpecialHolidayWorkTimeDurationText)]
+            );
+        }
+
+        /// <summary>
         /// 日曜日のデフォルト作業可能時間の時間表記
         /// </summary>
         public string SundayWorkTimeDurationText => FormatDuration(SundayWorkTimeMinutes);
@@ -189,6 +204,11 @@ namespace MainApplication.ViewModels.TeamModel
         public string SaturdayWorkTimeDurationText => FormatDuration(SaturdayWorkTimeMinutes);
 
         /// <summary>
+        /// 特別休日のデフォルト作業可能時間の時間表記
+        /// </summary>
+        public string SpecialHolidayWorkTimeDurationText => FormatDuration(SpecialHolidayWorkTimeMinutes);
+
+        /// <summary>
         /// 一覧表示用テキスト
         /// </summary>
         public string DisplayText => DisplayNameOrFallback;
@@ -213,6 +233,19 @@ namespace MainApplication.ViewModels.TeamModel
                 DayOfWeek.Saturday => SaturdayWorkTimeMinutes,
                 _ => 0
             };
+        }
+
+        /// <summary>
+        /// 指定日のデフォルト作業可能時間を取得する
+        /// </summary>
+        /// <param name="date">対象日。</param>
+        /// <param name="specialHolidays">特別休日一覧。</param>
+        /// <returns>デフォルト作業可能時間。単位は分。</returns>
+        public int GetDefaultWorkTimeMinutes(DateOnly date, IEnumerable<DateOnly> specialHolidays)
+        {
+            return specialHolidays.Contains(date)
+                ? SpecialHolidayWorkTimeMinutes
+                : GetDefaultWorkTimeMinutes(date.DayOfWeek);
         }
 
         /// <summary>
@@ -244,7 +277,8 @@ namespace MainApplication.ViewModels.TeamModel
                 WednesdayWorkTimeMinutes = WednesdayWorkTimeMinutes,
                 ThursdayWorkTimeMinutes = ThursdayWorkTimeMinutes,
                 FridayWorkTimeMinutes = FridayWorkTimeMinutes,
-                SaturdayWorkTimeMinutes = SaturdayWorkTimeMinutes
+                SaturdayWorkTimeMinutes = SaturdayWorkTimeMinutes,
+                SpecialHolidayWorkTimeMinutes = SpecialHolidayWorkTimeMinutes
             };
         }
     }

@@ -1,0 +1,67 @@
+<Window x:Class="MainApplication.Views.SpecialHolidaySettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="特別休日設定"
+        WindowStartupLocation="CenterOwner"
+        Width="520"
+        Height="420"
+        Background="{DynamicResource WindowBackgroundBrush}">
+    <Grid Margin="12"
+          Background="{DynamicResource WindowBackgroundBrush}"
+          TextElement.Foreground="{DynamicResource WindowTextBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="12"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.Row="0"
+                   Grid.ColumnSpan="3"
+                   Text="日付をクリックして特別休日を設定または解除します。"
+                   Margin="0,0,0,8"/>
+
+        <Calendar x:Name="HolidayCalendar"
+                  Grid.Row="1"
+                  Grid.Column="0"
+                  SelectionMode="MultipleRange"
+                  PreviewMouseLeftButtonDown="HolidayCalendar_PreviewMouseLeftButtonDown"
+                  Loaded="HolidayCalendar_Loaded"/>
+
+        <Border Grid.Row="1"
+                Grid.Column="2"
+                BorderBrush="{DynamicResource NodeEditorBorderBrush}"
+                BorderThickness="1"
+                Background="{DynamicResource SidePanelBackgroundBrush}">
+            <DockPanel Margin="8">
+                <TextBlock DockPanel.Dock="Top"
+                           Text="設定済み特別休日"
+                           FontWeight="Bold"
+                           Foreground="{DynamicResource TaskEditorHeadingTextBrush}"
+                           Margin="0,0,0,6"/>
+                <ListBox ItemsSource="{Binding HolidayItems}"
+                         Background="{DynamicResource HistoryListBackgroundBrush}"
+                         Foreground="{DynamicResource WindowTextBrush}"
+                         BorderBrush="{DynamicResource NodeEditorBorderBrush}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DisplayText}"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <Button Grid.Row="2"
+                Grid.ColumnSpan="3"
+                Content="閉じる"
+                Width="80"
+                HorizontalAlignment="Right"
+                Margin="0,12,0,0"
+                Click="CloseButton_Click"/>
+    </Grid>
+</Window>

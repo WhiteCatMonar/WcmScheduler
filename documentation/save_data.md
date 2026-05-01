@@ -9,7 +9,7 @@ JSON Schema は以下に定義します。
 
 ## 概要
 
-保存ファイルは、プロジェクト一覧とチームメンバー一覧を1つのJSONとして保持します。
+保存ファイルは、プロジェクト一覧、チームメンバー一覧、特別休日一覧を1つのJSONとして保持します。
 
 チームメンバーはチーム全体のマスタ情報として `members` に保存します。
 タスク編集データ、メンバー別のプロジェクト参加期間、メンバー別の日付単位作業可能時間は、プロジェクト固有の情報として `projects` の各要素に保存します。
@@ -22,11 +22,13 @@ JSON Schema は以下に定義します。
 | --- | --- | --- |
 | `projects` | array | プロジェクト一覧 |
 | `members` | array | チームメンバー一覧 |
+| `special-holidays` | array | 特別休日一覧 |
 
 ```json
 {
   "projects": [],
-  "members": []
+  "members": [],
+  "special-holidays": []
 }
 ```
 
@@ -203,6 +205,7 @@ JSON Schema は以下に定義します。
 | `thursday-work-time-minutes` | number | 木曜日のデフォルト作業可能時間 |
 | `friday-work-time-minutes` | number | 金曜日のデフォルト作業可能時間 |
 | `saturday-work-time-minutes` | number | 土曜日のデフォルト作業可能時間 |
+| `special-holiday-work-time-minutes` | number | 特別休日のデフォルト作業可能時間 |
 
 作業可能時間の単位は分です。
 
@@ -216,8 +219,23 @@ JSON Schema は以下に定義します。
   "wednesday-work-time-minutes": 480,
   "thursday-work-time-minutes": 480,
   "friday-work-time-minutes": 480,
-  "saturday-work-time-minutes": 0
+  "saturday-work-time-minutes": 0,
+  "special-holiday-work-time-minutes": 0
 }
+```
+
+## 特別休日
+
+`special-holidays` は、チーム全体で共有する特別休日の日付一覧を表します。
+祝日など、土曜日または日曜日以外に休日扱いしたい日付を保存します。
+
+日付は `DateOnly` の標準形式で保存します。
+
+```json
+[
+  "2026-05-04",
+  "2026-05-05"
+]
 ```
 
 ## プロジェクト内メンバー情報
@@ -248,6 +266,7 @@ JSON Schema は以下に定義します。
 `work-times` の各要素は、プロジェクト内メンバーの日付単位作業可能時間上書き値を表します。
 対象メンバーは親要素の `member-id` によって識別します。
 未入力の日付は、メンバーの曜日別デフォルト作業可能時間を使用します。
+対象日が特別休日の場合は、メンバーの特別休日デフォルト作業可能時間を使用します。
 
 | キー | 型 | 内容 |
 | --- | --- | --- |
@@ -392,7 +411,8 @@ JSON Schema は以下に定義します。
       "wednesday-work-time-minutes": 480,
       "thursday-work-time-minutes": 480,
       "friday-work-time-minutes": 480,
-      "saturday-work-time-minutes": 0
+      "saturday-work-time-minutes": 0,
+      "special-holiday-work-time-minutes": 0
     },
     {
       "member-id": "33333333-3333-3333-3333-333333333333",
@@ -403,8 +423,13 @@ JSON Schema は以下に定義します。
       "wednesday-work-time-minutes": 360,
       "thursday-work-time-minutes": 360,
       "friday-work-time-minutes": 360,
-      "saturday-work-time-minutes": 0
+      "saturday-work-time-minutes": 0,
+      "special-holiday-work-time-minutes": 0
     }
+  ],
+  "special-holidays": [
+    "2026-05-04",
+    "2026-05-05"
   ]
 }
 ```

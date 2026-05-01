@@ -75,7 +75,12 @@ namespace MainApplication.ViewModels.ProjectModel
         /// </summary>
         /// <param name="name">プロジェクト名</param>
         /// <param name="members">チームメンバー一覧</param>
-        public ProjectViewModel(string name, ObservableCollection<TeamMemberViewModel>? members = null)
+        /// <param name="specialHolidays">特別休日一覧</param>
+        public ProjectViewModel(
+            string name,
+            ObservableCollection<TeamMemberViewModel>? members = null,
+            ObservableCollection<DateOnly>? specialHolidays = null
+        )
         {
             ProjectName = name;
             NodeEditor = new NodeEditorViewModel();
@@ -84,7 +89,7 @@ namespace MainApplication.ViewModels.ProjectModel
                 NodeEditor.SetTeamMembers(members);
             }
 
-            GanttChart = new GanttChartViewModel(NodeEditor);
+            GanttChart = new GanttChartViewModel(NodeEditor, specialHolidays);
 
             var nodeEditorTab = new TabInfo("タスク編集", NodeEditor);
             var ganttChartTab = new TabInfo("プロジェクトスケジュール", GanttChart);

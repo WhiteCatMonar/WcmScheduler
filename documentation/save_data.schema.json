@@ -7,7 +7,8 @@
   "additionalProperties": false,
   "required": [
     "projects",
-    "members"
+    "members",
+    "special-holidays"
   ],
   "properties": {
     "projects": {
@@ -23,6 +24,14 @@
       "items": {
         "$ref": "#/$defs/member"
       }
+    },
+    "special-holidays": {
+      "type": "array",
+      "description": "Team-wide special holiday date list.",
+      "items": {
+        "$ref": "#/$defs/date"
+      },
+      "uniqueItems": true
     }
   },
   "$defs": {
@@ -338,7 +347,8 @@
         "wednesday-work-time-minutes",
         "thursday-work-time-minutes",
         "friday-work-time-minutes",
-        "saturday-work-time-minutes"
+        "saturday-work-time-minutes",
+        "special-holiday-work-time-minutes"
       ],
       "properties": {
         "member-id": {
@@ -376,6 +386,10 @@
         "saturday-work-time-minutes": {
           "$ref": "#/$defs/non-negative-integer",
           "description": "Default Saturday work time in minutes."
+        },
+        "special-holiday-work-time-minutes": {
+          "$ref": "#/$defs/non-negative-integer",
+          "description": "Default special holiday work time in minutes."
         }
       }
     },

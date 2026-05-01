@@ -14,6 +14,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         private const double DefaultRowHeight = 48.0;
         private const int DefaultVisibleDays = 14;
         private readonly NodeEditorViewModel _nodeEditor;
+        private readonly ObservableCollection<DateOnly> _specialHolidays;
         private readonly GanttChartService _service = new();
         private DateOnly _timelineStartDate = DateOnly.FromDateTime(DateTime.Today);
         private DateOnly _timelineEndDate = DateOnly.FromDateTime(DateTime.Today).AddDays(DefaultVisibleDays - 1);
@@ -25,9 +26,14 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// ガントチャートViewModelを生成する
         /// </summary>
         /// <param name="nodeEditor">対象ノードエディタ</param>
-        public GanttChartViewModel(NodeEditorViewModel nodeEditor)
+        /// <param name="specialHolidays">特別休日一覧</param>
+        public GanttChartViewModel(
+            NodeEditorViewModel nodeEditor,
+            ObservableCollection<DateOnly>? specialHolidays = null
+        )
         {
             _nodeEditor = nodeEditor;
+            _specialHolidays = specialHolidays ?? [];
             RefreshCommand = new RelayCommand(Refresh);
             Refresh();
         }
@@ -120,7 +126,7 @@ namespace MainApplication.ViewModels.GanttChartModel
             var startDate = GetTimelineStartDate();
             TimelineStartDate = startDate;
 
-            var tasks = _service.CreateProjectTasks(_nodeEditor, startDate, DayWidth, RowHeight);
+            var tasks = _service.CreateProjectTasks(_nodeEditor, startDate, DayWidth, RowHeight, _specialHolidays);
             var endDate = GetTimelineEndDate(tasks, startDate);
             _timelineEndDate = endDate;
             RebuildTimeline(startDate, endDate);

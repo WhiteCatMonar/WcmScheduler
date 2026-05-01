@@ -77,6 +77,7 @@
                     <ColumnDefinition Width="86"/>
                     <ColumnDefinition Width="86"/>
                     <ColumnDefinition Width="86"/>
+                    <ColumnDefinition Width="96"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="名前" FontWeight="Bold"/>
@@ -87,7 +88,8 @@
                 <TextBlock Grid.Column="5" Text="木" FontWeight="Bold" HorizontalAlignment="Center"/>
                 <TextBlock Grid.Column="6" Text="金" FontWeight="Bold" HorizontalAlignment="Center"/>
                 <TextBlock Grid.Column="7" Text="土" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <TextBlock Grid.Column="8" Text="表示" FontWeight="Bold"/>
+                <TextBlock Grid.Column="8" Text="特別休日" FontWeight="Bold" HorizontalAlignment="Center"/>
+                <TextBlock Grid.Column="9" Text="表示" FontWeight="Bold"/>
             </Grid>
 
             <ListBox Grid.Row="1"
@@ -109,6 +111,7 @@
                                 <ColumnDefinition Width="86"/>
                                 <ColumnDefinition Width="86"/>
                                 <ColumnDefinition Width="86"/>
+                                <ColumnDefinition Width="96"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <TextBox Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}"
@@ -169,7 +172,15 @@
                                 </DockPanel>
                                 <TextBlock Text="{Binding SaturdayWorkTimeDurationText}" HorizontalAlignment="Right"/>
                             </StackPanel>
-                            <TextBlock Grid.Column="8"
+                            <StackPanel Grid.Column="8" Margin="0,0,6,0">
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="分" VerticalAlignment="Center" Margin="3,0,0,0"/>
+                                    <TextBox Text="{Binding SpecialHolidayWorkTimeMinutes, UpdateSourceTrigger=PropertyChanged}"
+                                             HorizontalContentAlignment="Right"/>
+                                </DockPanel>
+                                <TextBlock Text="{Binding SpecialHolidayWorkTimeDurationText}" HorizontalAlignment="Right"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="9"
                                        Text="{Binding DisplayText}"
                                        VerticalAlignment="Center"
                                        TextTrimming="CharacterEllipsis"/>
@@ -239,6 +250,7 @@
 
             <DockPanel Grid.Row="0" Margin="0,0,0,6">
                 <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="特別休日設定" Command="{Binding OpenSpecialHolidaySettingsCommand}" Width="92" Margin="0,0,4,0"/>
                     <Button Content="前へ" Command="{Binding PreviousCalendarCommand}" Width="56" Margin="0,0,4,0"/>
                     <Button Content="今日" Command="{Binding TodayCalendarCommand}" Width="56" Margin="0,0,4,0"/>
                     <Button Content="次へ" Command="{Binding NextCalendarCommand}" Width="56"/>

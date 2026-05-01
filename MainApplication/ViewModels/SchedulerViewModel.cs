@@ -119,8 +119,9 @@ namespace MainApplication.ViewModels
 
             /* 子となるViewModelの生成 */
             var teamMembers = new ObservableCollection<TeamMemberViewModel>();
-            TeamProjects = new TeamProjectsViewModel(teamMembers);
-            TeamSettings = new TeamSettingsViewModel(TeamProjects, teamMembers);
+            var specialHolidays = new ObservableCollection<DateOnly>();
+            TeamProjects = new TeamProjectsViewModel(teamMembers, specialHolidays);
+            TeamSettings = new TeamSettingsViewModel(TeamProjects, teamMembers, specialHolidays);
             /* TODO:タブごとの機能追加 */
 
             /* タブ管理 */
@@ -183,7 +184,7 @@ namespace MainApplication.ViewModels
         private void ApplyRootDataModel(RootSaveDataModel root)
         {
             TeamProjects.LoadFromDataModels(root.Projects);
-            TeamSettings.LoadFromDataModels(root.Members, root.Projects);
+            TeamSettings.LoadFromDataModels(root.Members, root.Projects, root.SpecialHolidays);
         }
 
 
@@ -240,6 +241,7 @@ namespace MainApplication.ViewModels
             RootSaveDataModel save_data = new()
             {
                 Members = TeamSettings.ToMemberDataModels(),
+                SpecialHolidays = TeamSettings.ToSpecialHolidayDataModels(),
                 Projects =
                 [
                     ..

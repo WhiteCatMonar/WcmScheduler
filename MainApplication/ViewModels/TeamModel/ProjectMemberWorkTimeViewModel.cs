@@ -1,5 +1,6 @@
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
+using System.Collections.ObjectModel;
 
 namespace MainApplication.ViewModels.TeamModel
 {
@@ -9,6 +10,7 @@ namespace MainApplication.ViewModels.TeamModel
     public class ProjectMemberWorkTimeViewModel : ViewModelBase
     {
         private readonly Action<ProjectMemberWorkTimeViewModel> _workTimeChanged;
+        private readonly ObservableCollection<DateOnly> _specialHolidays;
         private int? _workTimeMinutes;
 
         /// <summary>
@@ -19,6 +21,7 @@ namespace MainApplication.ViewModels.TeamModel
         /// <param name="participation">プロジェクト参加期間。</param>
         /// <param name="workDate">対象日付。</param>
         /// <param name="workTimeMinutes">上書き作業可能時間。未設定ならnull。</param>
+        /// <param name="specialHolidays">特別休日一覧。</param>
         /// <param name="workTimeChanged">作業時間変更時の処理。</param>
         public ProjectMemberWorkTimeViewModel(
             ProjectViewModel project,
@@ -26,6 +29,7 @@ namespace MainApplication.ViewModels.TeamModel
             ProjectMemberParticipationViewModel participation,
             DateOnly workDate,
             int? workTimeMinutes,
+            ObservableCollection<DateOnly> specialHolidays,
             Action<ProjectMemberWorkTimeViewModel> workTimeChanged
         )
         {
@@ -34,6 +38,7 @@ namespace MainApplication.ViewModels.TeamModel
             Participation = participation;
             WorkDate = workDate;
             _workTimeMinutes = workTimeMinutes;
+            _specialHolidays = specialHolidays;
             _workTimeChanged = workTimeChanged;
         }
 
@@ -90,7 +95,7 @@ namespace MainApplication.ViewModels.TeamModel
         /// <summary>
         /// デフォルト反映後の作業可能時間。単位は分
         /// </summary>
-        public int EffectiveWorkTimeMinutes => IsParticipating ? WorkTimeMinutes ?? Member.GetDefaultWorkTimeMinutes(WorkDate.DayOfWeek) : 0;
+        public int EffectiveWorkTimeMinutes => IsParticipating ? WorkTimeMinutes ?? Member.GetDefaultWorkTimeMinutes(WorkDate, _specialHolidays) : 0;
 
         /// <summary>
         /// 未入力時に表示するデフォルト作業可能時間

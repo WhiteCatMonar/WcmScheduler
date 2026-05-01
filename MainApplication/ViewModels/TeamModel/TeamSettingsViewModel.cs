@@ -1,4 +1,5 @@
 using MainApplication.Models.SaveData;
+using MainApplication.Views;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
 using System.Collections.ObjectModel;
@@ -15,6 +16,7 @@ namespace MainApplication.ViewModels.TeamModel
     {
         private const int CalendarDays = 7;
         private readonly TeamProjectsViewModel _teamProjects;
+        private readonly ObservableCollection<DateOnly> _specialHolidays;
         private readonly Dictionary<(Guid ProjectId, Guid MemberId, DateOnly WorkDate), int> _workTimeOverrides = [];
         private readonly Dictionary<(Guid ProjectId, Guid MemberId), (DateOnly? StartDate, DateOnly? EndDate)> _projectParticipations = [];
         private TeamMemberViewModel? _selectedMember;
@@ -28,10 +30,12 @@ namespace MainApplication.ViewModels.TeamModel
         /// <param name="members">チームメンバー一覧。</param>
         public TeamSettingsViewModel(
             TeamProjectsViewModel teamProjects,
-            ObservableCollection<TeamMemberViewModel> members
+            ObservableCollection<TeamMemberViewModel> members,
+            ObservableCollection<DateOnly> specialHolidays
         )
         {
             _teamProjects = teamProjects;
+            _specialHolidays = specialHolidays;
             Members = members;
             Members.CollectionChanged += OnMembersCollectionChanged;
             _teamProjects.Projects.CollectionChanged += OnProjectsCollectionChanged;
@@ -43,6 +47,7 @@ namespace MainApplication.ViewModels.TeamModel
             PreviousCalendarCommand = new RelayCommand(() => MoveCalendar(-CalendarDays));
             NextCalendarCommand = new RelayCommand(() => MoveCalendar(CalendarDays));
             TodayCalendarCommand = new RelayCommand(() => CalendarStartDate = DateOnly.FromDateTime(DateTime.Today));
+            OpenSpecialHolidaySettingsCommand = new RelayCommand(OpenSpecialHolidaySettings);
         }
 
         /// <summary>
@@ -59,6 +64,11 @@ namespace MainApplication.ViewModels.TeamModel
         /// 選択中メンバーの作業可能時間カレンダー
         /// </summary>
         public ObservableCollection<MemberWorkCalendarDayViewModel> WorkCalendarDays { get; } = [];
+
+        /// <summary>
+        /// 特別休日一覧
+        /// </summary>
+        public ObservableCollection<DateOnly> SpecialHolidays => _specialHolidays;
 
         /// <summary>
         /// 選択中のメンバー
@@ -156,17 +166,24 @@ namespace MainApplication.ViewModels.TeamModel
         public ICommand TodayCalendarCommand { get; }
 
         /// <summary>
+        /// 特別休日設定ウィンドウを開くコマンド
+        /// </summary>
+        public ICommand OpenSpecialHolidaySettingsCommand { get; }
+
+        /// <summary>
         /// 保存データを適用する
         /// </summary>
         /// <param name="members">メンバー保存データ。</param>
         /// <param name="projects">プロジェクト保存データ一覧</param>
         public void LoadFromDataModels(
             IEnumerable<MemberDataModel> members,
-            IEnumerable<ProjectDataModel> projects
+            IEnumerable<ProjectDataModel> projects,
+            IEnumerable<DateOnly> specialHolidays
         )
         {
             _isLoading = true;
             Members.Clear();
+            _specialHolidays.Clear();
             _workTimeOverrides.Clear();
             _projectParticipations.Clear();
             ProjectParticipations.Clear();
@@ -175,6 +192,11 @@ namespace MainApplication.ViewModels.TeamModel
             foreach (var member in members)
             {
                 Members.Add(new TeamMemberViewModel(member));
+            }
+
+            foreach (var specialHoliday in specialHolidays.OrderBy(date => date))
+            {
+                _specialHolidays.Add(specialHoliday);
             }
 
             foreach (var project in projects)
@@ -204,6 +226,15 @@ namespace MainApplication.ViewModels.TeamModel
         public List<MemberDataModel> ToMemberDataModels()
         {
             return [.. Members.Select(member => member.ToDataModel())];
+        }
+
+        /// <summary>
+        /// 特別休日保存データへ変換する
+        /// </summary>
+        /// <returns>特別休日一覧。</returns>
+        public List<DateOnly> ToSpecialHolidayDataModels()
+        {
+            return [.. _specialHolidays.OrderBy(date => date)];
         }
 
         /// <summary>
@@ -324,6 +355,22 @@ namespace MainApplication.ViewModels.TeamModel
         }
 
         /// <summary>
+        /// 特別休日設定ウィンドウを開く
+        /// </summary>
+        private void OpenSpecialHolidaySettings()
+        {
+            var viewModel = new SpecialHolidaySettingsViewModel(_specialHolidays);
+            var window = new SpecialHolidaySettingsWindow
+            {
+                DataContext = viewModel,
+                Owner = System.Windows.Application.Current.Windows.OfType<System.Windows.Window>().FirstOrDefault(window => window.IsActive)
+            };
+
+            window.ShowDialog();
+            RefreshVisibleEffectiveWorkTimes();
+        }
+
+        /// <summary>
         /// 指定日を含む週の日曜日を取得する
         /// </summary>
         /// <param name="date">対象日。</param>
@@ -411,7 +458,8 @@ namespace MainApplication.ViewModels.TeamModel
                 nameof(TeamMemberViewModel.WednesdayWorkTimeMinutes) or
                 nameof(TeamMemberViewModel.ThursdayWorkTimeMinutes) or
                 nameof(TeamMemberViewModel.FridayWorkTimeMinutes) or
-                nameof(TeamMemberViewModel.SaturdayWorkTimeMinutes);
+                nameof(TeamMemberViewModel.SaturdayWorkTimeMinutes) or
+                nameof(TeamMemberViewModel.SpecialHolidayWorkTimeMinutes);
         }
 
         /// <summary>
@@ -480,6 +528,7 @@ namespace MainApplication.ViewModels.TeamModel
                             participation,
                             date,
                             _workTimeOverrides.ContainsKey(key) ? minutes : null,
+                            _specialHolidays,
                             OnProjectMemberWorkTimeChanged
                         )
                     );

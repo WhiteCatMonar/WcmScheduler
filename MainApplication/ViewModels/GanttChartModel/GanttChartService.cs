@@ -15,15 +15,18 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <param name="timelineStartDate">表示開始日</param>
         /// <param name="dayWidth">1日分の表示幅</param>
         /// <param name="rowHeight">1行分の表示高さ</param>
+        /// <param name="specialHolidays">特別休日一覧</param>
         /// <returns>ガントタスク一覧</returns>
         public List<GanttTaskItemViewModel> CreateProjectTasks(
             NodeEditorViewModel nodeEditor,
             DateOnly timelineStartDate,
             double dayWidth,
-            double rowHeight
+            double rowHeight,
+            IEnumerable<DateOnly> specialHolidays
         )
         {
-            var schedules = CalculateSchedules(nodeEditor);
+            var holidays = specialHolidays.ToHashSet();
+            var schedules = CalculateSchedules(nodeEditor, holidays);
             var result = new List<GanttTaskItemViewModel>();
             var index = 0;
 
@@ -78,15 +81,19 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// ノード一覧から算定済み予定を生成する
         /// </summary>
         /// <param name="nodeEditor">対象ノードエディタ</param>
+        /// <param name="specialHolidays">特別休日一覧</param>
         /// <returns>算定済み予定一覧</returns>
-        private static List<GanttTaskSchedule> CalculateSchedules(NodeEditorViewModel nodeEditor)
+        private static List<GanttTaskSchedule> CalculateSchedules(
+            NodeEditorViewModel nodeEditor,
+            IReadOnlySet<DateOnly> specialHolidays
+        )
         {
             var schedules = new Dictionary<NodeViewModel, GanttTaskSchedule>();
             var nodes = nodeEditor.Nodes.Nodes.ToList();
 
             foreach (var node in nodes)
             {
-                CalculateSchedule(node, nodeEditor, schedules, []);
+                CalculateSchedule(node, nodeEditor, schedules, [], specialHolidays);
             }
 
             foreach (var node in nodes.Where(node => !schedules.ContainsKey(node)))
@@ -108,12 +115,14 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <param name="nodeEditor">対象ノードエディタ</param>
         /// <param name="schedules">算定済み予定</param>
         /// <param name="visiting">循環検出用ノード集合</param>
+        /// <param name="specialHolidays">特別休日一覧</param>
         /// <returns>算定済み予定</returns>
         private static GanttTaskSchedule? CalculateSchedule(
             NodeViewModel node,
             NodeEditorViewModel nodeEditor,
             Dictionary<NodeViewModel, GanttTaskSchedule> schedules,
-            HashSet<NodeViewModel> visiting
+            HashSet<NodeViewModel> visiting,
+            IReadOnlySet<DateOnly> specialHolidays
         )
         {
             if (schedules.TryGetValue(node, out var existing))
@@ -150,24 +159,24 @@ namespace MainApplication.ViewModels.GanttChartModel
 
             if (start != null)
             {
-                end = AddWorkMinutes(start.Value, estimateMinutes, ResolveAssignee(nodeEditor, detail.AssigneeMemberId));
+                end = AddWorkMinutes(start.Value, estimateMinutes, ResolveAssignee(nodeEditor, detail.AssigneeMemberId), specialHolidays);
                 return AddSchedule(node, schedules, visiting, start.Value, end.Value, isEndOnly);
             }
 
             if (end != null)
             {
-                start = SubtractWorkMinutes(end.Value, estimateMinutes, ResolveAssignee(nodeEditor, detail.AssigneeMemberId));
+                start = SubtractWorkMinutes(end.Value, estimateMinutes, ResolveAssignee(nodeEditor, detail.AssigneeMemberId), specialHolidays);
                 return AddSchedule(node, schedules, visiting, start.Value, end.Value, isEndOnly);
             }
 
             var predecessorEnd = GetPredecessors(node, nodeEditor)
-                .Select(predecessor => CalculateSchedule(predecessor, nodeEditor, schedules, visiting)?.EndDateTime)
+                .Select(predecessor => CalculateSchedule(predecessor, nodeEditor, schedules, visiting, specialHolidays)?.EndDateTime)
                 .Where(value => value != null)
                 .DefaultIfEmpty(DateTime.Today)
                 .Max();
 
             start = predecessorEnd ?? DateTime.Today;
-            end = AddWorkMinutes(start.Value, estimateMinutes, ResolveAssignee(nodeEditor, detail.AssigneeMemberId));
+            end = AddWorkMinutes(start.Value, estimateMinutes, ResolveAssignee(nodeEditor, detail.AssigneeMemberId), specialHolidays);
             return AddSchedule(node, schedules, visiting, start.Value, end.Value, isEndOnly);
         }
 
@@ -225,10 +234,16 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <param name="start">開始日時</param>
         /// <param name="minutes">作業分</param>
         /// <param name="assignee">担当者</param>
+        /// <param name="specialHolidays">特別休日一覧</param>
         /// <returns>終了日時</returns>
-        private static DateTime AddWorkMinutes(DateTime start, int minutes, TeamMemberViewModel? assignee)
+        private static DateTime AddWorkMinutes(
+            DateTime start,
+            int minutes,
+            TeamMemberViewModel? assignee,
+            IReadOnlySet<DateOnly> specialHolidays
+        )
         {
-            if (!HasAnyWorkingDay(assignee))
+            if (!HasAnyWorkingDay(assignee, specialHolidays))
             {
                 return start.AddMinutes(minutes);
             }
@@ -237,7 +252,7 @@ namespace MainApplication.ViewModels.GanttChartModel
             var remaining = minutes;
             while (remaining > 0)
             {
-                var dailyMinutes = GetDailyWorkMinutes(cursor, assignee);
+                var dailyMinutes = GetDailyWorkMinutes(cursor, assignee, specialHolidays);
                 if (dailyMinutes <= 0)
                 {
                     cursor = cursor.Date.AddDays(1);
@@ -266,10 +281,16 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <param name="end">終了日時</param>
         /// <param name="minutes">作業分</param>
         /// <param name="assignee">担当者</param>
+        /// <param name="specialHolidays">特別休日一覧</param>
         /// <returns>開始日時</returns>
-        private static DateTime SubtractWorkMinutes(DateTime end, int minutes, TeamMemberViewModel? assignee)
+        private static DateTime SubtractWorkMinutes(
+            DateTime end,
+            int minutes,
+            TeamMemberViewModel? assignee,
+            IReadOnlySet<DateOnly> specialHolidays
+        )
         {
-            if (!HasAnyWorkingDay(assignee))
+            if (!HasAnyWorkingDay(assignee, specialHolidays))
             {
                 return end.AddMinutes(-minutes);
             }
@@ -278,7 +299,7 @@ namespace MainApplication.ViewModels.GanttChartModel
             var remaining = minutes;
             while (remaining > 0)
             {
-                var dailyMinutes = GetDailyWorkMinutes(cursor, assignee);
+                var dailyMinutes = GetDailyWorkMinutes(cursor, assignee, specialHolidays);
                 if (dailyMinutes <= 0)
                 {
                     cursor = cursor.Date.AddTicks(-1);
@@ -312,18 +333,24 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// </summary>
         /// <param name="dateTime">対象日時</param>
         /// <param name="assignee">担当者</param>
+        /// <param name="specialHolidays">特別休日一覧</param>
         /// <returns>作業可能時間。単位は分</returns>
-        private static int GetDailyWorkMinutes(DateTime dateTime, TeamMemberViewModel? assignee)
+        private static int GetDailyWorkMinutes(
+            DateTime dateTime,
+            TeamMemberViewModel? assignee,
+            IReadOnlySet<DateOnly> specialHolidays
+        )
         {
-            return assignee?.GetDefaultWorkTimeMinutes(dateTime.DayOfWeek) ?? 480;
+            return assignee?.GetDefaultWorkTimeMinutes(DateOnly.FromDateTime(dateTime.Date), specialHolidays) ?? 480;
         }
 
         /// <summary>
         /// 担当者に作業可能日が存在するかどうかを判定する
         /// </summary>
         /// <param name="assignee">担当者</param>
+        /// <param name="specialHolidays">特別休日一覧</param>
         /// <returns>作業可能日が存在する場合はtrue</returns>
-        private static bool HasAnyWorkingDay(TeamMemberViewModel? assignee)
+        private static bool HasAnyWorkingDay(TeamMemberViewModel? assignee, IReadOnlySet<DateOnly> specialHolidays)
         {
             if (assignee == null)
             {
@@ -331,7 +358,8 @@ namespace MainApplication.ViewModels.GanttChartModel
             }
 
             return Enum.GetValues<DayOfWeek>()
-                .Any(dayOfWeek => assignee.GetDefaultWorkTimeMinutes(dayOfWeek) > 0);
+                       .Any(dayOfWeek => assignee.GetDefaultWorkTimeMinutes(dayOfWeek) > 0) ||
+                   specialHolidays.Any(date => assignee.GetDefaultWorkTimeMinutes(date, specialHolidays) > 0);
         }
 
         /// <summary>

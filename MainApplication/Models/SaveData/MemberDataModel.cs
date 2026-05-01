@@ -61,6 +61,12 @@ namespace MainApplication.Models.SaveData
         /// </summary>
         [JsonPropertyName("saturday-work-time-minutes")]
         public int SaturdayWorkTimeMinutes { get; set; } = 480;
+
+        /// <summary>
+        /// 特別休日のデフォルト作業可能時間。単位は分
+        /// </summary>
+        [JsonPropertyName("special-holiday-work-time-minutes")]
+        public int SpecialHolidayWorkTimeMinutes { get; set; }
     }
 }
 

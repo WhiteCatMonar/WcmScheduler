@@ -13,6 +13,7 @@ namespace MainApplication.ViewModels
     public class TeamProjectsViewModel : ViewModelBase
     {
         private readonly ObservableCollection<TeamMemberViewModel> _members;
+        private readonly ObservableCollection<DateOnly> _specialHolidays;
         private ProjectViewModel? _selectedProject;
         private TabInfo? _selectedTab;
 
@@ -76,12 +77,17 @@ namespace MainApplication.ViewModels
         /// TeamProjectsViewModelを初期化し、プロジェクト一覧を生成する
         /// </summary>
         /// <param name="members">チームメンバー一覧</param>
-        public TeamProjectsViewModel(ObservableCollection<TeamMemberViewModel> members)
+        /// <param name="specialHolidays">特別休日一覧</param>
+        public TeamProjectsViewModel(
+            ObservableCollection<TeamMemberViewModel> members,
+            ObservableCollection<DateOnly> specialHolidays
+        )
         {
             _members = members;
+            _specialHolidays = specialHolidays;
             Projects = [];
 
-            var project = new ProjectViewModel("New Project", members);
+            var project = new ProjectViewModel("New Project", members, specialHolidays);
             Projects.Add(project);
 
             var newProjectTab = CreateProjectTab(project);
@@ -107,7 +113,7 @@ namespace MainApplication.ViewModels
 
             foreach (var projectData in projects)
             {
-                var project = new ProjectViewModel(projectData.ProjectName ?? string.Empty, _members)
+                var project = new ProjectViewModel(projectData.ProjectName ?? string.Empty, _members, _specialHolidays)
                 {
                     ProjectId = projectData.ProjectId == Guid.Empty ? Guid.NewGuid() : projectData.ProjectId
                 };
@@ -118,7 +124,7 @@ namespace MainApplication.ViewModels
 
             if (Projects.Count == 0)
             {
-                var project = new ProjectViewModel("New Project", _members);
+                var project = new ProjectViewModel("New Project", _members, _specialHolidays);
                 Projects.Add(project);
                 Tabs.Add(CreateProjectTab(project));
             }
@@ -142,7 +148,7 @@ namespace MainApplication.ViewModels
         /// </summary>
         private void AddProject()
         {
-            var project = new ProjectViewModel(CreateDefaultProjectName(), _members);
+            var project = new ProjectViewModel(CreateDefaultProjectName(), _members, _specialHolidays);
             var tab = CreateProjectTab(project);
             Projects.Add(project);
             Tabs.Add(tab);

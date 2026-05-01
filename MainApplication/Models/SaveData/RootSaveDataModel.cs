@@ -19,6 +19,12 @@ namespace MainApplication.Models.SaveData
         /// </summary>
         [JsonPropertyName("members")]
         public List<MemberDataModel> Members { get; set; } = [];
+
+        /// <summary>
+        /// 特別休日一覧
+        /// </summary>
+        [JsonPropertyName("special-holidays")]
+        public List<DateOnly> SpecialHolidays { get; set; } = [];
     }
 }
 
