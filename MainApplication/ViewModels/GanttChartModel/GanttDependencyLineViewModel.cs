@@ -9,6 +9,10 @@ namespace MainApplication.ViewModels.GanttChartModel
     /// </summary>
     public class GanttDependencyLineViewModel : ViewModelBase
     {
+        private const double BacktrackThreshold = 1.0;
+        private const double TaskBarHalfHeight = 10.0;
+        private const double BacktrackBarGap = 3.0;
+
         /// <summary>
         /// 依存関係線を生成する
         /// </summary>
@@ -96,6 +100,11 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <returns>描画用ジオメトリ</returns>
         private static Geometry CreateGeometry(double startX, double startY, double endX, double endY)
         {
+            if (endX < startX - BacktrackThreshold)
+            {
+                return CreateBacktrackGeometry(startX, startY, endX, endY);
+            }
+
             var horizontalGap = Math.Max(24.0, Math.Abs(endX - startX) * 0.45);
             var firstControlPoint = new Point(startX + horizontalGap, startY);
             var secondControlPoint = new Point(endX - horizontalGap, endY);
@@ -105,6 +114,36 @@ namespace MainApplication.ViewModels.GanttChartModel
                 Segments =
                 [
                     new BezierSegment(firstControlPoint, secondControlPoint, new Point(endX, endY), true)
+                ],
+                IsClosed = false
+            };
+
+            return new PathGeometry([figure]);
+        }
+
+        /// <summary>
+        /// 後段タスクが前段タスク終了より前にある依存関係線を生成する
+        /// </summary>
+        /// <param name="startX">開始X座標</param>
+        /// <param name="startY">開始Y座標</param>
+        /// <param name="endX">終了X座標</param>
+        /// <param name="endY">終了Y座標</param>
+        /// <returns>描画用ジオメトリ</returns>
+        private static Geometry CreateBacktrackGeometry(double startX, double startY, double endX, double endY)
+        {
+            var detourX = Math.Max(startX, endX) + 24.0;
+            var approachX = Math.Max(0.0, endX - 16.0);
+            var routeY = Math.Max(0.0, endY - TaskBarHalfHeight - BacktrackBarGap);
+            var figure = new PathFigure
+            {
+                StartPoint = new Point(startX, startY),
+                Segments =
+                [
+                    new LineSegment(new Point(detourX, startY), true),
+                    new LineSegment(new Point(detourX, routeY), true),
+                    new LineSegment(new Point(approachX, routeY), true),
+                    new LineSegment(new Point(approachX, endY), true),
+                    new LineSegment(new Point(endX, endY), true)
                 ],
                 IsClosed = false
             };

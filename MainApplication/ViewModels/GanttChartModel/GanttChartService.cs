@@ -33,8 +33,11 @@ namespace MainApplication.ViewModels.GanttChartModel
             foreach (var schedule in schedules.OrderBy(item => item.SortDateTime).ThenBy(item => item.Node.Detail.TaskName))
             {
                 var left = schedule.HasSchedule ? CalculateLeft(timelineStartDate, schedule.StartDateTime, dayWidth) : 0.0;
+                var scheduleWidth = schedule.HasSchedule
+                    ? CalculateWidth(schedule.StartDateTime, schedule.EndDateTime, dayWidth)
+                    : 0.0;
                 var width = schedule.HasSchedule
-                    ? Math.Max(dayWidth * 0.25, CalculateWidth(schedule.StartDateTime, schedule.EndDateTime, dayWidth))
+                    ? Math.Max(1.0, scheduleWidth)
                     : 0.0;
                 var task = new GanttTaskItemViewModel
                 {
@@ -48,7 +51,8 @@ namespace MainApplication.ViewModels.GanttChartModel
                     ErrorText = schedule.ErrorText,
                     RowTop = index * rowHeight,
                     BarLeft = left,
-                    BarWidth = width
+                    BarWidth = width,
+                    ScheduleBarWidth = scheduleWidth
                 };
 
                 if (schedule.HasSchedule)
@@ -175,6 +179,11 @@ namespace MainApplication.ViewModels.GanttChartModel
                 .Max();
 
             start = predecessorEnd ?? DateTime.Today;
+            if (node.Status == NodeViewModel.TaskStatus.Ready && start < DateTime.Now)
+            {
+                start = DateTime.Now;
+            }
+
             end = AddWorkMinutes(start.Value, estimateMinutes, ResolveAssignee(nodeEditor, detail.AssigneeMemberId), specialHolidays);
             return AddSchedule(node, schedules, visiting, start.Value, end.Value, isEndOnly);
         }

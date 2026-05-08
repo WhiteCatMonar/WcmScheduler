@@ -77,6 +77,11 @@ namespace MainApplication.ViewModels.GanttChartModel
         public required double BarWidth { get; init; }
 
         /// <summary>
+        /// 予定期間に対応する実時間幅
+        /// </summary>
+        public required double ScheduleBarWidth { get; init; }
+
+        /// <summary>
         /// 中断期間表示一覧
         /// </summary>
         public ObservableCollection<GanttSuspensionItemViewModel> Suspensions { get; } = [];

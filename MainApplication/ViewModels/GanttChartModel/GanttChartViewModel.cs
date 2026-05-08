@@ -503,7 +503,7 @@ namespace MainApplication.ViewModels.GanttChartModel
 
                 var source = taskByNode[fromTask];
                 var target = taskByNode[toTask];
-                var startX = source.BarLeft + source.BarWidth;
+                var startX = source.BarLeft + source.ScheduleBarWidth;
                 var startY = source.RowTop + (RowHeight / 2.0);
                 var endX = Math.Max(0.0, target.BarLeft);
                 var endY = target.RowTop + (RowHeight / 2.0);
