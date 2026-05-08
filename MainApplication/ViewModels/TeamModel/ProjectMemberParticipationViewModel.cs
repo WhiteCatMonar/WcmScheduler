@@ -1,4 +1,5 @@
-using MainApplication.ViewModels.Core;
+﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 
 namespace MainApplication.ViewModels.TeamModel

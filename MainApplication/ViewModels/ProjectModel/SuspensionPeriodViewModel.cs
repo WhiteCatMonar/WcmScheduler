@@ -1,4 +1,4 @@
-using MainApplication.ViewModels.Actions;
+﻿using MainApplication.ViewModels.Actions;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using System.ComponentModel;
@@ -11,7 +11,7 @@ namespace MainApplication.ViewModels.ProjectModel
     /// </summary>
     public class SuspensionPeriodViewModel : ViewModelBase
     {
-        private readonly NodeDetailViewModel _owner;
+        private readonly TaskDetailViewModel _owner;
         private readonly UndoRedoManager _undoRedo;
         private readonly IDateTimeEditorService _dateTimeEditor;
         private DateTime? _startDateTime;
@@ -24,7 +24,7 @@ namespace MainApplication.ViewModels.ProjectModel
         /// <param name="undoRedo">Undo/Redo管理。</param>
         /// <param name="dateTimeEditor">日時編集サービス。</param>
         public SuspensionPeriodViewModel(
-            NodeDetailViewModel owner,
+            TaskDetailViewModel owner,
             UndoRedoManager undoRedo,
             IDateTimeEditorService dateTimeEditor,
             DateTime? startDateTime = null,

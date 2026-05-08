@@ -1,4 +1,5 @@
-﻿using MainApplication.ViewModels.ProjectModel;
+﻿using MainApplication.ViewModels.DependencyEditorModel;
+using MainApplication.ViewModels.ProjectModel;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Xml.Linq;
@@ -173,7 +174,7 @@ namespace MainApplication.ViewModels.Core
         /// <summary>
         /// ノードの位置を表示領域内に収め、かつグリッドにスナップさせる
         /// </summary>
-        public Point ClampNodePosition(Point Position, NodeViewModel node)
+        public Point ClampNodePosition(Point Position, TaskNodeViewModel node)
         {
             /* ノード配置可能な位置はノードサイズの影響を受けるため、配置可能エリアを計算 */
             Point nodeAreaEnd = CanvasViewAreaEnd.Sub(node.Width, node.Height);

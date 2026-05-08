@@ -1,3 +1,4 @@
+﻿using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -35,9 +36,9 @@ namespace MainApplication.Views
 
             if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Z)
             {
-                if (project.NodeEditor.UndoCommand.CanExecute(null))
+                if (project.DependencyEditor.UndoCommand.CanExecute(null))
                 {
-                    project.NodeEditor.UndoCommand.Execute(null);
+                    project.DependencyEditor.UndoCommand.Execute(null);
                     e.Handled = true;
                 }
 
@@ -46,18 +47,18 @@ namespace MainApplication.Views
 
             if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.Y)
             {
-                if (project.NodeEditor.RedoCommand.CanExecute(null))
+                if (project.DependencyEditor.RedoCommand.CanExecute(null))
                 {
-                    project.NodeEditor.RedoCommand.Execute(null);
+                    project.DependencyEditor.RedoCommand.Execute(null);
                     e.Handled = true;
                 }
 
                 return;
             }
 
-            if (e.Key == Key.Delete && project.NodeEditor.Connections.DeleteSelectedConnectionCommand.CanExecute(null))
+            if (e.Key == Key.Delete && project.DependencyEditor.Connections.DeleteSelectedConnectionCommand.CanExecute(null))
             {
-                project.NodeEditor.Connections.DeleteSelectedConnectionCommand.Execute(null);
+                project.DependencyEditor.Connections.DeleteSelectedConnectionCommand.Execute(null);
                 e.Handled = true;
             }
         }

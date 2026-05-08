@@ -1,4 +1,4 @@
-using MainApplication.Infrastructure;
+﻿using MainApplication.Infrastructure;
 using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.SettingsModel;
@@ -637,7 +637,7 @@ namespace MainApplication.ViewModels
                     ..
                     TeamProjects.Projects.Select(project =>
                     {
-                        project.NodeEditor.SaveToTaskEditorDataModel(out var taskEditor);
+                        project.DependencyEditor.SaveToTaskEditorDataModel(out var taskEditor);
                         return new ProjectDataModel
                         {
                             ProjectId = project.ProjectId,

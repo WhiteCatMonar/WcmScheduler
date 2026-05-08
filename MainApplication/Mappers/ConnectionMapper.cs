@@ -1,4 +1,5 @@
 ﻿using MainApplication.Models.SaveData;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using System;
 
@@ -22,12 +23,12 @@ namespace MainApplication.Mappers
         /* ---------------------------------------------------------
          * DataModel → ViewModel
          * --------------------------------------------------------- */
-        public static ConnectionViewModel? ToViewModel(ConnectionDataModel data, NodeEditorViewModel editor)
+        public static ConnectionViewModel? ToViewModel(ConnectionDataModel data, DependencyEditorViewModel editor)
         {
             PortViewModel? from = null;
             PortViewModel? to = null;
 
-            foreach (NodeViewModel node in editor.Nodes.Nodes)
+            foreach (TaskNodeViewModel node in editor.Nodes.Nodes)
             {
                 foreach (PortViewModel port in node.AllPorts)
                 {

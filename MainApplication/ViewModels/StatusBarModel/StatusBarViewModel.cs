@@ -1,4 +1,5 @@
-using MainApplication.ViewModels.Core;
+﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -309,7 +310,7 @@ namespace MainApplication.ViewModels.StatusBarModel
                 return;
             }
 
-            var nodes = project.NodeEditor.Nodes.Nodes;
+            var nodes = project.DependencyEditor.Nodes.Nodes;
             var total = nodes.Count;
             if (total == 0)
             {
@@ -317,10 +318,10 @@ namespace MainApplication.ViewModels.StatusBarModel
                 return;
             }
 
-            var ready = nodes.Count(node => node.Status == NodeViewModel.TaskStatus.Ready);
-            var pending = nodes.Count(node => node.Status == NodeViewModel.TaskStatus.Pending);
-            var inProgress = nodes.Count(node => node.Status == NodeViewModel.TaskStatus.InProgress);
-            var done = nodes.Count(node => node.Status == NodeViewModel.TaskStatus.Done);
+            var ready = nodes.Count(node => node.Status == TaskNodeViewModel.TaskStatus.Ready);
+            var pending = nodes.Count(node => node.Status == TaskNodeViewModel.TaskStatus.Pending);
+            var inProgress = nodes.Count(node => node.Status == TaskNodeViewModel.TaskStatus.InProgress);
+            var done = nodes.Count(node => node.Status == TaskNodeViewModel.TaskStatus.Done);
             var progress = (int)Math.Round((double)done / total * 100.0);
             SetProjectProgressCounts(ready, pending, inProgress, done, total, progress);
         }

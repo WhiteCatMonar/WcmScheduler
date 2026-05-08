@@ -19,7 +19,7 @@
 │
 ├── 📂 Mappers
 │   ├── 📄 ConnectionMapper.cs                         # 接続線情報のViewModel⇔Model相互変換
-│   ├── 📄 NodeEditorMapper.cs                         # タスク編集機能(NodeEditor/TaskEditor)のViewModel⇔Model相互変換
+│   ├── 📄 DependencyEditorMapper.cs                   # 依存関係編集機能のViewModel⇔Model相互変換
 │   └── 📄 NodeMapper.cs                               # ノード情報のViewModel⇔Model相互変換
 │
 ├── 📂 Models
@@ -59,8 +59,8 @@
 │   │   └── 📄 MoveNodeAction.cs                       # Undo/Redoアクション：ノード移動
 │   │
 │   ├── 📂 Converters                                  # XAMLバインディング用コンバータ
-│   │   ├── 📄 BoolToVisibilityConverter.cs            # bool      → Visibility
-│   │   ├── 📄 DateTimeDisplayConverter.cs             # DateTime? → 表示文字列
+│   │   ├── 📄 BoolToVisibilityConverter.cs            # bool            → Visibility
+│   │   ├── 📄 DateTimeDisplayConverter.cs             # DateTime?       → 表示文字列
 │   │   └── 📄 DisplayNameConverter.cs                 # DisplayName属性 → 表示名
 │   │
 │   ├── 📂 Core                                        # 基盤ロジック(UI非依存)
@@ -74,26 +74,28 @@
 │   │   ├── 📄 UndoRedoManager.cs                      # Undo/Redo管理
 │   │   └── 📄 ViewModelBase.cs                        # ViewModelの基底クラス
 │   │
-│   ├── 📂 GanttChartModel                             # ガントチャート表示用ViewModel
+│   ├── 📂 ProjectModel                                # プロジェクト共通の状態管理
+│   │   ├── 📄 ProjectViewModel.cs                     # 1つのプロジェクト全体の管理
+│   │   ├── 📄 TaskDetailViewModel.cs                  # タスク詳細情報(編集可能プロパティ)
+│   │   ├── 📄 SuspensionPeriodRange.cs                # 中断期間の正規化済み範囲
+│   │   └── 📄 SuspensionPeriodViewModel.cs            # タスク中断期間の状態・編集ロジック
+│   │
+│   ├── 📂 DependencyEditorModel                       # 依存関係編集面のViewModel
+│   │   ├── 📄 DependencyEditorViewModel.cs            # 依存関係編集面全体の状態管理(ズーム・パン・Undo/Redo)
+│   │   ├── 📄 TaskNodeCollectionViewModel.cs          # タスクノード一覧管理(生成・削除・選択)
+│   │   ├── 📄 TaskNodeViewModel.cs                    # 依存関係編集面上のタスクノード
+│   │   ├── 📄 ConnectionCollectionViewModel.cs        # 接続線の一覧管理
+│   │   ├── 📄 ConnectionViewModel.cs                  # 接続線1本の状態
+│   │   ├── 📄 LineViewModel.cs                        # 線分の描画情報(接続線の補助)
+│   │   └── 📄 PortViewModel.cs                        # ポート(入出力端子)の状態
+│   │
+│   ├── 📂 GanttChartModel                             # プロジェクトスケジュール面のViewModel
 │   │   ├── 📄 GanttChartService.cs                    # 予定期間算定・表示用データ生成
 │   │   ├── 📄 GanttChartViewModel.cs                  # ガントチャート全体の状態管理
 │   │   ├── 📄 GanttDependencyLineViewModel.cs         # タスク依存関係線の描画情報
 │   │   ├── 📄 GanttSuspensionItemViewModel.cs         # 中断期間表示情報
 │   │   ├── 📄 GanttTaskItemViewModel.cs               # ガントチャート上のタスク1件の状態
 │   │   └── 📄 GanttTimelineDayViewModel.cs            # 時間軸の日付単位表示情報
-│   │
-│   ├── 📂 ProjectModel
-│   │   ├── 📄 ConnectionCollectionViewModel.cs        # 接続線の一覧管理
-│   │   ├── 📄 ConnectionViewModel.cs                  # 接続線1本の状態
-│   │   ├── 📄 LineViewModel.cs                        # 線分の描画情報(接続線の補助)
-│   │   ├── 📄 NodeCollectionViewModel.cs              # ノード一覧管理(生成・削除・選択)
-│   │   ├── 📄 NodeDetailViewModel.cs                  # ノードの詳細情報(編集可能プロパティ)
-│   │   ├── 📄 NodeEditorViewModel.cs                  # ノードエディタ全体の状態管理(ズーム・パン・Undo/Redo)
-│   │   ├── 📄 NodeViewModel.cs                        # ノード1個の状態・編集ロジック
-│   │   ├── 📄 PortViewModel.cs                        # ポート(入出力端子)の状態
-│   │   ├── 📄 ProjectViewModel.cs                     # 1つのプロジェクト全体の管理
-│   │   ├── 📄 SuspensionPeriodRange.cs                # 中断期間の正規化済み範囲
-│   │   └── 📄 SuspensionPeriodViewModel.cs            # タスク中断期間の状態・編集ロジック
 │   │
 │   ├── 📂 Service
 │   │   ├── 📄 ColorPickerService.cs                   # 色編集ダイアログを開くサービス(UI呼び出し)
@@ -128,37 +130,36 @@
 │   │   ├── 📄 ListBoxAutoScrollBehavior.cs            # ListBoxの自動スクロール
 │   │   └── 📄 ListBoxItemDoubleClickBehavior.cs       # ダブルクリック動作
 │   │
-│   ├── 📂 NodeEditorTab                               # ノードエディタUI一式
-│   │   ├── 📂 Controls
+│   ├── 📂 ProjectEditor                               # プロジェクト編集画面の共通UI
+│   │   ├── 📂 Sidebar
+│   │   │   ├── 📄 TaskDetailControl.xaml              # 選択タスク詳細(プロパティ編集)
+│   │   │   ├── 📄 TaskDetailControl.xaml.cs
+│   │   │   ├── 📄 TaskDetailTemplateSelector.cs       # 選択タスク詳細のテンプレート切り替え
+│   │   │   ├── 📄 HistoryControl.xaml                 # Undo/Redo履歴表示
+│   │   │   └── 📄 HistoryControl.xaml.cs
+│   │   ├── 📂 DependencyEditor
+│   │   │   ├── 📄 DependencyEditorView.xaml           # 依存関係編集面
+│   │   │   ├── 📄 DependencyEditorView.xaml.cs
+│   │   │   ├── 📄 TaskNodeCollectionControl.xaml      # タスクノード一覧管理
+│   │   │   ├── 📄 TaskNodeCollectionControl.xaml.cs
+│   │   │   ├── 📄 TaskNodeControl.xaml                # タスクノードの見た目
+│   │   │   ├── 📄 TaskNodeControl.xaml.cs
 │   │   │   ├── 📄 ConnectionCollectionControl.xaml    # 接続線一覧管理
 │   │   │   ├── 📄 ConnectionCollectionControl.xaml.cs
 │   │   │   ├── 📄 ConnectionControl.xaml              # 接続線の見た目
 │   │   │   ├── 📄 ConnectionControl.xaml.cs
 │   │   │   ├── 📄 GridControl.xaml                    # グリッド・原点軸の見た目
 │   │   │   ├── 📄 GridControl.xaml.cs
-│   │   │   ├── 📄 HistoryControl.xaml                 # Undo/Redo履歴表示
-│   │   │   ├── 📄 HistoryControl.xaml.cs
-│   │   │   ├── 📄 NodeCollectionControl.xaml          # ノード一覧管理
-│   │   │   ├── 📄 NodeCollectionControl.xaml.cs
-│   │   │   ├── 📄 NodeControl.xaml                    # ノードの見た目
-│   │   │   ├── 📄 NodeControl.xaml.cs
-│   │   │   ├── 📄 NodeDetailControl.xaml              # ノード詳細(プロパティ編集)
-│   │   │   ├── 📄 NodeDetailControl.xaml.cs
-│   │   │   ├── 📄 NodeEditorControl.xaml              # エディタ全体のUI
-│   │   │   ├── 📄 NodeEditorControl.xaml.cs
 │   │   │   ├── 📄 PortControl.xaml                    # ポートの見た目
 │   │   │   └── 📄 PortControl.xaml.cs
-│   │   ├── 📄 NodeDetailTemplateSelector.cs           # ノード詳細のテンプレート切り替え
-│   │   ├── 📄 NodeEditorTab.xaml                      # タブUI
-│   │   └── 📄 NodeEditorTab.xaml.cs
+│   │   └── 📂 GanttChart
+│   │       ├── 📄 GanttChartView.xaml                 # プロジェクトスケジュール面
+│   │       └── 📄 GanttChartView.xaml.cs
 │   │
-│   ├── 📄 BindingProxy.cs                             # XAMLのバインディング補助
 │   ├── 📄 ColorPickerWindow.xaml                      # 色編集ダイアログ(View)
-│   ├── 📄 ColorPickerWindow.xaml.cs                   # 色編集ダイアログのコードビハインド
+│   ├── 📄 ColorPickerWindow.xaml.cs
 │   ├── 📄 DateTimeEditorWindow.xaml                   # 日時編集ダイアログ(View)
-│   ├── 📄 DateTimeEditorWindow.xaml.cs                # 日時編集ダイアログのコードビハインド
-│   ├── 📄 GanttChartView.xaml                         # ガントチャートView
-│   ├── 📄 GanttChartView.xaml.cs                      # ガントチャートViewのコードビハインド
+│   ├── 📄 DateTimeEditorWindow.xaml.cs
 │   ├── 📄 ProjectView.xaml                            # プロジェクト単体情報
 │   ├── 📄 ProjectView.xaml.cs
 │   ├── 📄 TeamProjectsView.xaml                       # チーム内プロジェクト情報(複数のプロジェクトの管理用View)
@@ -166,14 +167,14 @@
 │   ├── 📄 TeamSettingsView.xaml                       # チーム設定View
 │   ├── 📄 TeamSettingsView.xaml.cs
 │   ├── 📄 ThemeSettingWindow.xaml                     # テーマ編集ウィンドウ(View)
-│   └── 📄 ThemeSettingWindow.xaml.cs                  # テーマ編集ウィンドウのコードビハインド
+│   └── 📄 ThemeSettingWindow.xaml.cs
 │
 ├── 📄 App.xaml                                        # アプリケーション定義
-├── 📄 App.xaml.cs                                     # アプリ起動ロジック
+├── 📄 App.xaml.cs
 ├── 📄 AssemblyInfo.cs                                 # アセンブリ情報
 ├── 📄 MainApplication.csproj                          # プロジェクトファイル
 ├── 📄 MainWindow.xaml                                 # メインウィンドウ
-└── 📄 MainWindow.xaml.cs                              # メインウィンドウのコードビハインド
+└── 📄 MainWindow.xaml.cs
 ```
 
 ## タスクエディタ仕様

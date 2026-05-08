@@ -1,4 +1,5 @@
 ﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using System.ComponentModel;
 using System.Reflection;
@@ -25,7 +26,7 @@ namespace MainApplication.ViewModels.Actions
          * フィールド
          * --------------------------------------------------------- */
 
-        private readonly NodeDetailViewModel _nodeDetail;
+        private readonly TaskDetailViewModel _nodeDetail;
         private readonly string _propertyName;
         private readonly object? _oldValue;
         private readonly object? _newValue;
@@ -42,7 +43,7 @@ namespace MainApplication.ViewModels.Actions
         /// <param name="propertyName">変更対象プロパティ名</param>
         /// <param name="oldValue">変更前の値</param>
         /// <param name="newValue">変更後の値</param>
-        public EditNodeDetailPropertyAction(NodeDetailViewModel nodeDetail, string propertyName, object? oldValue, object? newValue)
+        public EditNodeDetailPropertyAction(TaskDetailViewModel nodeDetail, string propertyName, object? oldValue, object? newValue)
         {
             _nodeDetail = nodeDetail;
             _propertyName = propertyName;

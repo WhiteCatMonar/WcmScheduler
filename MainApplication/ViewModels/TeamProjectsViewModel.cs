@@ -1,5 +1,6 @@
-using MainApplication.Models.SaveData;
+﻿using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using MainApplication.ViewModels.StatusBarModel;
 using MainApplication.ViewModels.TeamModel;
@@ -121,7 +122,7 @@ namespace MainApplication.ViewModels
                 {
                     ProjectId = projectData.ProjectId == Guid.Empty ? Guid.NewGuid() : projectData.ProjectId
                 };
-                project.NodeEditor.LoadFromTaskEditorDataModel(projectData.TaskEditor ?? new TaskEditorDataModel());
+                project.DependencyEditor.LoadFromTaskEditorDataModel(projectData.TaskEditor ?? new TaskEditorDataModel());
                 Projects.Add(project);
                 Tabs.Add(CreateProjectTab(project));
             }

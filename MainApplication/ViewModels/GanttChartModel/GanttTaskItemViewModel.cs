@@ -1,4 +1,5 @@
-using MainApplication.ViewModels.Core;
+﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using System.Collections.ObjectModel;
 
@@ -12,7 +13,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// 対象ノード
         /// </summary>
-        public required NodeViewModel Node { get; init; }
+        public required TaskNodeViewModel Node { get; init; }
 
         /// <summary>
         /// タスク名
@@ -44,7 +45,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// タスクステータス
         /// </summary>
-        public NodeViewModel.TaskStatus Status => Node.Status;
+        public TaskNodeViewModel.TaskStatus Status => Node.Status;
 
         /// <summary>
         /// タスク名を警告色で表示するか

@@ -1,4 +1,4 @@
-# タスクエディタ仕様
+﻿# タスクエディタ仕様
 
 このドキュメントは、WcmScheduler のタスクエディタ機能について、公開仕様として構成と依存関係を整理したものです。
 
@@ -56,7 +56,7 @@
 
 ## 命名方針
 
-現状の実装では、タスクをノードとして扱う都合から `NodeViewModel` などの名称を使用しています。
+現状の実装では、タスクをノードとして扱う都合から `TaskNodeViewModel` などの名称を使用しています。
 今後は、タスク本体と表示方法を分離する方向で名称を整理します。
 
 名称整理の方針は以下です。
@@ -89,12 +89,12 @@
 | `MainWindow` | アプリケーション全体のメインウィンドウ |
 | `TeamProjectsView` | チーム内プロジェクトのタブ表示 |
 | `ProjectView` | 1つのプロジェクト内の機能タブ表示 |
-| `NodeEditorTab` | タスク編集タブ全体 |
-| `NodeEditorControl` | ノードエディタキャンバス |
-| `NodeDetailControl` | 選択中ノードの詳細編集 |
+| `ProjectEditor` | タスク編集タブ全体 |
+| `DependencyEditorView` | ノードエディタキャンバス |
+| `TaskDetailControl` | 選択中ノードの詳細編集 |
 | `HistoryControl` | Undo/Redo履歴表示 |
-| `NodeCollectionControl` | ノード一覧表示 |
-| `NodeControl` | ノード1個の表示 |
+| `TaskNodeCollectionControl` | ノード一覧表示 |
+| `TaskNodeControl` | ノード1個の表示 |
 | `PortControl` | ポート表示と接続ドラッグ操作 |
 | `ConnectionCollectionControl` | 接続線一覧表示 |
 | `ConnectionControl` | 接続線1本の表示 |
@@ -109,10 +109,10 @@
 | `SchedulerViewModel` | アプリケーション全体の状態管理 |
 | `TeamProjectsViewModel` | チーム内プロジェクト一覧とタブ管理 |
 | `ProjectViewModel` | 1つのプロジェクト全体の管理 |
-| `NodeEditorViewModel` | タスクエディタ全体の状態管理 |
-| `NodeCollectionViewModel` | ノード一覧、追加、削除、選択、移動 |
-| `NodeViewModel` | ノード1個の状態とタスクステータス |
-| `NodeDetailViewModel` | タスク名、担当者、日時、作業見積時間、中断期間、コメントなどの詳細情報 |
+| `DependencyEditorViewModel` | タスクエディタ全体の状態管理 |
+| `TaskNodeCollectionViewModel` | ノード一覧、追加、削除、選択、移動 |
+| `TaskNodeViewModel` | ノード1個の状態とタスクステータス |
+| `TaskDetailViewModel` | タスク名、担当者、日時、作業見積時間、中断期間、コメントなどの詳細情報 |
 | `SuspensionPeriodViewModel` | タスク中断期間1件の状態と日時編集 |
 | `PortViewModel` | 入出力ポートの状態 |
 | `ConnectionCollectionViewModel` | 接続線一覧、作成、削除、選択 |
@@ -245,11 +245,11 @@
 
 ## ノード表示と移動制限
 
-ノードは `NodeControl` によって表示します。
+ノードは `TaskNodeControl` によって表示します。
 ノードの左端にはステータスバーを配置し、枠線色と合わせてタスクステータスを表現します。
 
 ノード移動は `NodeEditorCanvas` 座標系を基準に扱います。
-ドラッグ開始位置とドラッグ中の現在位置は同じ座標系で取得し、`NodeEditorViewModel` が論理座標へ変換して移動量を算出します。
+ドラッグ開始位置とドラッグ中の現在位置は同じ座標系で取得し、`DependencyEditorViewModel` が論理座標へ変換して移動量を算出します。
 
 移動後の位置は `GridManager` によって表示領域内へ制限します。
 位置制限では、ノードの実描画範囲を考慮したサイズを使用します。
@@ -288,19 +288,24 @@ views: Views {
   MainWindow
   TeamProjectsView
   ProjectView
-  NodeEditorTab
+  ProjectEditor
   DateTimeEditorWindow
   ThemeSettingWindow
   ColorPickerWindow
 
-  controls: "NodeEditorTab.Controls" {
+  sidebar: "ProjectEditor.Sidebar" {
+    grid-columns: 2
+    grid-gap: 12
+    TaskDetailControl
+    HistoryControl
+  }
+
+  dependency-editor: "ProjectEditor.DependencyEditor" {
     grid-columns: 3
     grid-gap: 12
-    NodeEditorControl
-    NodeDetailControl
-    HistoryControl
-    NodeCollectionControl
-    NodeControl
+    DependencyEditorView
+    TaskNodeCollectionControl
+    TaskNodeControl
     PortControl
     ConnectionCollectionControl
     ConnectionControl
@@ -316,7 +321,7 @@ viewmodels: ViewModels {
   SchedulerViewModel
   TeamProjectsViewModel
   ProjectViewModel
-  NodeEditorViewModel
+  DependencyEditorViewModel
 
   DateTimeEditorViewModel
   ThemeMenuItemViewModel
@@ -326,9 +331,9 @@ viewmodels: ViewModels {
 
   node: Node {
     grid-rows: 5
-    NodeCollectionViewModel
-    NodeViewModel
-    NodeDetailViewModel
+    TaskNodeCollectionViewModel
+    TaskNodeViewModel
+    TaskDetailViewModel
     SuspensionPeriodViewModel
     PortViewModel
   }
@@ -377,17 +382,17 @@ direction: down
 
 MainWindow -> TeamProjectsView
 TeamProjectsView -> ProjectView
-ProjectView -> NodeEditorTab
+ProjectView -> ProjectEditor
 
-NodeEditorTab -> NodeEditorControl
-NodeEditorTab -> NodeDetailControl
-NodeDetailControl -> HistoryControl
+ProjectEditor -> DependencyEditorView
+ProjectEditor -> TaskDetailControl
+TaskDetailControl -> HistoryControl
 
-NodeEditorControl -> NodeCollectionControl
-NodeCollectionControl -> NodeControl
-NodeControl -> PortControl
+DependencyEditorView -> TaskNodeCollectionControl
+TaskNodeCollectionControl -> TaskNodeControl
+TaskNodeControl -> PortControl
 
-NodeEditorControl -> ConnectionCollectionControl
+DependencyEditorView -> ConnectionCollectionControl
 ConnectionCollectionControl -> ConnectionControl
 ```
 
@@ -408,11 +413,11 @@ views: Views {
   MainWindow
   TeamProjectsView
   ProjectView
-  NodeEditorControl
-  NodeControl
+  DependencyEditorView
+  TaskNodeControl
   PortControl
   ConnectionControl
-  NodeDetailControl
+  TaskDetailControl
   HistoryControl
   DateTimeEditorWindow
   ThemeSettingWindow
@@ -429,9 +434,9 @@ targets: "ViewModels / Core" {
   ProjectViewModel
   Blank1:{style.opacity:0}
   Blank2:{style.opacity:0}
-  NodeEditorViewModel
+  DependencyEditorViewModel
   Blank3:{style.opacity:0}
-  NodeDetailViewModel
+  TaskDetailViewModel
   UndoRedoManager
   DateTimeEditorViewModel
   ThemeSettingViewModel
@@ -441,11 +446,11 @@ targets: "ViewModels / Core" {
 views.MainWindow -> targets.SchedulerViewModel
 views.TeamProjectsView -> targets.TeamProjectsViewModel
 views.ProjectView -> targets.ProjectViewModel
-views.NodeEditorControl -> targets.NodeEditorViewModel
-views.NodeControl -> targets.NodeEditorViewModel
-views.PortControl -> targets.NodeEditorViewModel
-views.ConnectionControl -> targets.NodeEditorViewModel
-views.NodeDetailControl -> targets.NodeDetailViewModel
+views.DependencyEditorView -> targets.DependencyEditorViewModel
+views.TaskNodeControl -> targets.DependencyEditorViewModel
+views.PortControl -> targets.DependencyEditorViewModel
+views.ConnectionControl -> targets.DependencyEditorViewModel
+views.TaskDetailControl -> targets.TaskDetailViewModel
 views.HistoryControl -> targets.UndoRedoManager
 views.DateTimeEditorWindow -> targets.DateTimeEditorViewModel
 views.ThemeSettingWindow -> targets.ThemeSettingViewModel
@@ -480,11 +485,11 @@ viewmodels: ViewModels {
   SchedulerViewModel
   TeamProjectsViewModel
   ProjectViewModel
-  NodeEditorViewModel
+  DependencyEditorViewModel
   Blank2_1:{style.opacity:0}
-  NodeCollectionViewModel
-  NodeViewModel
-  NodeDetailViewModel
+  TaskNodeCollectionViewModel
+  TaskNodeViewModel
+  TaskDetailViewModel
   Blank2_2:{style.opacity:0}
   Blank2_3:{style.opacity:0}
 
@@ -531,27 +536,27 @@ viewmodels.SchedulerViewModel -> viewmodels.TeamProjectsViewModel
 viewmodels.SchedulerViewModel -> core.TabInfo
 viewmodels.TeamProjectsViewModel -> viewmodels.ProjectViewModel
 viewmodels.TeamProjectsViewModel -> core.TabInfo
-viewmodels.ProjectViewModel -> viewmodels.NodeEditorViewModel
+viewmodels.ProjectViewModel -> viewmodels.DependencyEditorViewModel
 viewmodels.ProjectViewModel -> core.TabInfo
 
-viewmodels.NodeEditorViewModel -> viewmodels.NodeCollectionViewModel
-viewmodels.NodeEditorViewModel -> viewmodels.ConnectionCollectionViewModel
-viewmodels.NodeEditorViewModel -> core.GridManager
-viewmodels.NodeEditorViewModel -> core.UndoRedoManager
-viewmodels.NodeEditorViewModel -> core.IDateTimeEditorService
-viewmodels.NodeEditorViewModel -> core.DateTimeEditorService
+viewmodels.DependencyEditorViewModel -> viewmodels.TaskNodeCollectionViewModel
+viewmodels.DependencyEditorViewModel -> viewmodels.ConnectionCollectionViewModel
+viewmodels.DependencyEditorViewModel -> core.GridManager
+viewmodels.DependencyEditorViewModel -> core.UndoRedoManager
+viewmodels.DependencyEditorViewModel -> core.IDateTimeEditorService
+viewmodels.DependencyEditorViewModel -> core.DateTimeEditorService
 
-viewmodels.NodeCollectionViewModel -> viewmodels.NodeViewModel
-viewmodels.NodeCollectionViewModel -> core.UndoRedoManager
-viewmodels.NodeCollectionViewModel -> core.IDateTimeEditorService
-viewmodels.NodeViewModel -> viewmodels.NodeDetailViewModel
-viewmodels.NodeViewModel -> viewmodels.PortViewModel
-viewmodels.NodeViewModel -> core.IDateTimeEditorService
-viewmodels.NodeDetailViewModel -> viewmodels.SuspensionPeriodViewModel
-viewmodels.NodeDetailViewModel -> core.EditableField
-viewmodels.NodeDetailViewModel -> core.IEditableField
-viewmodels.NodeDetailViewModel -> core.UndoRedoManager
-viewmodels.NodeDetailViewModel -> core.IDateTimeEditorService
+viewmodels.TaskNodeCollectionViewModel -> viewmodels.TaskNodeViewModel
+viewmodels.TaskNodeCollectionViewModel -> core.UndoRedoManager
+viewmodels.TaskNodeCollectionViewModel -> core.IDateTimeEditorService
+viewmodels.TaskNodeViewModel -> viewmodels.TaskDetailViewModel
+viewmodels.TaskNodeViewModel -> viewmodels.PortViewModel
+viewmodels.TaskNodeViewModel -> core.IDateTimeEditorService
+viewmodels.TaskDetailViewModel -> viewmodels.SuspensionPeriodViewModel
+viewmodels.TaskDetailViewModel -> core.EditableField
+viewmodels.TaskDetailViewModel -> core.IEditableField
+viewmodels.TaskDetailViewModel -> core.UndoRedoManager
+viewmodels.TaskDetailViewModel -> core.IDateTimeEditorService
 viewmodels.SuspensionPeriodViewModel -> core.UndoRedoManager
 viewmodels.SuspensionPeriodViewModel -> core.IDateTimeEditorService
 
@@ -655,7 +660,7 @@ core.AppSettingsManager -> core.AppSettingsModel
 
 ## 補足
 
-ViewはUIイベントを受け取り、できるだけ `NodeEditorViewModel` へ処理を委譲します。
+ViewはUIイベントを受け取り、できるだけ `DependencyEditorViewModel` へ処理を委譲します。
 ノードや接続線の座標は論理座標で管理し、表示時にズームとパンを反映します。
 
 Undo/Redo対象の操作は `IUndoableAction` として表現します。

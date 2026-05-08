@@ -1,4 +1,5 @@
 ﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using System.Windows;
 
@@ -24,7 +25,7 @@ namespace MainApplication.ViewModels.Actions
          * フィールド
          * --------------------------------------------------------- */
 
-        private readonly NodeViewModel _node;
+        private readonly TaskNodeViewModel _node;
         private readonly Point _oldPosition;
         private readonly Point _newPosition;
 
@@ -38,7 +39,7 @@ namespace MainApplication.ViewModels.Actions
         /// <param name="node">対象ノード</param>
         /// <param name="oldPosition">移動前の座標</param>
         /// <param name="newPosition">移動後の座標</param>
-        public MoveNodeAction(NodeViewModel node, Point oldPosition, Point newPosition)
+        public MoveNodeAction(TaskNodeViewModel node, Point oldPosition, Point newPosition)
         {
             _node = node;
             _oldPosition = oldPosition;

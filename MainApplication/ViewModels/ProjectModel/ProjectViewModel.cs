@@ -1,4 +1,5 @@
-using MainApplication.ViewModels.Core;
+﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.GanttChartModel;
 using MainApplication.ViewModels.StatusBarModel;
 using MainApplication.ViewModels.TeamModel;
@@ -29,9 +30,9 @@ namespace MainApplication.ViewModels.ProjectModel
         public Guid ProjectId { get; set; } = Guid.NewGuid();
 
         /// <summary>
-        /// ノードエディタViewModel
+        /// 依存関係編集ViewModel
         /// </summary>
-        public NodeEditorViewModel NodeEditor { get; }
+        public DependencyEditorViewModel DependencyEditor { get; }
 
         /// <summary>
         /// プロジェクトスケジュール用ガントチャートViewModel
@@ -52,7 +53,7 @@ namespace MainApplication.ViewModels.ProjectModel
             set => SetProperty(
                 ref _selectedTab,
                 value,
-                [nameof(IsNodeEditor)],
+                [nameof(IsDependencyEditor)],
                 CreateHooksFromValue(
                     value,
                     post: (oldValue, newValue) =>
@@ -67,9 +68,9 @@ namespace MainApplication.ViewModels.ProjectModel
         }
 
         /// <summary>
-        /// 現在のタブがNodeEditorかどうか
+        /// 現在のタブが依存関係編集かどうか
         /// </summary>
-        public bool IsNodeEditor => SelectedTab?.Content == NodeEditor;
+        public bool IsDependencyEditor => SelectedTab?.Content == DependencyEditor;
 
         /// <summary>
         /// ProjectViewModelを生成し、子ViewModelやサービスを初期化する
@@ -85,23 +86,23 @@ namespace MainApplication.ViewModels.ProjectModel
         )
         {
             ProjectName = name;
-            NodeEditor = new NodeEditorViewModel();
+            DependencyEditor = new DependencyEditorViewModel();
             if (members != null)
             {
-                NodeEditor.SetTeamMembers(members);
+                DependencyEditor.SetTeamMembers(members);
             }
 
-            GanttChart = new GanttChartViewModel(NodeEditor, specialHolidays, statusBar);
+            GanttChart = new GanttChartViewModel(DependencyEditor, specialHolidays, statusBar);
 
-            var nodeEditorTab = new TabInfo("タスク編集", NodeEditor);
+            var dependencyEditorTab = new TabInfo("タスク編集", DependencyEditor);
             var ganttChartTab = new TabInfo("プロジェクトスケジュール", GanttChart);
             Tabs =
             [
-                nodeEditorTab,
+                dependencyEditorTab,
                 ganttChartTab
             ];
 
-            SelectedTab = nodeEditorTab;
+            SelectedTab = dependencyEditorTab;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using System.Collections.ObjectModel;
 
@@ -24,8 +25,8 @@ namespace MainApplication.ViewModels.Actions
          * フィールド
          * --------------------------------------------------------- */
 
-        private readonly ObservableCollection<NodeViewModel> _nodes;
-        private readonly NodeViewModel _node;
+        private readonly ObservableCollection<TaskNodeViewModel> _nodes;
+        private readonly TaskNodeViewModel _node;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -34,7 +35,7 @@ namespace MainApplication.ViewModels.Actions
         /// <summary>
         /// ノード追加アクションを生成する
         /// </summary>
-        public AddNodeAction(ObservableCollection<NodeViewModel> nodes, NodeViewModel node)
+        public AddNodeAction(ObservableCollection<TaskNodeViewModel> nodes, TaskNodeViewModel node)
         {
             _nodes = nodes;
             _node = node;

@@ -1,4 +1,5 @@
-using MainApplication.ViewModels.Core;
+﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using MainApplication.ViewModels.StatusBarModel;
 using System.Collections.ObjectModel;
@@ -17,7 +18,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         private const double DefaultDayWidth = 72.0;
         private const double DefaultRowHeight = 48.0;
         private const int DefaultVisibleDays = 14;
-        private readonly NodeEditorViewModel _nodeEditor;
+        private readonly DependencyEditorViewModel _dependencyEditor;
         private readonly ObservableCollection<DateOnly> _specialHolidays;
         private readonly StatusBarViewModel? _statusBar;
         private readonly GanttChartService _service = new();
@@ -35,24 +36,24 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// ガントチャートViewModelを生成する
         /// </summary>
-        /// <param name="nodeEditor">対象ノードエディタ</param>
+        /// <param name="dependencyEditor">対象依存関係編集</param>
         /// <param name="specialHolidays">特別休日一覧</param>
         public GanttChartViewModel(
-            NodeEditorViewModel nodeEditor,
+            DependencyEditorViewModel dependencyEditor,
             ObservableCollection<DateOnly>? specialHolidays = null,
             StatusBarViewModel? statusBar = null
         )
         {
-            _nodeEditor = nodeEditor;
+            _dependencyEditor = dependencyEditor;
             _specialHolidays = specialHolidays ?? [];
             _statusBar = statusBar;
             _dispatcher = Dispatcher.CurrentDispatcher;
-            _nodeEditor.Nodes.PropertyChanged += NodeCollection_PropertyChanged;
-            _nodeEditor.CurrentHistoryChanged += NodeEditor_CurrentHistoryChanged;
-            _nodeEditor.Nodes.Nodes.CollectionChanged += Nodes_CollectionChanged;
-            _nodeEditor.Connections.Connections.CollectionChanged += Connections_CollectionChanged;
+            _dependencyEditor.Nodes.PropertyChanged += NodeCollection_PropertyChanged;
+            _dependencyEditor.CurrentHistoryChanged += DependencyEditor_CurrentHistoryChanged;
+            _dependencyEditor.Nodes.Nodes.CollectionChanged += Nodes_CollectionChanged;
+            _dependencyEditor.Connections.Connections.CollectionChanged += Connections_CollectionChanged;
             _specialHolidays.CollectionChanged += SpecialHolidays_CollectionChanged;
-            foreach (var node in _nodeEditor.Nodes.Nodes)
+            foreach (var node in _dependencyEditor.Nodes.Nodes)
             {
                 SubscribeNode(node);
             }
@@ -180,12 +181,12 @@ namespace MainApplication.ViewModels.GanttChartModel
             _isRefreshing = true;
             try
             {
-                _nodeEditor.RefreshTaskStatuses();
+                _dependencyEditor.RefreshTaskStatuses();
 
                 var startDate = GetTimelineStartDate();
                 TimelineStartDate = startDate;
 
-                var tasks = _service.CreateProjectTasks(_nodeEditor, startDate, DayWidth, RowHeight, _specialHolidays);
+                var tasks = _service.CreateProjectTasks(_dependencyEditor, startDate, DayWidth, RowHeight, _specialHolidays);
                 var endDate = GetTimelineEndDate(tasks, startDate);
                 _timelineEndDate = endDate;
                 RebuildTimeline(startDate, endDate);
@@ -250,7 +251,7 @@ namespace MainApplication.ViewModels.GanttChartModel
                 return;
             }
 
-            _nodeEditor.Nodes.SelectNode(task.Node);
+            _dependencyEditor.Nodes.SelectNode(task.Node);
         }
 
         /// <summary>
@@ -260,7 +261,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <param name="e">プロパティ変更情報</param>
         private void NodeCollection_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName != nameof(NodeCollectionViewModel.SelectedNode))
+            if (e.PropertyName != nameof(TaskNodeCollectionViewModel.SelectedNode))
             {
                 return;
             }
@@ -306,7 +307,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         {
             if (e.OldItems != null)
             {
-                foreach (NodeViewModel node in e.OldItems)
+                foreach (TaskNodeViewModel node in e.OldItems)
                 {
                     UnsubscribeNode(node);
                 }
@@ -314,7 +315,7 @@ namespace MainApplication.ViewModels.GanttChartModel
 
             if (e.NewItems != null)
             {
-                foreach (NodeViewModel node in e.NewItems)
+                foreach (TaskNodeViewModel node in e.NewItems)
                 {
                     SubscribeNode(node);
                 }
@@ -342,7 +343,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// ノード変更監視を開始する
         /// </summary>
-        private void SubscribeNode(NodeViewModel node)
+        private void SubscribeNode(TaskNodeViewModel node)
         {
             node.PropertyChanged += Node_PropertyChanged;
             node.Detail.PropertyChanged += NodeDetail_PropertyChanged;
@@ -351,7 +352,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// ノード変更監視を解除する
         /// </summary>
-        private void UnsubscribeNode(NodeViewModel node)
+        private void UnsubscribeNode(TaskNodeViewModel node)
         {
             node.PropertyChanged -= Node_PropertyChanged;
             node.Detail.PropertyChanged -= NodeDetail_PropertyChanged;
@@ -362,7 +363,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// </summary>
         private void Node_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is NodeViewModel node && e.PropertyName == nameof(NodeViewModel.Status))
+            if (sender is TaskNodeViewModel node && e.PropertyName == nameof(TaskNodeViewModel.Status))
             {
                 RefreshTaskDisplayForNode(node);
             }
@@ -373,7 +374,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// </summary>
         private void NodeDetail_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (sender is NodeDetailViewModel detail && e.PropertyName == nameof(NodeDetailViewModel.TaskName))
+            if (sender is TaskDetailViewModel detail && e.PropertyName == nameof(TaskDetailViewModel.TaskName))
             {
                 RefreshTaskDisplayForDetail(detail);
             }
@@ -382,7 +383,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// 編集履歴確定時にガントチャートを更新する
         /// </summary>
-        private void NodeEditor_CurrentHistoryChanged(object? sender, UndoRedoManager.HistoryItem? e)
+        private void DependencyEditor_CurrentHistoryChanged(object? sender, UndoRedoManager.HistoryItem? e)
         {
             RequestRefresh();
         }
@@ -391,7 +392,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 指定ノードに対応するタスク行の表示状態を更新する
         /// </summary>
         /// <param name="node">更新対象ノード</param>
-        private void RefreshTaskDisplayForNode(NodeViewModel node)
+        private void RefreshTaskDisplayForNode(TaskNodeViewModel node)
         {
             foreach (var task in Tasks.Where(task => ReferenceEquals(task.Node, node)))
             {
@@ -403,7 +404,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 指定タスク詳細に対応するタスク行の表示状態を更新する
         /// </summary>
         /// <param name="detail">更新対象タスク詳細</param>
-        private void RefreshTaskDisplayForDetail(NodeDetailViewModel detail)
+        private void RefreshTaskDisplayForDetail(TaskDetailViewModel detail)
         {
             foreach (var task in Tasks.Where(task => ReferenceEquals(task.Node.Detail, detail)))
             {
@@ -417,7 +418,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <returns>表示開始日</returns>
         private DateOnly GetTimelineStartDate()
         {
-            var dates = _nodeEditor.Nodes.Nodes
+            var dates = _dependencyEditor.Nodes.Nodes
                 .SelectMany(node => new[]
                 {
                     node.Detail.StartDateTime,
@@ -492,7 +493,7 @@ namespace MainApplication.ViewModels.GanttChartModel
                 .Where(task => task.HasSchedule)
                 .ToDictionary(task => task.Node);
 
-            foreach (var connection in _nodeEditor.Connections.Connections)
+            foreach (var connection in _dependencyEditor.Connections.Connections)
             {
                 var fromTask = taskByNode.Keys.FirstOrDefault(node => node.OutputPorts.Contains(connection.FromPort));
                 var toTask = taskByNode.Keys.FirstOrDefault(node => node.InputPorts.Contains(connection.ToPort));

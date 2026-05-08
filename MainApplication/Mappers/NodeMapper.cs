@@ -1,7 +1,8 @@
-using MainApplication.Models.SaveData;
+﻿using MainApplication.Models.SaveData;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using System.Windows;
-using static MainApplication.ViewModels.ProjectModel.PortViewModel;
+using static MainApplication.ViewModels.DependencyEditorModel.PortViewModel;
 
 namespace MainApplication.Mappers
 {
@@ -10,7 +11,7 @@ namespace MainApplication.Mappers
         /* ---------------------------------------------------------
          * ViewModel → DataModel
          * --------------------------------------------------------- */
-        public static NodeDataModel ToDataModel(NodeViewModel vm)
+        public static NodeDataModel ToDataModel(TaskNodeViewModel vm)
         {
             return new NodeDataModel
             {
@@ -59,9 +60,9 @@ namespace MainApplication.Mappers
         /* ---------------------------------------------------------
          * DataModel → ViewModel
          * --------------------------------------------------------- */
-        public static NodeViewModel ToViewModel(NodeDataModel data, NodeEditorViewModel editor)
+        public static TaskNodeViewModel ToViewModel(NodeDataModel data, DependencyEditorViewModel editor)
         {
-            NodeViewModel loadedNode = new(editor.UndoRedo, editor.DateTimeEditor)
+            TaskNodeViewModel loadedNode = new(editor.UndoRedo, editor.DateTimeEditor)
             {
                 NodeGuid = Guid.Parse(data.Id),
                 NodeType = data.Type,

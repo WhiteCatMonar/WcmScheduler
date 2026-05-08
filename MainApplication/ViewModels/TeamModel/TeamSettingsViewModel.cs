@@ -1,6 +1,7 @@
-using MainApplication.Models.SaveData;
+﻿using MainApplication.Models.SaveData;
 using MainApplication.Views;
 using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -629,7 +630,7 @@ namespace MainApplication.ViewModels.TeamModel
         private bool IsMemberReferenced(Guid memberId)
         {
             return _teamProjects.Projects
-                .SelectMany(project => project.NodeEditor.Nodes.Nodes)
+                .SelectMany(project => project.DependencyEditor.Nodes.Nodes)
                 .Any(node =>
                     node.Detail.AssigneeMemberId == memberId ||
                     node.Detail.CollaboratorMemberIds.Contains(memberId)

@@ -1,3 +1,4 @@
+﻿using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using MainApplication.ViewModels.TeamModel;
 
@@ -11,14 +12,14 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// プロジェクト内ノードから表示可能なガントタスクを生成する
         /// </summary>
-        /// <param name="nodeEditor">対象ノードエディタ</param>
+        /// <param name="dependencyEditor">対象依存関係編集</param>
         /// <param name="timelineStartDate">表示開始日</param>
         /// <param name="dayWidth">1日分の表示幅</param>
         /// <param name="rowHeight">1行分の表示高さ</param>
         /// <param name="specialHolidays">特別休日一覧</param>
         /// <returns>ガントタスク一覧</returns>
         public List<GanttTaskItemViewModel> CreateProjectTasks(
-            NodeEditorViewModel nodeEditor,
+            DependencyEditorViewModel dependencyEditor,
             DateOnly timelineStartDate,
             double dayWidth,
             double rowHeight,
@@ -26,7 +27,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         )
         {
             var holidays = specialHolidays.ToHashSet();
-            var schedules = CalculateSchedules(nodeEditor, holidays);
+            var schedules = CalculateSchedules(dependencyEditor, holidays);
             var result = new List<GanttTaskItemViewModel>();
             var index = 0;
 
@@ -42,8 +43,8 @@ namespace MainApplication.ViewModels.GanttChartModel
                 var task = new GanttTaskItemViewModel
                 {
                     Node = schedule.Node,
-                    AssigneeName = ResolveAssigneeName(nodeEditor, schedule.Node.Detail.AssigneeMemberId),
-                    AssigneeInitials = ResolveAssigneeInitials(nodeEditor, schedule.Node.Detail.AssigneeMemberId),
+                    AssigneeName = ResolveAssigneeName(dependencyEditor, schedule.Node.Detail.AssigneeMemberId),
+                    AssigneeInitials = ResolveAssigneeInitials(dependencyEditor, schedule.Node.Detail.AssigneeMemberId),
                     StartDateTime = schedule.StartDateTime,
                     EndDateTime = schedule.EndDateTime,
                     HasWarning = schedule.HasWarning,
@@ -83,20 +84,20 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// ノード一覧から算定済み予定を生成する
         /// </summary>
-        /// <param name="nodeEditor">対象ノードエディタ</param>
+        /// <param name="dependencyEditor">対象依存関係編集</param>
         /// <param name="specialHolidays">特別休日一覧</param>
         /// <returns>算定済み予定一覧</returns>
         private static List<GanttTaskSchedule> CalculateSchedules(
-            NodeEditorViewModel nodeEditor,
+            DependencyEditorViewModel dependencyEditor,
             IReadOnlySet<DateOnly> specialHolidays
         )
         {
-            var schedules = new Dictionary<NodeViewModel, GanttTaskSchedule>();
-            var nodes = nodeEditor.Nodes.Nodes.ToList();
+            var schedules = new Dictionary<TaskNodeViewModel, GanttTaskSchedule>();
+            var nodes = dependencyEditor.Nodes.Nodes.ToList();
 
             foreach (var node in nodes)
             {
-                CalculateSchedule(node, nodeEditor, schedules, [], specialHolidays);
+                CalculateSchedule(node, dependencyEditor, schedules, [], specialHolidays);
             }
 
             foreach (var node in nodes.Where(node => !schedules.ContainsKey(node)))
@@ -115,16 +116,16 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 指定ノードの予定期間を算定する
         /// </summary>
         /// <param name="node">対象ノード</param>
-        /// <param name="nodeEditor">対象ノードエディタ</param>
+        /// <param name="dependencyEditor">対象依存関係編集</param>
         /// <param name="schedules">算定済み予定</param>
         /// <param name="visiting">循環検出用ノード集合</param>
         /// <param name="specialHolidays">特別休日一覧</param>
         /// <returns>算定済み予定</returns>
         private static GanttTaskSchedule? CalculateSchedule(
-            NodeViewModel node,
-            NodeEditorViewModel nodeEditor,
-            Dictionary<NodeViewModel, GanttTaskSchedule> schedules,
-            HashSet<NodeViewModel> visiting,
+            TaskNodeViewModel node,
+            DependencyEditorViewModel dependencyEditor,
+            Dictionary<TaskNodeViewModel, GanttTaskSchedule> schedules,
+            HashSet<TaskNodeViewModel> visiting,
             IReadOnlySet<DateOnly> specialHolidays
         )
         {
@@ -162,29 +163,29 @@ namespace MainApplication.ViewModels.GanttChartModel
 
             if (start != null)
             {
-                end = AddWorkMinutes(start.Value, estimateMinutes, ResolveAssignee(nodeEditor, detail.AssigneeMemberId), specialHolidays);
+                end = AddWorkMinutes(start.Value, estimateMinutes, ResolveAssignee(dependencyEditor, detail.AssigneeMemberId), specialHolidays);
                 return AddSchedule(node, schedules, visiting, start.Value, end.Value, isEndOnly);
             }
 
             if (end != null)
             {
-                start = SubtractWorkMinutes(end.Value, estimateMinutes, ResolveAssignee(nodeEditor, detail.AssigneeMemberId), specialHolidays);
+                start = SubtractWorkMinutes(end.Value, estimateMinutes, ResolveAssignee(dependencyEditor, detail.AssigneeMemberId), specialHolidays);
                 return AddSchedule(node, schedules, visiting, start.Value, end.Value, isEndOnly);
             }
 
-            var predecessorEnd = GetPredecessors(node, nodeEditor)
-                .Select(predecessor => CalculateSchedule(predecessor, nodeEditor, schedules, visiting, specialHolidays)?.EndDateTime)
+            var predecessorEnd = GetPredecessors(node, dependencyEditor)
+                .Select(predecessor => CalculateSchedule(predecessor, dependencyEditor, schedules, visiting, specialHolidays)?.EndDateTime)
                 .Where(value => value != null)
                 .DefaultIfEmpty(DateTime.Today)
                 .Max();
 
             start = predecessorEnd ?? DateTime.Today;
-            if (node.Status == NodeViewModel.TaskStatus.Ready && start < DateTime.Now)
+            if (node.Status == TaskNodeViewModel.TaskStatus.Ready && start < DateTime.Now)
             {
                 start = DateTime.Now;
             }
 
-            end = AddWorkMinutes(start.Value, estimateMinutes, ResolveAssignee(nodeEditor, detail.AssigneeMemberId), specialHolidays);
+            end = AddWorkMinutes(start.Value, estimateMinutes, ResolveAssignee(dependencyEditor, detail.AssigneeMemberId), specialHolidays);
             return AddSchedule(node, schedules, visiting, start.Value, end.Value, isEndOnly);
         }
 
@@ -199,9 +200,9 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <param name="isEndOnly">終了日時のみ設定されているか</param>
         /// <returns>追加した予定</returns>
         private static GanttTaskSchedule AddSchedule(
-            NodeViewModel node,
-            Dictionary<NodeViewModel, GanttTaskSchedule> schedules,
-            HashSet<NodeViewModel> visiting,
+            TaskNodeViewModel node,
+            Dictionary<TaskNodeViewModel, GanttTaskSchedule> schedules,
+            HashSet<TaskNodeViewModel> visiting,
             DateTime start,
             DateTime end,
             bool isEndOnly
@@ -218,16 +219,16 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 前段タスク一覧を取得する
         /// </summary>
         /// <param name="node">対象ノード</param>
-        /// <param name="nodeEditor">対象ノードエディタ</param>
+        /// <param name="dependencyEditor">対象依存関係編集</param>
         /// <returns>前段ノード一覧</returns>
-        private static IEnumerable<NodeViewModel> GetPredecessors(NodeViewModel node, NodeEditorViewModel nodeEditor)
+        private static IEnumerable<TaskNodeViewModel> GetPredecessors(TaskNodeViewModel node, DependencyEditorViewModel dependencyEditor)
         {
             var inputPortIds = node.InputPorts.Select(port => port.PortGuid).ToHashSet();
-            foreach (var connection in nodeEditor.Connections.Connections)
+            foreach (var connection in dependencyEditor.Connections.Connections)
             {
                 if (inputPortIds.Contains(connection.ToPort.PortGuid))
                 {
-                    var predecessor = nodeEditor.Nodes.Nodes.FirstOrDefault(item => item.OutputPorts.Contains(connection.FromPort));
+                    var predecessor = dependencyEditor.Nodes.Nodes.FirstOrDefault(item => item.OutputPorts.Contains(connection.FromPort));
                     if (predecessor != null)
                     {
                         yield return predecessor;
@@ -373,39 +374,39 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// 担当者を解決する
         /// </summary>
-        /// <param name="nodeEditor">対象ノードエディタ</param>
+        /// <param name="dependencyEditor">対象依存関係編集</param>
         /// <param name="memberId">担当者ID</param>
         /// <returns>担当者</returns>
-        private static TeamMemberViewModel? ResolveAssignee(NodeEditorViewModel nodeEditor, Guid? memberId)
+        private static TeamMemberViewModel? ResolveAssignee(DependencyEditorViewModel dependencyEditor, Guid? memberId)
         {
-            if (memberId == null || nodeEditor.TeamMembers == null)
+            if (memberId == null || dependencyEditor.TeamMembers == null)
             {
                 return null;
             }
 
-            return nodeEditor.TeamMembers.FirstOrDefault(member => member.MemberId == memberId.Value);
+            return dependencyEditor.TeamMembers.FirstOrDefault(member => member.MemberId == memberId.Value);
         }
 
         /// <summary>
         /// 担当者名を解決する
         /// </summary>
-        /// <param name="nodeEditor">対象ノードエディタ</param>
+        /// <param name="dependencyEditor">対象依存関係編集</param>
         /// <param name="memberId">担当者ID</param>
         /// <returns>担当者名</returns>
-        private static string ResolveAssigneeName(NodeEditorViewModel nodeEditor, Guid? memberId)
+        private static string ResolveAssigneeName(DependencyEditorViewModel dependencyEditor, Guid? memberId)
         {
-            return ResolveAssignee(nodeEditor, memberId)?.DisplayText ?? "(未担当)";
+            return ResolveAssignee(dependencyEditor, memberId)?.DisplayText ?? "(未担当)";
         }
 
         /// <summary>
         /// 担当者イニシャルを解決する
         /// </summary>
-        /// <param name="nodeEditor">対象ノードエディタ</param>
+        /// <param name="dependencyEditor">対象依存関係編集</param>
         /// <param name="memberId">担当者ID</param>
         /// <returns>担当者イニシャル</returns>
-        private static string ResolveAssigneeInitials(NodeEditorViewModel nodeEditor, Guid? memberId)
+        private static string ResolveAssigneeInitials(DependencyEditorViewModel dependencyEditor, Guid? memberId)
         {
-            return ResolveAssignee(nodeEditor, memberId)?.Initials ?? "";
+            return ResolveAssignee(dependencyEditor, memberId)?.Initials ?? "";
         }
 
         /// <summary>
@@ -437,7 +438,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 内部算定済み予定
         /// </summary>
         private sealed record GanttTaskSchedule(
-            NodeViewModel Node,
+            TaskNodeViewModel Node,
             DateTime StartDateTime,
             DateTime EndDateTime,
             bool HasSchedule,
@@ -458,7 +459,7 @@ namespace MainApplication.ViewModels.GanttChartModel
             /// <param name="end">終了日時</param>
             /// <param name="isEndOnly">終了日時のみ設定されているか</param>
             /// <returns>算定結果</returns>
-            public static GanttTaskSchedule CreateSchedule(NodeViewModel node, DateTime start, DateTime end, bool isEndOnly)
+            public static GanttTaskSchedule CreateSchedule(TaskNodeViewModel node, DateTime start, DateTime end, bool isEndOnly)
             {
                 return new GanttTaskSchedule(
                     node,
@@ -477,7 +478,7 @@ namespace MainApplication.ViewModels.GanttChartModel
             /// <param name="baseDateTime">基準日時</param>
             /// <param name="errorText">エラー表示文字列</param>
             /// <returns>算定結果</returns>
-            public static GanttTaskSchedule CreateError(NodeViewModel node, DateTime baseDateTime, string errorText)
+            public static GanttTaskSchedule CreateError(TaskNodeViewModel node, DateTime baseDateTime, string errorText)
             {
                 return new GanttTaskSchedule(
                     node,
