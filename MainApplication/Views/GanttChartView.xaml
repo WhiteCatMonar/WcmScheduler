@@ -202,6 +202,30 @@
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Top"
                                     ClipToBounds="True">
+                                <ItemsControl ItemsSource="{Binding TimelineDays}"
+                                              Panel.ZIndex="0">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <Canvas/>
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemContainerStyle>
+                                        <Style TargetType="ContentPresenter">
+                                            <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                                        </Style>
+                                    </ItemsControl.ItemContainerStyle>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate DataType="{x:Type gantt:GanttTimelineDayViewModel}">
+                                            <Border Width="{Binding Width}"
+                                                    Height="{Binding DataContext.ChartHeight, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    BorderBrush="{DynamicResource GanttGridLineBrush}"
+                                                    BorderThickness="0,0,1,0"
+                                                    Style="{StaticResource GanttDayCellStyle}"
+                                                    Opacity="0.35"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
                                 <ItemsControl ItemsSource="{Binding Tasks}"
                                               Panel.ZIndex="1">
                                     <ItemsControl.ItemsPanel>
@@ -218,28 +242,11 @@
                                         <DataTemplate DataType="{x:Type gantt:GanttTaskItemViewModel}">
                                             <Canvas Width="{Binding DataContext.ChartWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     Height="48">
-                                                <ItemsControl ItemsSource="{Binding DataContext.TimelineDays, RelativeSource={RelativeSource AncestorType=UserControl}}">
-                                                    <ItemsControl.ItemsPanel>
-                                                        <ItemsPanelTemplate>
-                                                            <Canvas/>
-                                                        </ItemsPanelTemplate>
-                                                    </ItemsControl.ItemsPanel>
-                                                    <ItemsControl.ItemContainerStyle>
-                                                        <Style TargetType="ContentPresenter">
-                                                            <Setter Property="Canvas.Left" Value="{Binding Left}"/>
-                                                        </Style>
-                                                    </ItemsControl.ItemContainerStyle>
-                                                    <ItemsControl.ItemTemplate>
-                                                        <DataTemplate DataType="{x:Type gantt:GanttTimelineDayViewModel}">
-                                                            <Border Width="{Binding Width}"
-                                                                    Height="48"
-                                                                    BorderBrush="{DynamicResource GanttGridLineBrush}"
-                                                                    BorderThickness="0,0,1,1"
-                                                                    Style="{StaticResource GanttDayCellStyle}"
-                                                                    Opacity="0.35"/>
-                                                        </DataTemplate>
-                                                    </ItemsControl.ItemTemplate>
-                                                </ItemsControl>
+                                                <Border Width="{Binding DataContext.ChartWidth, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                        Height="48"
+                                                        BorderBrush="{DynamicResource GanttGridLineBrush}"
+                                                        BorderThickness="0,0,0,1"
+                                                        IsHitTestVisible="False"/>
 
                                                 <Border Canvas.Left="{Binding BarLeft}"
                                                         Canvas.Top="14"
