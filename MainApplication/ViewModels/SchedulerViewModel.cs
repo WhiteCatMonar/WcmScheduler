@@ -2,6 +2,7 @@ using MainApplication.Infrastructure;
 using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.SettingsModel;
+using MainApplication.ViewModels.StatusBarModel;
 using MainApplication.ViewModels.TeamModel;
 using MainApplication.ViewModels.ThemeModel;
 using MainApplication.Views;
@@ -28,6 +29,11 @@ namespace MainApplication.ViewModels
         /// チーム設定。
         /// </summary>
         public TeamSettingsViewModel TeamSettings { get; }
+
+        /// <summary>
+        /// 共通ステータスバー。
+        /// </summary>
+        public StatusBarViewModel StatusBar { get; }
 
         /* ---------------------------------------------------------
          * 保存・読み込み関連定義
@@ -68,7 +74,15 @@ namespace MainApplication.ViewModels
         public bool IsDirty
         {
             get => _isDirty;
-            private set => SetProperty(ref _isDirty, value, [nameof(WindowTitle)]);
+            private set => SetProperty(
+                ref _isDirty,
+                value,
+                [nameof(WindowTitle)],
+                CreateHooksFromValue(
+                    value,
+                    chain: UpdateStatusBarState
+                )
+            );
         }
 
         /// <summary>
@@ -136,7 +150,18 @@ namespace MainApplication.ViewModels
         public object? SelectedTab
         {
             get => _selectedTab;
-            set => SetProperty(ref _selectedTab, value);
+            set => SetProperty(
+                ref _selectedTab,
+                value,
+                CreateHooksFromValue(
+                    value,
+                    chain: () =>
+                    {
+                        StatusBar.ResetToIdle();
+                        UpdateStatusBarState();
+                    }
+                )
+            );
         }
 
         /* ---------------------------------------------------------
@@ -151,11 +176,12 @@ namespace MainApplication.ViewModels
             /* サービス */
             _jsonSerializer = new JsonSerializerService();
             _fileService = new FileService();
+            StatusBar = new StatusBarViewModel();
 
             /* 子となるViewModelの生成 */
             var teamMembers = new ObservableCollection<TeamMemberViewModel>();
             var specialHolidays = new ObservableCollection<DateOnly>();
-            TeamProjects = new TeamProjectsViewModel(teamMembers, specialHolidays);
+            TeamProjects = new TeamProjectsViewModel(teamMembers, specialHolidays, StatusBar);
             TeamSettings = new TeamSettingsViewModel(TeamProjects, teamMembers, specialHolidays);
             /* TODO:タブごとの機能追加 */
 
@@ -191,12 +217,22 @@ namespace MainApplication.ViewModels
             OpenApplicationSettingsCommand = new RelayCommand(OpenApplicationSettings);
 
             _savedSnapshotJson = CreateCurrentSnapshot();
+            UpdateStatusBarState();
             _dirtyRefreshTimer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
             _dirtyRefreshTimer.Tick += (sender, args) => RefreshDirtyStateAndAutoSave();
             _dirtyRefreshTimer.Start();
+        }
+
+        /// <summary>
+        /// ステータスバーに保存状態とプロジェクト進捗を反映する。
+        /// </summary>
+        private void UpdateStatusBarState()
+        {
+            StatusBar.UpdateSaveState(IsDirty, CurrentFilePath);
+            StatusBar.UpdateProjectProgress(TeamProjects.SelectedProject);
         }
 
         /// <summary>
@@ -267,6 +303,7 @@ namespace MainApplication.ViewModels
                 OnPropertyChangedA(nameof(CurrentFilePath));
                 OnPropertyChangedA(nameof(CurrentEditFilePath));
                 RefreshDirtyState();
+                UpdateStatusBarState();
                 return true;
             }
             catch
@@ -354,6 +391,7 @@ namespace MainApplication.ViewModels
                 OnPropertyChangedA(nameof(CurrentFilePath));
                 OnPropertyChangedA(nameof(CurrentEditFilePath));
                 RefreshDirtyState();
+                UpdateStatusBarState();
                 return true;
             }
             catch
@@ -369,6 +407,7 @@ namespace MainApplication.ViewModels
         {
             var currentSnapshot = CreateCurrentSnapshot();
             IsDirty = currentSnapshot != _savedSnapshotJson;
+            UpdateStatusBarState();
         }
 
         /// <summary>
@@ -378,6 +417,7 @@ namespace MainApplication.ViewModels
         {
             var currentSnapshot = CreateCurrentSnapshot();
             IsDirty = currentSnapshot != _savedSnapshotJson;
+            UpdateStatusBarState();
             if (string.IsNullOrEmpty(_currentEditFilePath))
             {
                 return;

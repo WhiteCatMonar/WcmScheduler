@@ -48,6 +48,95 @@
             </MenuItem>
         </Menu>
         
+        <Border DockPanel.Dock="Bottom"
+                Background="{DynamicResource StatusBarBackgroundBrush}"
+                BorderBrush="{DynamicResource StatusBarBorderBrush}"
+                BorderThickness="0,1,0,0"
+                MinHeight="24"
+                Padding="6,2">
+            <Grid TextElement.Foreground="{DynamicResource StatusBarTextBrush}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center">
+                    <ProgressBar Width="96"
+                                 Height="10"
+                                 Margin="0,0,8,0"
+                                 IsIndeterminate="{Binding StatusBar.IsIndeterminate}"
+                                 Background="{DynamicResource StatusBarProgressBackgroundBrush}"
+                                 Foreground="{DynamicResource StatusBarProgressForegroundBrush}"
+                                 Visibility="{Binding StatusBar.IsBusy, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    <TextBlock Text="{Binding StatusBar.Message}"
+                               VerticalAlignment="Center"
+                               TextTrimming="CharacterEllipsis">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="{DynamicResource StatusBarTextBrush}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding StatusBar.IsWarning}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource StatusBarWarningTextBrush}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding StatusBar.IsError}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource StatusBarErrorTextBrush}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Text="{Binding StatusBar.QueueProgressText}"
+                               Margin="8,0,0,0"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Margin="12,0,0,0"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding StatusBar.HasProjectProgress, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock Text="Done "
+                               Foreground="{DynamicResource NodeStatusDoneBrush}"/>
+                    <TextBlock Text="{Binding StatusBar.DoneTaskCount}"
+                               Foreground="{DynamicResource NodeStatusDoneBrush}"/>
+                    <TextBlock Text="{Binding StatusBar.ProjectProgressTotalText}"
+                               Margin="4,0,0,0"/>
+                    <TextBlock Text="{Binding StatusBar.ReadyTaskCount, StringFormat=R:{0}}"
+                               Foreground="{DynamicResource NodeStatusReadyBrush}"
+                               Margin="8,0,0,0"/>
+                    <TextBlock Text="{Binding StatusBar.PendingTaskCount, StringFormat=P:{0}}"
+                               Foreground="{DynamicResource NodeStatusPendingBrush}"
+                               Margin="4,0,0,0"/>
+                    <TextBlock Text="{Binding StatusBar.InProgressTaskCount, StringFormat=I:{0}}"
+                               Foreground="{DynamicResource NodeStatusInProgressBrush}"
+                               Margin="4,0,0,0"/>
+                </StackPanel>
+                <TextBlock Grid.Column="2"
+                           Text="{Binding StatusBar.ElapsedTimeText}"
+                           Margin="12,0,0,0"
+                           MinWidth="44"
+                           TextAlignment="Right"
+                           VerticalAlignment="Center"/>
+                <TextBlock Grid.Column="3"
+                           Text="未保存"
+                           Foreground="{DynamicResource StatusBarWarningTextBrush}"
+                           FontWeight="Bold"
+                           Margin="12,0,0,0"
+                           VerticalAlignment="Center"
+                           Visibility="{Binding StatusBar.HasUnsavedChanges, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                <TextBlock Grid.Column="4"
+                           Text="{Binding StatusBar.CurrentFileName}"
+                           Margin="12,0,0,0"
+                           VerticalAlignment="Center"/>
+            </Grid>
+        </Border>
+
         <!-- タブウィンドウ -->
         <TabControl ItemsSource="{Binding Tabs}"
                     SelectedItem="{Binding SelectedTab}"

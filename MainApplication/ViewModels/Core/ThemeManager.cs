@@ -82,7 +82,14 @@ namespace MainApplication.ViewModels.Core
             { "gantt-today-text", "GanttTodayTextBrush" },
             { "member-badge-background", "MemberBadgeBackgroundBrush" },
             { "member-badge-text", "MemberBadgeTextBrush" },
-            { "member-badge-border", "MemberBadgeBorderBrush" }
+            { "member-badge-border", "MemberBadgeBorderBrush" },
+            { "status-bar-background", "StatusBarBackgroundBrush" },
+            { "status-bar-text", "StatusBarTextBrush" },
+            { "status-bar-border", "StatusBarBorderBrush" },
+            { "status-bar-warning-text", "StatusBarWarningTextBrush" },
+            { "status-bar-error-text", "StatusBarErrorTextBrush" },
+            { "status-bar-progress-background", "StatusBarProgressBackgroundBrush" },
+            { "status-bar-progress-foreground", "StatusBarProgressForegroundBrush" }
         };
 
         /// <summary>

@@ -265,6 +265,34 @@
         "member-badge-border": {
           "description": "担当者バッジ枠線",
           "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-background": {
+          "description": "ステータスバー背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-text": {
+          "description": "ステータスバー通常文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-border": {
+          "description": "ステータスバー上境界線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-warning-text": {
+          "description": "ステータスバー警告文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-error-text": {
+          "description": "ステータスバーエラー文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-progress-background": {
+          "description": "ステータスバープログレス背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-progress-foreground": {
+          "description": "ステータスバープログレス前景",
+          "$ref": "#/$defs/argbColor"
         }
       }
     }

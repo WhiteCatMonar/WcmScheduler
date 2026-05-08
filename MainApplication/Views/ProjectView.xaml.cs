@@ -79,7 +79,7 @@ namespace MainApplication.Views
 
             if (DataContext is ProjectViewModel project)
             {
-                project.GanttChart.Refresh();
+                project.GanttChart.RequestRefresh();
             }
         }
     }

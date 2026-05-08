@@ -76,7 +76,14 @@ namespace MainApplication.Models.Settings
             { "gantt-today-text", "#FF7A5A00" },
             { "member-badge-background", "#FF007ACC" },
             { "member-badge-text", "#FFFFFFFF" },
-            { "member-badge-border", "#FFFFFFFF" }
+            { "member-badge-border", "#FFFFFFFF" },
+            { "status-bar-background", "#FFECECEC" },
+            { "status-bar-text", "#FF1E1E1E" },
+            { "status-bar-border", "#FFD0D0D0" },
+            { "status-bar-warning-text", "#FFF9A825" },
+            { "status-bar-error-text", "#FFE51400" },
+            { "status-bar-progress-background", "#FFD0D0D0" },
+            { "status-bar-progress-foreground", "#FF007ACC" }
         };
     }
 }

@@ -1,5 +1,6 @@
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
+using MainApplication.ViewModels.StatusBarModel;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -18,6 +19,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         private const int DefaultVisibleDays = 14;
         private readonly NodeEditorViewModel _nodeEditor;
         private readonly ObservableCollection<DateOnly> _specialHolidays;
+        private readonly StatusBarViewModel? _statusBar;
         private readonly GanttChartService _service = new();
         private readonly Dispatcher _dispatcher;
         private DateOnly _timelineStartDate = DateOnly.FromDateTime(DateTime.Today);
@@ -28,6 +30,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         private int _scrollToTodayRequestCount;
         private bool _isRefreshing;
         private bool _isRefreshQueued;
+        private bool _isStatusOperationActive;
 
         /// <summary>
         /// ガントチャートViewModelを生成する
@@ -36,11 +39,13 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <param name="specialHolidays">特別休日一覧</param>
         public GanttChartViewModel(
             NodeEditorViewModel nodeEditor,
-            ObservableCollection<DateOnly>? specialHolidays = null
+            ObservableCollection<DateOnly>? specialHolidays = null,
+            StatusBarViewModel? statusBar = null
         )
         {
             _nodeEditor = nodeEditor;
             _specialHolidays = specialHolidays ?? [];
+            _statusBar = statusBar;
             _dispatcher = Dispatcher.CurrentDispatcher;
             _nodeEditor.Nodes.PropertyChanged += NodeCollection_PropertyChanged;
             _nodeEditor.CurrentHistoryChanged += NodeEditor_CurrentHistoryChanged;
@@ -52,7 +57,7 @@ namespace MainApplication.ViewModels.GanttChartModel
                 SubscribeNode(node);
             }
 
-            RefreshCommand = new RelayCommand(Refresh);
+            RefreshCommand = new RelayCommand(RequestRefresh);
             SelectTaskCommand = new RelayCommand<GanttTaskItemViewModel>(SelectTask, task => task != null);
             Refresh();
         }
@@ -196,10 +201,24 @@ namespace MainApplication.ViewModels.GanttChartModel
                 OnPropertyChangedA(nameof(TimelineRangeText));
                 OnPropertyChangedA(nameof(HasNoTasks));
                 RequestScrollToToday();
+                if (_isStatusOperationActive)
+                {
+                    _statusBar?.CompleteOperation("プロジェクトスケジュールを更新しました");
+                }
+            }
+            catch
+            {
+                if (_isStatusOperationActive)
+                {
+                    _statusBar?.FailOperation("プロジェクトスケジュール更新に失敗しました");
+                }
+
+                throw;
             }
             finally
             {
                 _isRefreshing = false;
+                _isStatusOperationActive = false;
             }
         }
 
@@ -255,7 +274,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// 更新要求を短い遅延で集約する
         /// </summary>
-        private void RequestRefresh()
+        public void RequestRefresh()
         {
             if (_isRefreshing || _isRefreshQueued)
             {
@@ -263,6 +282,8 @@ namespace MainApplication.ViewModels.GanttChartModel
             }
 
             _isRefreshQueued = true;
+            _isStatusOperationActive = true;
+            _statusBar?.BeginOperation("プロジェクトスケジュールを更新中...");
             _dispatcher.BeginInvoke(
                 RefreshQueued,
                 DispatcherPriority.Background

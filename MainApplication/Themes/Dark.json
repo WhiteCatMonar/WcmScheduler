@@ -63,6 +63,13 @@
     "gantt-today-text": "#FFFFE680",
     "member-badge-background": "#FF569CD6",
     "member-badge-text": "#FF1E1E1E",
-    "member-badge-border": "#FFF1F1F1"
+    "member-badge-border": "#FFF1F1F1",
+    "status-bar-background": "#FF252526",
+    "status-bar-text": "#FFD4D4D4",
+    "status-bar-border": "#FF3F3F46",
+    "status-bar-warning-text": "#FFDCDCAA",
+    "status-bar-error-text": "#FFF48771",
+    "status-bar-progress-background": "#FF3F3F46",
+    "status-bar-progress-foreground": "#FF569CD6"
   }
 }

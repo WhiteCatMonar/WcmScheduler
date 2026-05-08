@@ -101,6 +101,9 @@
 │   │   ├── 📄 IColorPickerService.cs                  # 色編集サービスのインターフェース
 │   │   └── 📄 IDateTimeEditorService.cs               # 日時編集サービスのインターフェース
 │   │
+│   ├── 📂 StatusBarModel                              # ステータスバー表示用ViewModel
+│   │   └── 📄 StatusBarViewModel.cs                   # アプリケーション共通ステータスバーの状態管理
+│   │
 │   ├── 📂 ThemeModel
 │   │   ├── 📄 ThemeMenuItemViewModel.cs               # テーマ関連メニューの1項目
 │   │   └── 📄 ThemeSettingViewModel.cs                # テーマ編集画面のViewModel
@@ -190,6 +193,12 @@
 プロジェクトスケジュール、チームスケジュール、予定期間算定、依存関係表示に関する仕様は以下にまとめています。
 
 - [ガントチャート仕様](documentation/gantt_chart.md)
+
+## ステータスバー仕様
+
+アプリケーション全体の状態表示、処理進捗、キュー表示、プロジェクト進捗表示に関する仕様は以下にまとめています。
+
+- [ステータスバー仕様](documentation/status_bar.md)
 
 ## 保存データ仕様
 

@@ -1,5 +1,6 @@
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.GanttChartModel;
+using MainApplication.ViewModels.StatusBarModel;
 using MainApplication.ViewModels.TeamModel;
 using System.Collections.ObjectModel;
 
@@ -79,7 +80,8 @@ namespace MainApplication.ViewModels.ProjectModel
         public ProjectViewModel(
             string name,
             ObservableCollection<TeamMemberViewModel>? members = null,
-            ObservableCollection<DateOnly>? specialHolidays = null
+            ObservableCollection<DateOnly>? specialHolidays = null,
+            StatusBarViewModel? statusBar = null
         )
         {
             ProjectName = name;
@@ -89,7 +91,7 @@ namespace MainApplication.ViewModels.ProjectModel
                 NodeEditor.SetTeamMembers(members);
             }
 
-            GanttChart = new GanttChartViewModel(NodeEditor, specialHolidays);
+            GanttChart = new GanttChartViewModel(NodeEditor, specialHolidays, statusBar);
 
             var nodeEditorTab = new TabInfo("タスク編集", NodeEditor);
             var ganttChartTab = new TabInfo("プロジェクトスケジュール", GanttChart);
