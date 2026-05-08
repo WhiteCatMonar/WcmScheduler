@@ -90,6 +90,10 @@
                     <Setter Property="Background" Value="{DynamicResource NodeStatusDoneBrush}"/>
                     <Setter Property="BorderBrush" Value="{DynamicResource NodeStatusDoneBrush}"/>
                 </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource ConnectionSelectedStrokeBrush}"/>
+                    <Setter Property="BorderThickness" Value="3"/>
+                </DataTrigger>
             </Style.Triggers>
         </Style>
 
@@ -119,10 +123,6 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0">
-            <Button DockPanel.Dock="Right"
-                    Content="更新"
-                    Command="{Binding RefreshCommand}"
-                    Width="64"/>
             <TextBlock Text="{Binding TimelineRangeText}"
                        FontWeight="Bold"
                        VerticalAlignment="Center"/>
@@ -245,7 +245,8 @@
                                                         Canvas.Top="14"
                                                         Width="{Binding BarWidth}"
                                                         Height="20"
-                                                        Style="{StaticResource GanttTaskBarStyle}">
+                                                        Style="{StaticResource GanttTaskBarStyle}"
+                                                        MouseLeftButtonDown="GanttTaskItem_MouseLeftButtonDown">
                                                     <Grid ClipToBounds="True">
                                                         <ItemsControl ItemsSource="{Binding Suspensions}">
                                                             <ItemsControl.ItemsPanel>
@@ -345,8 +346,18 @@
 
                                     <Border BorderBrush="{DynamicResource GanttChartBorderBrush}"
                                             BorderThickness="0,0,1,1"
-                                            Background="{DynamicResource GanttRowHeaderBackgroundBrush}"
-                                            Padding="6">
+                                            Padding="6"
+                                            MouseLeftButtonDown="GanttTaskItem_MouseLeftButtonDown">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="{DynamicResource GanttRowHeaderBackgroundBrush}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="Background" Value="{DynamicResource HistorySelectedBackgroundBrush}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="10"/>

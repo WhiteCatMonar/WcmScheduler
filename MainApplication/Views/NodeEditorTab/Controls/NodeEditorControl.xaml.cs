@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
 using MainApplication.Views.NodeEditorTab.Controls;
 using System.Windows;
@@ -7,6 +7,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace MainApplication.Views.NodeEditorTab
 {
@@ -26,6 +27,7 @@ namespace MainApplication.Views.NodeEditorTab
         public NodeEditorControl()
         {
             InitializeComponent();
+            DataContextChanged += NodeEditorControl_DataContextChanged;
         }
 
         /* ---------------------------------------------------------
@@ -39,11 +41,38 @@ namespace MainApplication.Views.NodeEditorTab
         private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             Keyboard.Focus(this);
+            UpdateCanvasViewSize();
 
-            if (DataContext is NodeEditorViewModel vm)
+            Dispatcher.InvokeAsync(
+                UpdateCanvasViewSize,
+                DispatcherPriority.Loaded
+            );
+        }
+
+        /// <summary>
+        /// DataContext変更時にキャンバス表示領域のサイズをViewModelへ反映する。
+        /// </summary>
+        private void NodeEditorControl_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            UpdateCanvasViewSize();
+
+            Dispatcher.InvokeAsync(
+                UpdateCanvasViewSize,
+                DispatcherPriority.Loaded
+            );
+        }
+
+        /// <summary>
+        /// キャンバス表示領域の実サイズをViewModelへ反映する。
+        /// </summary>
+        private void UpdateCanvasViewSize()
+        {
+            if (DataContext is NodeEditorViewModel vm &&
+                NodeEditorArea.ActualWidth > 0 &&
+                NodeEditorArea.ActualHeight > 0)
             {
-                /* 初期状態を GridManager に反映 */
-                vm.UpdateGridState();
+                vm.BaseCanvasWidth = NodeEditorArea.ActualWidth;
+                vm.BaseCanvasHeight = NodeEditorArea.ActualHeight;
             }
         }
 
@@ -108,11 +137,7 @@ namespace MainApplication.Views.NodeEditorTab
         /// </summary>
         private void NodeEditorArea_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (DataContext is NodeEditorViewModel vm)
-            {
-                vm.BaseCanvasWidth = e.NewSize.Width;
-                vm.BaseCanvasHeight = e.NewSize.Height;
-            }
+            UpdateCanvasViewSize();
         }
 
         /* ---------------------------------------------------------

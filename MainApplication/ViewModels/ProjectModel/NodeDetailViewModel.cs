@@ -59,6 +59,7 @@ namespace MainApplication.ViewModels.ProjectModel
             AddSuspensionPeriodCommand = new RelayCommand(AddSuspensionPeriod);
             AddCollaboratorCommand = new RelayCommand(AddCollaborator);
             NotifyEditedCommand = new RelayCommand(() => NotifyEdited());
+            CommitEditsCommand = new RelayCommand(CommitEdits);
 
             /* 編集遅延コミット用タイマー */
             _editTimer = new DispatcherTimer
@@ -858,7 +859,7 @@ namespace MainApplication.ViewModels.ProjectModel
         {
             var current = WorkEstimateMinutes ?? 0;
             WorkEstimateMinutes = Math.Max(0, current + deltaMinutes);
-            NotifyEdited();
+            CommitEdits();
         }
 
         /* ---------------------------------------------------------
@@ -1131,6 +1132,11 @@ namespace MainApplication.ViewModels.ProjectModel
 
         public ICommand NotifyEditedCommand { get; }
 
+        /// <summary>
+        /// 遅延コミット対象の編集内容を確定するコマンド。
+        /// </summary>
+        public ICommand CommitEditsCommand { get; }
+
         public void NotifyEdited()
         {
             _editTimer.Stop();
@@ -1139,6 +1145,7 @@ namespace MainApplication.ViewModels.ProjectModel
 
         public void CommitEdits()
         {
+            _editTimer.Stop();
             foreach (var field in _editableFields)
             {
                 field.TryCommit(CommitHistory);

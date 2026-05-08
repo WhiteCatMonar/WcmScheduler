@@ -1,7 +1,10 @@
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.ProjectModel;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace MainApplication.ViewModels.GanttChartModel
 {
@@ -16,12 +19,15 @@ namespace MainApplication.ViewModels.GanttChartModel
         private readonly NodeEditorViewModel _nodeEditor;
         private readonly ObservableCollection<DateOnly> _specialHolidays;
         private readonly GanttChartService _service = new();
+        private readonly Dispatcher _dispatcher;
         private DateOnly _timelineStartDate = DateOnly.FromDateTime(DateTime.Today);
         private DateOnly _timelineEndDate = DateOnly.FromDateTime(DateTime.Today).AddDays(DefaultVisibleDays - 1);
         private double _chartWidth = DefaultDayWidth * DefaultVisibleDays;
         private double _chartHeight = DefaultRowHeight;
         private double _viewportChartWidth = DefaultDayWidth * DefaultVisibleDays;
         private int _scrollToTodayRequestCount;
+        private bool _isRefreshing;
+        private bool _isRefreshQueued;
 
         /// <summary>
         /// ガントチャートViewModelを生成する
@@ -35,7 +41,19 @@ namespace MainApplication.ViewModels.GanttChartModel
         {
             _nodeEditor = nodeEditor;
             _specialHolidays = specialHolidays ?? [];
+            _dispatcher = Dispatcher.CurrentDispatcher;
+            _nodeEditor.Nodes.PropertyChanged += NodeCollection_PropertyChanged;
+            _nodeEditor.CurrentHistoryChanged += NodeEditor_CurrentHistoryChanged;
+            _nodeEditor.Nodes.Nodes.CollectionChanged += Nodes_CollectionChanged;
+            _nodeEditor.Connections.Connections.CollectionChanged += Connections_CollectionChanged;
+            _specialHolidays.CollectionChanged += SpecialHolidays_CollectionChanged;
+            foreach (var node in _nodeEditor.Nodes.Nodes)
+            {
+                SubscribeNode(node);
+            }
+
             RefreshCommand = new RelayCommand(Refresh);
+            SelectTaskCommand = new RelayCommand<GanttTaskItemViewModel>(SelectTask, task => task != null);
             Refresh();
         }
 
@@ -58,6 +76,11 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 表示更新コマンド
         /// </summary>
         public ICommand RefreshCommand { get; }
+
+        /// <summary>
+        /// ガントチャート上のタスク選択コマンド
+        /// </summary>
+        public ICommand SelectTaskCommand { get; }
 
         /// <summary>
         /// 1日分の表示幅
@@ -144,27 +167,40 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// </summary>
         public void Refresh()
         {
-            _nodeEditor.RefreshTaskStatuses();
-
-            var startDate = GetTimelineStartDate();
-            TimelineStartDate = startDate;
-
-            var tasks = _service.CreateProjectTasks(_nodeEditor, startDate, DayWidth, RowHeight, _specialHolidays);
-            var endDate = GetTimelineEndDate(tasks, startDate);
-            _timelineEndDate = endDate;
-            RebuildTimeline(startDate, endDate);
-
-            Tasks.Clear();
-            foreach (var task in tasks)
+            if (_isRefreshing)
             {
-                Tasks.Add(task);
+                return;
             }
 
-            RebuildDependencyLines();
-            ChartHeight = Math.Max(RowHeight, Tasks.Count * RowHeight);
-            OnPropertyChangedA(nameof(TimelineRangeText));
-            OnPropertyChangedA(nameof(HasNoTasks));
-            RequestScrollToToday();
+            _isRefreshing = true;
+            try
+            {
+                _nodeEditor.RefreshTaskStatuses();
+
+                var startDate = GetTimelineStartDate();
+                TimelineStartDate = startDate;
+
+                var tasks = _service.CreateProjectTasks(_nodeEditor, startDate, DayWidth, RowHeight, _specialHolidays);
+                var endDate = GetTimelineEndDate(tasks, startDate);
+                _timelineEndDate = endDate;
+                RebuildTimeline(startDate, endDate);
+
+                Tasks.Clear();
+                foreach (var task in tasks)
+                {
+                    Tasks.Add(task);
+                }
+
+                RebuildDependencyLines();
+                ChartHeight = Math.Max(RowHeight, Tasks.Count * RowHeight);
+                OnPropertyChangedA(nameof(TimelineRangeText));
+                OnPropertyChangedA(nameof(HasNoTasks));
+                RequestScrollToToday();
+            }
+            finally
+            {
+                _isRefreshing = false;
+            }
         }
 
         /// <summary>
@@ -182,6 +218,176 @@ namespace MainApplication.ViewModels.GanttChartModel
             RebuildTimeline(TimelineStartDate, _timelineEndDate);
             OnPropertyChangedA(nameof(TimelineRangeText));
             RequestScrollToToday();
+        }
+
+        /// <summary>
+        /// ガントチャート上のタスクを選択する
+        /// </summary>
+        /// <param name="task">選択対象タスク</param>
+        public void SelectTask(GanttTaskItemViewModel? task)
+        {
+            if (task == null)
+            {
+                return;
+            }
+
+            _nodeEditor.Nodes.SelectNode(task.Node);
+        }
+
+        /// <summary>
+        /// ノード選択状態の変更をガントチャート表示へ反映する
+        /// </summary>
+        /// <param name="sender">イベント送信元</param>
+        /// <param name="e">プロパティ変更情報</param>
+        private void NodeCollection_PropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName != nameof(NodeCollectionViewModel.SelectedNode))
+            {
+                return;
+            }
+
+            foreach (var task in Tasks)
+            {
+                task.RefreshSelectionState();
+            }
+        }
+
+        /// <summary>
+        /// 更新要求を短い遅延で集約する
+        /// </summary>
+        private void RequestRefresh()
+        {
+            if (_isRefreshing || _isRefreshQueued)
+            {
+                return;
+            }
+
+            _isRefreshQueued = true;
+            _dispatcher.BeginInvoke(
+                RefreshQueued,
+                DispatcherPriority.Background
+            );
+        }
+
+        /// <summary>
+        /// キュー登録されたガントチャート更新を実行する
+        /// </summary>
+        private void RefreshQueued()
+        {
+            _isRefreshQueued = false;
+            Refresh();
+        }
+
+        /// <summary>
+        /// ノード一覧変更時に監視対象を更新する
+        /// </summary>
+        private void Nodes_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (e.OldItems != null)
+            {
+                foreach (NodeViewModel node in e.OldItems)
+                {
+                    UnsubscribeNode(node);
+                }
+            }
+
+            if (e.NewItems != null)
+            {
+                foreach (NodeViewModel node in e.NewItems)
+                {
+                    SubscribeNode(node);
+                }
+            }
+
+            RequestRefresh();
+        }
+
+        /// <summary>
+        /// 接続線一覧変更時にガントチャートを更新する
+        /// </summary>
+        private void Connections_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RequestRefresh();
+        }
+
+        /// <summary>
+        /// 特別休日一覧変更時にガントチャートを更新する
+        /// </summary>
+        private void SpecialHolidays_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            RequestRefresh();
+        }
+
+        /// <summary>
+        /// ノード変更監視を開始する
+        /// </summary>
+        private void SubscribeNode(NodeViewModel node)
+        {
+            node.PropertyChanged += Node_PropertyChanged;
+            node.Detail.PropertyChanged += NodeDetail_PropertyChanged;
+        }
+
+        /// <summary>
+        /// ノード変更監視を解除する
+        /// </summary>
+        private void UnsubscribeNode(NodeViewModel node)
+        {
+            node.PropertyChanged -= Node_PropertyChanged;
+            node.Detail.PropertyChanged -= NodeDetail_PropertyChanged;
+        }
+
+        /// <summary>
+        /// ノード状態変更時にガントチャートを更新する
+        /// </summary>
+        private void Node_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is NodeViewModel node && e.PropertyName == nameof(NodeViewModel.Status))
+            {
+                RefreshTaskDisplayForNode(node);
+            }
+        }
+
+        /// <summary>
+        /// タスク詳細変更時にガントチャートを更新する
+        /// </summary>
+        private void NodeDetail_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is NodeDetailViewModel detail && e.PropertyName == nameof(NodeDetailViewModel.TaskName))
+            {
+                RefreshTaskDisplayForDetail(detail);
+            }
+        }
+
+        /// <summary>
+        /// 編集履歴確定時にガントチャートを更新する
+        /// </summary>
+        private void NodeEditor_CurrentHistoryChanged(object? sender, UndoRedoManager.HistoryItem? e)
+        {
+            RequestRefresh();
+        }
+
+        /// <summary>
+        /// 指定ノードに対応するタスク行の表示状態を更新する
+        /// </summary>
+        /// <param name="node">更新対象ノード</param>
+        private void RefreshTaskDisplayForNode(NodeViewModel node)
+        {
+            foreach (var task in Tasks.Where(task => ReferenceEquals(task.Node, node)))
+            {
+                task.RefreshNodeDisplayState();
+            }
+        }
+
+        /// <summary>
+        /// 指定タスク詳細に対応するタスク行の表示状態を更新する
+        /// </summary>
+        /// <param name="detail">更新対象タスク詳細</param>
+        private void RefreshTaskDisplayForDetail(NodeDetailViewModel detail)
+        {
+            foreach (var task in Tasks.Where(task => ReferenceEquals(task.Node.Detail, detail)))
+            {
+                task.RefreshNodeDisplayState();
+            }
         }
 
         /// <summary>

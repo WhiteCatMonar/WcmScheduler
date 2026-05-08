@@ -17,7 +17,9 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// タスク名
         /// </summary>
-        public required string TaskName { get; init; }
+        public string TaskName => string.IsNullOrWhiteSpace(Node.Detail.TaskName)
+            ? "(New Task)"
+            : Node.Detail.TaskName;
 
         /// <summary>
         /// 担当者名
@@ -42,7 +44,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <summary>
         /// タスクステータス
         /// </summary>
-        public required NodeViewModel.TaskStatus Status { get; init; }
+        public NodeViewModel.TaskStatus Status => Node.Status;
 
         /// <summary>
         /// タスク名を警告色で表示するか
@@ -88,6 +90,29 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 担当者バッジを表示するかどうか
         /// </summary>
         public bool HasAssigneeBadge => !string.IsNullOrWhiteSpace(AssigneeInitials);
+
+        /// <summary>
+        /// 対応タスクノードが選択されているかどうか
+        /// </summary>
+        public bool IsSelected => Node.IsSelected;
+
+        /// <summary>
+        /// 対応タスクノードの選択状態変更を表示へ反映する
+        /// </summary>
+        public void RefreshSelectionState()
+        {
+            OnPropertyChangedA(nameof(IsSelected));
+        }
+
+        /// <summary>
+        /// 対応タスクノードの表示状態変更を表示へ反映する
+        /// </summary>
+        public void RefreshNodeDisplayState()
+        {
+            OnPropertyChangedA(nameof(TaskName));
+            OnPropertyChangedA(nameof(Status));
+            OnPropertyChangedA(nameof(IsSelected));
+        }
     }
 }
 

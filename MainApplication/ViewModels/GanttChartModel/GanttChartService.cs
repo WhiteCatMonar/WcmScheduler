@@ -39,12 +39,10 @@ namespace MainApplication.ViewModels.GanttChartModel
                 var task = new GanttTaskItemViewModel
                 {
                     Node = schedule.Node,
-                    TaskName = string.IsNullOrWhiteSpace(schedule.Node.Detail.TaskName) ? "(New Task)" : schedule.Node.Detail.TaskName,
                     AssigneeName = ResolveAssigneeName(nodeEditor, schedule.Node.Detail.AssigneeMemberId),
                     AssigneeInitials = ResolveAssigneeInitials(nodeEditor, schedule.Node.Detail.AssigneeMemberId),
                     StartDateTime = schedule.StartDateTime,
                     EndDateTime = schedule.EndDateTime,
-                    Status = schedule.Node.Status,
                     HasWarning = schedule.HasWarning,
                     HasSchedule = schedule.HasSchedule,
                     ErrorText = schedule.ErrorText,

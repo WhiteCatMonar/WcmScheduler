@@ -103,6 +103,22 @@ namespace MainApplication.Views
         }
 
         /// <summary>
+        /// ガントチャート上のタスク行またはバー選択をViewModelへ通知する
+        /// </summary>
+        /// <param name="sender">イベント送信元</param>
+        /// <param name="e">マウスイベント引数</param>
+        private void GanttTaskItem_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is GanttChartViewModel viewModel &&
+                sender is FrameworkElement element &&
+                element.DataContext is GanttTaskItemViewModel task)
+            {
+                viewModel.SelectTask(task);
+                e.Handled = true;
+            }
+        }
+
+        /// <summary>
         /// レイアウト完了後に現在日付へ横スクロールする
         /// </summary>
         private void ScrollToToday()

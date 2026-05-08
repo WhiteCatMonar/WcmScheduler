@@ -59,6 +59,9 @@
                     <i:EventTrigger EventName="TextChanged">
                         <i:InvokeCommandAction Command="{Binding Detail.NotifyEditedCommand}" />
                     </i:EventTrigger>
+                    <i:EventTrigger EventName="LostFocus">
+                        <i:InvokeCommandAction Command="{Binding Detail.CommitEditsCommand}" />
+                    </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
         </DockPanel>
@@ -149,6 +152,9 @@
                     <i:EventTrigger EventName="TextChanged">
                         <i:InvokeCommandAction Command="{Binding Detail.NotifyEditedCommand}" />
                     </i:EventTrigger>
+                    <i:EventTrigger EventName="LostFocus">
+                        <i:InvokeCommandAction Command="{Binding Detail.CommitEditsCommand}" />
+                    </i:EventTrigger>
                 </i:Interaction.Triggers>
             </TextBox>
         </DockPanel>
@@ -198,6 +204,9 @@
                     <i:Interaction.Triggers>
                         <i:EventTrigger EventName="TextChanged">
                             <i:InvokeCommandAction Command="{Binding Detail.NotifyEditedCommand}" />
+                        </i:EventTrigger>
+                        <i:EventTrigger EventName="LostFocus">
+                            <i:InvokeCommandAction Command="{Binding Detail.CommitEditsCommand}" />
                         </i:EventTrigger>
                     </i:Interaction.Triggers>
                 </TextBox>
