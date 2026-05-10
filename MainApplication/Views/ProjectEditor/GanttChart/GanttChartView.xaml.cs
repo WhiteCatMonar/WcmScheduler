@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Threading;
 using MainApplication.ViewModels.GanttChartModel;
 using System.Windows.Controls;
+using MainApplication.Helpers;
+using MainApplication.ViewModels.ProjectModel;
 
 namespace MainApplication.Views.ProjectEditor.GanttChart
 {
@@ -13,6 +15,7 @@ namespace MainApplication.Views.ProjectEditor.GanttChart
     public partial class GanttChartView : UserControl
     {
         private GanttChartViewModel? _subscribedViewModel;
+        private ProjectViewModel? _projectViewModel;
 
         /// <summary>
         /// GanttChartViewを初期化する
@@ -31,6 +34,13 @@ namespace MainApplication.Views.ProjectEditor.GanttChart
         /// <param name="e">イベント引数</param>
         private void GanttChartView_Loaded(object sender, RoutedEventArgs e)
         {
+            _projectViewModel = VisualTreeUtils.FindParentViewModel<ProjectViewModel>(this);
+            if (DataContext is GanttChartViewModel viewModel && viewModel.HasPendingTaskScroll)
+            {
+                ScrollToRequestedTask();
+                return;
+            }
+
             ScrollToToday();
         }
 
@@ -63,6 +73,11 @@ namespace MainApplication.Views.ProjectEditor.GanttChart
             if (e.PropertyName == nameof(GanttChartViewModel.ScrollToTodayRequestCount))
             {
                 ScrollToToday();
+            }
+
+            if (e.PropertyName == nameof(GanttChartViewModel.ScrollToTaskRequestCount))
+            {
+                ScrollToRequestedTask();
             }
         }
 
@@ -129,6 +144,37 @@ namespace MainApplication.Views.ProjectEditor.GanttChart
         }
 
         /// <summary>
+        /// ガントチャート行の右クリック時に依存関係編集へのジャンプメニューを表示する
+        /// </summary>
+        /// <param name="sender">イベント送信元</param>
+        /// <param name="e">マウスイベント引数</param>
+        private void GanttTaskItem_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is not GanttChartViewModel viewModel ||
+                sender is not FrameworkElement element ||
+                element.DataContext is not GanttTaskItemViewModel task)
+            {
+                return;
+            }
+
+            _projectViewModel ??= VisualTreeUtils.FindParentViewModel<ProjectViewModel>(this);
+            viewModel.SelectTask(task);
+
+            var menu = new ContextMenu
+            {
+                PlacementTarget = element
+            };
+            var item = new MenuItem
+            {
+                Header = "依存関係編集で表示"
+            };
+            item.Click += (_, _) => _projectViewModel?.ShowTaskInDependencyEditor(task.Node);
+            menu.Items.Add(item);
+            menu.IsOpen = true;
+            e.Handled = true;
+        }
+
+        /// <summary>
         /// レイアウト完了後に現在日付へ横スクロールする
         /// </summary>
         private void ScrollToToday()
@@ -141,6 +187,22 @@ namespace MainApplication.Views.ProjectEditor.GanttChart
             Dispatcher.BeginInvoke(
                 viewModel.ScrollToToday,
                 DispatcherPriority.Loaded
+            );
+        }
+
+        /// <summary>
+        /// レイアウト完了後に指定タスクへスクロールする
+        /// </summary>
+        private void ScrollToRequestedTask()
+        {
+            if (DataContext is not GanttChartViewModel viewModel)
+            {
+                return;
+            }
+
+            Dispatcher.BeginInvoke(
+                viewModel.ScrollToRequestedTask,
+                DispatcherPriority.ContextIdle
             );
         }
     }

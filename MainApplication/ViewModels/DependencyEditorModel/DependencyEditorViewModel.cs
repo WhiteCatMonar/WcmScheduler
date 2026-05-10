@@ -210,6 +210,19 @@ namespace MainApplication.ViewModels.DependencyEditorModel
             Pan = Pan.Add(logicalDelta);
         }
 
+        /// <summary>
+        /// 指定ノードが表示領域中央に来るようにパン位置を調整する
+        /// </summary>
+        /// <param name="node">表示対象ノード</param>
+        public void ScrollToNode(TaskNodeViewModel node)
+        {
+            Nodes.SelectNode(node);
+
+            var nodeCenter = node.Position.Add(node.Width / 2.0, node.Height / 2.0);
+            var viewportCenter = new Point(BaseCanvasWidth / 2.0, BaseCanvasHeight / 2.0);
+            Pan = viewportCenter.Sub(nodeCenter.Mul(Zoom));
+        }
+
         /* ---------------------------------------------------------
          * 選択状態管理
          * --------------------------------------------------------- */

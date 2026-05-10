@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="MainApplication.Views.ProjectView"
+<UserControl x:Class="MainApplication.Views.ProjectView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:sidebar="clr-namespace:MainApplication.Views.ProjectEditor.Sidebar"
@@ -114,6 +114,7 @@
                         Margin="5"
                         Style="{StaticResource ThemedTabControlStyle}"
                         ItemContainerStyle="{StaticResource ThemedTabItemStyle}"
+                        SelectedIndex="{Binding SelectedEditorTabIndex, Mode=TwoWay}"
                         SelectionChanged="EditorTabControl_SelectionChanged">
                 <TabItem Header="依存関係編集">
                     <dependencyEditor:DependencyEditorView DataContext="{Binding DependencyEditor}"/>

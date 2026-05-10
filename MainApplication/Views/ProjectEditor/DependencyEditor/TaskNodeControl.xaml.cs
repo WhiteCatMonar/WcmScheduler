@@ -21,6 +21,7 @@ namespace MainApplication.Views.ProjectEditor.DependencyEditor
 
         private DependencyEditorView? _editor;
         private DependencyEditorViewModel? _editorVM;
+        private ProjectViewModel? _projectVM;
 
         /* ---------------------------------------------------------
          * コンストラクタ
@@ -51,6 +52,7 @@ namespace MainApplication.Views.ProjectEditor.DependencyEditor
             /* VisualTreeをキャッシュ */
             _editor = VisualTreeUtils.FindAncestor<DependencyEditorView>(this);
             _editorVM = VisualTreeUtils.FindParentViewModel<DependencyEditorViewModel>(this);
+            _projectVM = VisualTreeUtils.FindParentViewModel<ProjectViewModel>(this);
 
             UpdateVisualBoundsSize();
         }
@@ -109,6 +111,32 @@ namespace MainApplication.Views.ProjectEditor.DependencyEditor
         private void NodeBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             _editorVM?.RequestSelectNode(DataContext);
+        }
+
+        /// <summary>
+        /// 右クリック時にプロジェクトスケジュールへのジャンプメニューを表示する
+        /// </summary>
+        private void TaskNodeControl_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (DataContext is not TaskNodeViewModel node || _projectVM == null)
+            {
+                return;
+            }
+
+            _editorVM?.RequestSelectNode(node);
+
+            var menu = new ContextMenu
+            {
+                PlacementTarget = this
+            };
+            var item = new MenuItem
+            {
+                Header = "プロジェクトスケジュールで表示"
+            };
+            item.Click += (_, _) => _projectVM.ShowTaskInGanttChart(node);
+            menu.Items.Add(item);
+            menu.IsOpen = true;
+            e.Handled = true;
         }
 
         /* ---------------------------------------------------------

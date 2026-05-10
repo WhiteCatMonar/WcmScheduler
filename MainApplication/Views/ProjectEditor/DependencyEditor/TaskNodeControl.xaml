@@ -7,6 +7,7 @@
              MouseMove="TaskNodeControl_MouseMove"
              MouseLeftButtonUp="TaskNodeControl_MouseLeftButtonUp"
              MouseLeftButtonDown="TaskNodeControl_MouseLeftButtonDown"
+             MouseRightButtonUp="TaskNodeControl_MouseRightButtonUp"
              MinWidth="{Binding MinWidth}" MinHeight="{Binding MinHeight}"
              SizeChanged="TaskNodeControl_SizeChanged">
 

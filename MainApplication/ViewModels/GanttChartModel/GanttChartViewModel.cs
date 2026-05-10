@@ -39,6 +39,8 @@ namespace MainApplication.ViewModels.GanttChartModel
         private bool _isRefreshing;
         private bool _isRefreshQueued;
         private bool _isStatusOperationActive;
+        private TaskNodeViewModel? _pendingScrollNode;
+        private int _scrollToTaskRequestCount;
 
         /// <summary>
         /// ガントチャートViewModelを生成する
@@ -134,6 +136,20 @@ namespace MainApplication.ViewModels.GanttChartModel
             get => _scrollToTodayRequestCount;
             private set => SetProperty(ref _scrollToTodayRequestCount, value);
         }
+
+        /// <summary>
+        /// 指定タスクへスクロールする要求回数
+        /// </summary>
+        public int ScrollToTaskRequestCount
+        {
+            get => _scrollToTaskRequestCount;
+            private set => SetProperty(ref _scrollToTaskRequestCount, value);
+        }
+
+        /// <summary>
+        /// タスク位置へのスクロール要求が保留中かどうか
+        /// </summary>
+        public bool HasPendingTaskScroll => _pendingScrollNode != null;
 
         /// <summary>
         /// 現在日付を表示するための横スクロール位置
@@ -363,7 +379,11 @@ namespace MainApplication.ViewModels.GanttChartModel
                 ChartHeight = Math.Max(RowHeight, Tasks.Count * RowHeight);
                 OnPropertyChangedA(nameof(TimelineRangeText));
                 OnPropertyChangedA(nameof(HasNoTasks));
-                if (requestScrollToToday)
+                if (_pendingScrollNode != null)
+                {
+                    ScrollToTaskRequestCount++;
+                }
+                else if (requestScrollToToday)
                 {
                     RequestScrollToToday();
                 }
@@ -471,6 +491,62 @@ namespace MainApplication.ViewModels.GanttChartModel
             }
 
             _dependencyEditor.Nodes.SelectNode(task.Node);
+        }
+
+        /// <summary>
+        /// 指定ノードに対応するタスク行が見える位置へスクロールする
+        /// </summary>
+        /// <param name="node">表示対象ノード</param>
+        public void ScrollToTask(TaskNodeViewModel node)
+        {
+            var task = Tasks.FirstOrDefault(task => ReferenceEquals(task.Node, node));
+            if (task == null)
+            {
+                Refresh(false);
+                task = Tasks.FirstOrDefault(task => ReferenceEquals(task.Node, node));
+            }
+
+            _dependencyEditor.Nodes.SelectNode(node);
+            if (task == null)
+            {
+                return;
+            }
+
+            if (task.HasSchedule)
+            {
+                var scheduleCenter = task.BarLeft + (task.ScheduleBarWidth / 2.0);
+                HorizontalOffset = scheduleCenter - (ViewportChartWidth / 2.0);
+            }
+
+            var rowCenter = task.RowTop + (RowHeight / 2.0);
+            VerticalOffset = rowCenter - (ViewportChartHeight / 2.0);
+        }
+
+        /// <summary>
+        /// 指定ノードに対応するタスク行へのスクロールを要求する
+        /// </summary>
+        /// <param name="node">表示対象ノード</param>
+        public void RequestScrollToTask(TaskNodeViewModel node)
+        {
+            _pendingScrollNode = node;
+            OnPropertyChangedA(nameof(HasPendingTaskScroll));
+            ScrollToTaskRequestCount++;
+        }
+
+        /// <summary>
+        /// 保留中のタスク行スクロール要求を処理する
+        /// </summary>
+        public void ScrollToRequestedTask()
+        {
+            if (_pendingScrollNode == null)
+            {
+                return;
+            }
+
+            var node = _pendingScrollNode;
+            _pendingScrollNode = null;
+            OnPropertyChangedA(nameof(HasPendingTaskScroll));
+            ScrollToTask(node);
         }
 
         /// <summary>

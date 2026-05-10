@@ -14,6 +14,7 @@ namespace MainApplication.ViewModels.ProjectModel
     {
         private string? _projectName;
         private TabInfo? _selectedTab;
+        private int _selectedEditorTabIndex;
 
         /// <summary>
         /// プロジェクト名
@@ -73,6 +74,15 @@ namespace MainApplication.ViewModels.ProjectModel
         public bool IsDependencyEditor => SelectedTab?.Content == DependencyEditor;
 
         /// <summary>
+        /// エディタ領域で選択されているタブ番号
+        /// </summary>
+        public int SelectedEditorTabIndex
+        {
+            get => _selectedEditorTabIndex;
+            set => SetProperty(ref _selectedEditorTabIndex, value);
+        }
+
+        /// <summary>
         /// ProjectViewModelを生成し、子ViewModelやサービスを初期化する
         /// </summary>
         /// <param name="name">プロジェクト名</param>
@@ -113,6 +123,28 @@ namespace MainApplication.ViewModels.ProjectModel
         public void SetMemberAvailabilityProvider(IProjectMemberAvailabilityProvider? memberAvailabilityProvider)
         {
             GanttChart.MemberAvailabilityProvider = memberAvailabilityProvider;
+        }
+
+        /// <summary>
+        /// 指定タスクをプロジェクトスケジュール上で表示する
+        /// </summary>
+        /// <param name="node">表示対象タスク</param>
+        public void ShowTaskInGanttChart(TaskNodeViewModel node)
+        {
+            DependencyEditor.Nodes.SelectNode(node);
+            SelectedEditorTabIndex = 1;
+            GanttChart.RequestScrollToTask(node);
+        }
+
+        /// <summary>
+        /// 指定タスクを依存関係編集上で表示する
+        /// </summary>
+        /// <param name="node">表示対象タスク</param>
+        public void ShowTaskInDependencyEditor(TaskNodeViewModel node)
+        {
+            DependencyEditor.Nodes.SelectNode(node);
+            SelectedEditorTabIndex = 0;
+            DependencyEditor.ScrollToNode(node);
         }
     }
 }

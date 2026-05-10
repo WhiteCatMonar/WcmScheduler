@@ -287,7 +287,8 @@
                                         <Border BorderBrush="{DynamicResource GanttChartBorderBrush}"
                                                 BorderThickness="0,0,1,1"
                                                 Padding="6"
-                                                MouseLeftButtonDown="GanttTaskItem_MouseLeftButtonDown">
+                                                MouseLeftButtonDown="GanttTaskItem_MouseLeftButtonDown"
+                                                MouseRightButtonUp="GanttTaskItem_MouseRightButtonUp">
                                             <Border.Style>
                                                 <Style TargetType="Border">
                                                     <Setter Property="Background" Value="{DynamicResource GanttRowHeaderBackgroundBrush}"/>
@@ -440,7 +441,8 @@
                                                 Width="{Binding BarWidth}"
                                                 Height="20"
                                                 Style="{StaticResource GanttTaskBarStyle}"
-                                                MouseLeftButtonDown="GanttTaskItem_MouseLeftButtonDown">
+                                                MouseLeftButtonDown="GanttTaskItem_MouseLeftButtonDown"
+                                                MouseRightButtonUp="GanttTaskItem_MouseRightButtonUp">
                                             <Grid ClipToBounds="True">
                                                 <ItemsControl ItemsSource="{Binding NonWorkingPeriods}">
                                                     <ItemsControl.ItemsPanel>
