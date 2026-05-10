@@ -8,6 +8,7 @@ using MainApplication.ViewModels.ThemeModel;
 using MainApplication.Views;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Reflection;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -57,6 +58,7 @@ namespace MainApplication.ViewModels
 
         private string? _currentFilePath;
         private string? _currentEditFilePath;
+        private static readonly string ProductVersion = GetProductVersion();
 
         /// <summary>
         /// 現在読み込んでいる保存ファイルパス。
@@ -88,7 +90,7 @@ namespace MainApplication.ViewModels
         /// <summary>
         /// メインウィンドウタイトル。
         /// </summary>
-        public string WindowTitle => IsDirty ? "WcmScheduler *" : "WcmScheduler";
+        public string WindowTitle => IsDirty ? $"WcmScheduler {ProductVersion} *" : $"WcmScheduler {ProductVersion}";
 
         /* ---------------------------------------------------------
          * テーマ管理
@@ -549,6 +551,18 @@ namespace MainApplication.ViewModels
             }
 
             return Path.Combine(directory, fileName);
+        }
+
+        /// <summary>
+        /// 表示用の製品バージョンを取得する
+        /// </summary>
+        /// <returns>製品バージョン</returns>
+        private static string GetProductVersion()
+        {
+            return typeof(SchedulerViewModel).Assembly
+                                             .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+                                             ?.InformationalVersion
+                   ?? "0.0.0";
         }
 
         /// <summary>

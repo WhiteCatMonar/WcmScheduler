@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:converters="clr-namespace:MainApplication.ViewModels.Converters"
         Title="{Binding WindowTitle}" Height="720" Width="1280"
+        Icon="/Assets/AppIcon.ico"
         Background="{DynamicResource WindowBackgroundBrush}">
     <Window.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
