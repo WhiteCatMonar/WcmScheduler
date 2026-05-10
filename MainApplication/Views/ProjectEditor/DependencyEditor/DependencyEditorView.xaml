@@ -1,0 +1,81 @@
+<UserControl x:Class="MainApplication.Views.ProjectEditor.DependencyEditor.DependencyEditorView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:views="clr-namespace:MainApplication.Views"
+             xmlns:controls="clr-namespace:MainApplication.Views.ProjectEditor.DependencyEditor"
+             xmlns:converters="clr-namespace:MainApplication.ViewModels.Converters"
+             Focusable="True"
+             Loaded="UserControl_Loaded">
+
+    <UserControl.Resources>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <!-- Undo / Redo -->
+    <UserControl.InputBindings>
+        <KeyBinding Key="Z" Modifiers="Control" Command="{Binding UndoCommand}" />
+        <KeyBinding Key="Y" Modifiers="Control" Command="{Binding RedoCommand}" />
+    </UserControl.InputBindings>
+
+    <!-- ウィンドウサイズに追従する領域 -->
+    <Border BorderBrush="{DynamicResource NodeEditorBorderBrush}" BorderThickness="1">
+        <Canvas x:Name="NodeEditorArea"
+                Background="Transparent"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                SizeChanged="NodeEditorArea_SizeChanged"
+                ClipToBounds="True">
+            
+            <!-- ズーム後サイズを持つキャンバス(位置は固定) -->
+            <Canvas x:Name="NodeEditorCanvas"
+                    Background="{DynamicResource NodeEditorCanvasBackgroundBrush}"
+                    Width="{Binding BaseCanvasWidth}"
+                    Height="{Binding BaseCanvasHeight}"
+                    Focusable="True"
+                    PreviewMouseDown="NodeEditorCanvas_PreviewMouseDown"
+                    MouseWheel="NodeEditorCanvas_MouseWheel"
+                    MouseDown="NodeEditorCanvas_MouseDown"
+                    MouseMove="NodeEditorCanvas_MouseMove"
+                    MouseUp="NodeEditorCanvas_MouseUp">
+
+                <!-- ズーム・パンは ContentRoot にのみ適用 -->
+                <Canvas x:Name="ContentRoot"
+                        Background="{x:Null}">
+                    <Canvas.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleX="{Binding Zoom}"
+                                            ScaleY="{Binding Zoom}"/>
+                            <TranslateTransform X="{Binding Pan.X}"
+                                                Y="{Binding Pan.Y}"/>
+                        </TransformGroup>
+                    </Canvas.RenderTransform>
+
+                    <!-- グリッド線(原点軸含む) -->
+                    <controls:GridControl />
+
+                    <!-- 接続線 -->
+                    <controls:ConnectionCollectionControl/>
+
+                    <!-- 仮接続線 -->
+                    <Path Stroke="{DynamicResource TemporaryConnectionStrokeBrush}" StrokeDashArray="2,2" StrokeThickness="2" IsHitTestVisible="False"
+                          Visibility="{Binding Connections.IsDraggingConnection, Converter={StaticResource BoolToVisibilityConverter}}">
+                        <Path.Data>
+                            <PathGeometry>
+                                <PathFigure StartPoint="{Binding Connections.DraggingFromPoint}">
+                                    <BezierSegment Point1="{Binding Connections.DraggingFromPortBezierControlPoint}"
+                                       Point2="{Binding Connections.DraggingToPointBezierControl}"
+                                       Point3="{Binding Connections.DraggingToPoint}" />
+                                </PathFigure>
+                            </PathGeometry>
+                        </Path.Data>
+                    </Path>
+
+                    <!-- ノード -->
+                    <controls:TaskNodeCollectionControl/>
+
+                </Canvas> <!-- ContentRoot -->
+            </Canvas> <!-- NodeEditorCanvas -->
+        </Canvas> <!-- NodeEditorArea -->
+    </Border>
+</UserControl>

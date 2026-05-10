@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "WcmScheduler テーマ設定用JSON",
+  "description": "配色設定などを行うための設定ファイル",
+  "type": "object",
+  "required": [
+    "name",
+    "colors"
+  ],
+  "properties": {
+    "name": {
+      "description": "テーマ名",
+      "type": "string",
+      "minLength": 1
+    },
+    "colors": {
+      "description": "配色設定",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "window-background": {
+          "description": "Window全体背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "window-text": {
+          "description": "Window全体文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "tab-window-background": {
+          "description": "タブウィンドウ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "tab-item-background": {
+          "description": "通常タブ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "tab-item-selected-background": {
+          "description": "選択中タブ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "tab-item-text": {
+          "description": "通常タブ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "tab-item-selected-text": {
+          "description": "選択中タブ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-editor-border": {
+          "description": "ノードエディタ外枠",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-editor-canvas-background": {
+          "description": "ノード配置キャンバス背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "temporary-connection-stroke": {
+          "description": "接続線ドラッグ中の仮接続線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "grid-line-minor": {
+          "description": "通常グリッド線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "grid-line-major": {
+          "description": "太いグリッド線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "grid-origin-axis-x": {
+          "description": "原点X軸",
+          "$ref": "#/$defs/argbColor"
+        },
+        "grid-origin-axis-y": {
+          "description": "原点Y軸",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-background": {
+          "description": "通常ノード背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-selected-background": {
+          "description": "選択中ノード背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-border": {
+          "description": "ノード枠線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-status-ready": {
+          "description": "Ready状態ノード表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-status-pending": {
+          "description": "Pending状態ノード表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-status-in-progress": {
+          "description": "InProgress状態ノード表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-status-done": {
+          "description": "Done状態ノード表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "node-text": {
+          "description": "ノード内テキスト",
+          "$ref": "#/$defs/argbColor"
+        },
+        "port-input-fill": {
+          "description": "入力ポート塗り",
+          "$ref": "#/$defs/argbColor"
+        },
+        "port-output-fill": {
+          "description": "出力ポート塗り",
+          "$ref": "#/$defs/argbColor"
+        },
+        "port-unknown-fill": {
+          "description": "不明なポート種別の塗り",
+          "$ref": "#/$defs/argbColor"
+        },
+        "connection-stroke": {
+          "description": "通常接続線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "connection-selected-stroke": {
+          "description": "選択中接続線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "side-panel-background": {
+          "description": "サイドパネル背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "splitter-background": {
+          "description": "サイドパネルとエディタ領域の区切り",
+          "$ref": "#/$defs/argbColor"
+        },
+        "placeholder-text": {
+          "description": "未選択時プレースホルダーテキスト",
+          "$ref": "#/$defs/argbColor"
+        },
+        "task-editor-heading-text": {
+          "description": "タスク編集タブ見出し文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-panel-background": {
+          "description": "履歴操作領域背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-list-background": {
+          "description": "履歴一覧背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-text": {
+          "description": "通常履歴文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-timestamp-text": {
+          "description": "履歴タイムスタンプ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-current-text": {
+          "description": "現在履歴の文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "history-selected-background": {
+          "description": "履歴リスト選択行背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "date-time-editor-background": {
+          "description": "日時編集ウィンドウ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "date-time-editor-text": {
+          "description": "日時編集ウィンドウ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "theme-setting-background": {
+          "description": "テーマ編集ウィンドウ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "theme-setting-text": {
+          "description": "テーマ編集ウィンドウ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "color-preview-border": {
+          "description": "色プレビュー枠線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-chart-background": {
+          "description": "ガントチャート表示領域背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-chart-border": {
+          "description": "ガントチャート表示領域枠線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-header-background": {
+          "description": "ガントチャート日付ヘッダー背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-header-text": {
+          "description": "ガントチャート日付ヘッダー文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-row-header-background": {
+          "description": "ガントチャートタスク列背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-grid-line": {
+          "description": "ガントチャートグリッド線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-warning-text": {
+          "description": "ガントチャート警告文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-suspension-background": {
+          "description": "ガントチャート中断期間表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-non-working-background": {
+          "description": "ガントチャート作業不可日表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-out-of-participation-background": {
+          "description": "ガントチャート参加期間外表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-dependency-line": {
+          "description": "ガントチャート依存関係線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-saturday-background": {
+          "description": "ガントチャート土曜日背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-saturday-text": {
+          "description": "ガントチャート土曜日文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-sunday-background": {
+          "description": "ガントチャート日曜日背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-sunday-text": {
+          "description": "ガントチャート日曜日文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-special-holiday-background": {
+          "description": "ガントチャート特別休日背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-special-holiday-text": {
+          "description": "ガントチャート特別休日文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-today-background": {
+          "description": "ガントチャート現在日背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-today-text": {
+          "description": "ガントチャート現在日文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "member-badge-background": {
+          "description": "担当者バッジ背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "member-badge-text": {
+          "description": "担当者バッジ文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "member-badge-border": {
+          "description": "担当者バッジ枠線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-background": {
+          "description": "ステータスバー背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-text": {
+          "description": "ステータスバー通常文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-border": {
+          "description": "ステータスバー上境界線",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-warning-text": {
+          "description": "ステータスバー警告文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-error-text": {
+          "description": "ステータスバーエラー文字",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-progress-background": {
+          "description": "ステータスバープログレス背景",
+          "$ref": "#/$defs/argbColor"
+        },
+        "status-bar-progress-foreground": {
+          "description": "ステータスバープログレス前景",
+          "$ref": "#/$defs/argbColor"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "argbColor": {
+      "type": "string",
+      "pattern": "^#[0-9A-Fa-f]{8}$"
+    }
+  }
+}

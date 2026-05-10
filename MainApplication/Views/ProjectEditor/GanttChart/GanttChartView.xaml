@@ -1,0 +1,744 @@
+<UserControl x:Class="MainApplication.Views.ProjectEditor.GanttChart.GanttChartView"
+             x:Name="GanttChartRoot"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:gantt="clr-namespace:MainApplication.ViewModels.GanttChartModel"
+             xmlns:dependencyModel="clr-namespace:MainApplication.ViewModels.DependencyEditorModel">
+    <UserControl.Resources>
+        <DrawingBrush x:Key="GanttNonWorkingHatchBrush"
+                      Viewport="0,0,20,20"
+                      ViewportUnits="Absolute"
+                      TileMode="Tile"
+                      Stretch="None">
+            <DrawingBrush.Drawing>
+                <GeometryDrawing>
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="{DynamicResource GanttNonWorkingBackgroundBrush}"
+                             Thickness="6"/>
+                    </GeometryDrawing.Pen>
+                    <GeometryDrawing.Geometry>
+                        <GeometryGroup>
+                            <LineGeometry StartPoint="0,20" EndPoint="20,0"/>
+                        </GeometryGroup>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <DrawingBrush x:Key="GanttOutOfParticipationHatchBrush"
+                      Viewport="0,0,20,20"
+                      ViewportUnits="Absolute"
+                      TileMode="Tile"
+                      Stretch="None">
+            <DrawingBrush.Drawing>
+                <GeometryDrawing>
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="{DynamicResource GanttOutOfParticipationBackgroundBrush}"
+                             Thickness="6"/>
+                    </GeometryDrawing.Pen>
+                    <GeometryDrawing.Geometry>
+                        <GeometryGroup>
+                            <LineGeometry StartPoint="0,20" EndPoint="20,0"/>
+                        </GeometryGroup>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <Style x:Key="TaskNameTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource WindowTextBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasWarning}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource GanttWarningTextBrush}"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="GanttDayHeaderStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource GanttHeaderBackgroundBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSaturday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSaturdayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSunday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSundayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSpecialHoliday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSpecialHolidayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttTodayBackgroundBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="GanttDayHeaderTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource GanttHeaderTextBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource GanttTodayTextBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSaturday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource GanttSaturdayTextBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSunday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource GanttSundayTextBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSpecialHoliday}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource GanttSpecialHolidayTextBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="GanttDayCellStyle" TargetType="Border">
+            <Setter Property="Background" Value="Transparent"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsSaturday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSaturdayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSunday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSundayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSpecialHoliday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttSpecialHolidayBackgroundBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsToday}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource GanttTodayBackgroundBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="GanttTaskBarStyle" TargetType="Border">
+            <Setter Property="Visibility" Value="Visible"/>
+            <Setter Property="Background" Value="{DynamicResource NodeStatusReadyBrush}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource NodeStatusReadyBrush}"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="SnapsToDevicePixels" Value="True"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HasSchedule}" Value="False">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static dependencyModel:TaskNodeViewModel+TaskStatus.Pending}">
+                    <Setter Property="Background" Value="{DynamicResource NodeStatusPendingBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource NodeStatusPendingBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static dependencyModel:TaskNodeViewModel+TaskStatus.InProgress}">
+                    <Setter Property="Background" Value="{DynamicResource NodeStatusInProgressBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource NodeStatusInProgressBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static dependencyModel:TaskNodeViewModel+TaskStatus.Done}">
+                    <Setter Property="Background" Value="{DynamicResource NodeStatusDoneBrush}"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource NodeStatusDoneBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource ConnectionSelectedStrokeBrush}"/>
+                    <Setter Property="BorderThickness" Value="3"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="GanttStatusColorBarStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource NodeStatusReadyBrush}"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static dependencyModel:TaskNodeViewModel+TaskStatus.Pending}">
+                    <Setter Property="Background" Value="{DynamicResource NodeStatusPendingBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static dependencyModel:TaskNodeViewModel+TaskStatus.InProgress}">
+                    <Setter Property="Background" Value="{DynamicResource NodeStatusInProgressBrush}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static dependencyModel:TaskNodeViewModel+TaskStatus.Done}">
+                    <Setter Property="Background" Value="{DynamicResource NodeStatusDoneBrush}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource WindowBackgroundBrush}"
+          TextElement.Foreground="{DynamicResource WindowTextBrush}"
+          SnapsToDevicePixels="True"
+          UseLayoutRounding="True"
+          Margin="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="8"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <DockPanel>
+                <TextBlock Text="{Binding TimelineRangeText}"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+            </DockPanel>
+
+            <Grid Margin="0,6,0,0"
+                  VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0"
+                            Margin="0,0,12,4"
+                            VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0,0,0,4">
+                        <TextBlock Text="並び替え"
+                                   Foreground="{DynamicResource WindowTextBrush}"
+                                   Margin="0,0,6,0"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox Width="120"
+                                  ItemsSource="{Binding DisplaySettings.SortOptions}"
+                                  DisplayMemberPath="DisplayText"
+                                  SelectedValuePath="SortKey"
+                                  SelectedValue="{Binding DisplaySettings.SelectedSortKey, Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <GroupBox Header="ステータス"
+                              Foreground="{DynamicResource WindowTextBrush}"
+                              Padding="6,2">
+                        <ItemsControl ItemsSource="{Binding DisplaySettings.StatusFilterItems}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type gantt:GanttStatusFilterItemViewModel}">
+                                    <CheckBox Content="{Binding DisplayText}"
+                                              Foreground="{DynamicResource WindowTextBrush}"
+                                              IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              Margin="0,0,8,0"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </GroupBox>
+                </StackPanel>
+
+                <GroupBox Grid.Column="1"
+                          Header="担当者"
+                          Foreground="{DynamicResource WindowTextBrush}"
+                          Margin="0,0,12,4"
+                          Padding="6,2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Width="120"
+                                  Height="24"
+                                  Margin="0,0,4,0"
+                                  VerticalAlignment="Center"
+                                  ItemsSource="{Binding DisplaySettings.AvailableAssigneeFilterItems}"
+                                  DisplayMemberPath="DisplayText"
+                                  SelectedItem="{Binding DisplaySettings.SelectedAssigneeFilterCandidate, Mode=TwoWay}"/>
+                        <Button Content="追加"
+                                Grid.Column="1"
+                                Command="{Binding DisplaySettings.AddAssigneeFilterCommand}"
+                                Height="24"
+                                MinWidth="46"
+                                Margin="0,0,6,0"
+                                VerticalAlignment="Center"/>
+                        <ScrollViewer Grid.Column="2"
+                                      Height="40"
+                                      MinWidth="120"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding DisplaySettings.SelectedAssigneeFilterItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type gantt:GanttMemberFilterItemViewModel}">
+                                        <Border BorderBrush="{DynamicResource GanttChartBorderBrush}"
+                                                BorderThickness="1"
+                                                Padding="4,1"
+                                                Margin="0,0,4,0"
+                                                Background="{DynamicResource GanttHeaderBackgroundBrush}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding DisplayText}"
+                                                           Foreground="{DynamicResource WindowTextBrush}"
+                                                           VerticalAlignment="Center"/>
+                                                <Button Content="削除"
+                                                        Command="{Binding DataContext.DisplaySettings.RemoveAssigneeFilterCommand, Source={x:Reference GanttChartRoot}}"
+                                                        CommandParameter="{Binding}"
+                                                        MinWidth="38"
+                                                        Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Grid.Column="2"
+                          Header="作業協力者"
+                          Foreground="{DynamicResource WindowTextBrush}"
+                          Margin="0,0,12,4"
+                          Padding="6,2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Width="120"
+                                  Height="24"
+                                  Margin="0,0,4,0"
+                                  VerticalAlignment="Center"
+                                  ItemsSource="{Binding DisplaySettings.AvailableCollaboratorFilterItems}"
+                                  DisplayMemberPath="DisplayText"
+                                  SelectedItem="{Binding DisplaySettings.SelectedCollaboratorFilterCandidate, Mode=TwoWay}"/>
+                        <Button Content="追加"
+                                Grid.Column="1"
+                                Command="{Binding DisplaySettings.AddCollaboratorFilterCommand}"
+                                Height="24"
+                                MinWidth="46"
+                                Margin="0,0,6,0"
+                                VerticalAlignment="Center"/>
+                        <ScrollViewer Grid.Column="2"
+                                      Height="40"
+                                      MinWidth="120"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding DisplaySettings.SelectedCollaboratorFilterItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type gantt:GanttMemberFilterItemViewModel}">
+                                        <Border BorderBrush="{DynamicResource GanttChartBorderBrush}"
+                                                BorderThickness="1"
+                                                Padding="4,1"
+                                                Margin="0,0,4,0"
+                                                Background="{DynamicResource GanttHeaderBackgroundBrush}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding DisplayText}"
+                                                           Foreground="{DynamicResource WindowTextBrush}"
+                                                           VerticalAlignment="Center"/>
+                                                <Button Content="削除"
+                                                        Command="{Binding DataContext.DisplaySettings.RemoveCollaboratorFilterCommand, Source={x:Reference GanttChartRoot}}"
+                                                        CommandParameter="{Binding}"
+                                                        MinWidth="38"
+                                                        Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </GroupBox>
+
+            </Grid>
+        </StackPanel>
+
+        <Border Grid.Row="2"
+                BorderBrush="{DynamicResource GanttChartBorderBrush}"
+                BorderThickness="1"
+                Background="{DynamicResource GanttChartBackgroundBrush}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="42"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="320"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Row="0"
+                        Grid.Column="0"
+                        BorderBrush="{DynamicResource GanttChartBorderBrush}"
+                        BorderThickness="0,0,1,1"
+                        Background="{DynamicResource GanttHeaderBackgroundBrush}"
+                        Padding="6">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="190"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="1"
+                                   Text="タスク"
+                                   Foreground="{DynamicResource GanttHeaderTextBrush}"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="2"
+                                   Text="担当者"
+                                   Foreground="{DynamicResource GanttHeaderTextBrush}"
+                                   FontWeight="Bold"
+                                   VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <Border x:Name="ChartHeaderViewport"
+                        Grid.Row="0"
+                        Grid.Column="1"
+                        ClipToBounds="True"
+                        PreviewMouseWheel="GanttChartViewport_PreviewMouseWheel">
+                    <Canvas Width="{Binding ChartWidth}"
+                            Height="42"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top">
+                        <Canvas.RenderTransform>
+                            <TranslateTransform X="{Binding ChartTranslateX}"/>
+                        </Canvas.RenderTransform>
+                        <ItemsControl Width="{Binding ChartWidth}"
+                                      Height="42"
+                                      ItemsSource="{Binding TimelineDays}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type gantt:GanttTimelineDayViewModel}">
+                                    <Border Width="{Binding Width}"
+                                            Height="42"
+                                            BorderBrush="{DynamicResource GanttChartBorderBrush}"
+                                            BorderThickness="0,0,1,1"
+                                            Padding="4"
+                                            Style="{StaticResource GanttDayHeaderStyle}">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding DateText}"
+                                                       Style="{StaticResource GanttDayHeaderTextStyle}"
+                                                       FontWeight="Bold"
+                                                       HorizontalAlignment="Center"/>
+                                            <TextBlock Text="{Binding DayOfWeekText}"
+                                                       Style="{StaticResource GanttDayHeaderTextStyle}"
+                                                       FontSize="11"
+                                                       HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Canvas>
+                </Border>
+
+                <Border x:Name="TaskRowsViewport"
+                        Grid.Row="1"
+                        Grid.Column="0"
+                        ClipToBounds="True"
+                        PreviewMouseWheel="GanttChartViewport_PreviewMouseWheel">
+                    <Canvas Width="320"
+                            Height="{Binding ChartHeight}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top">
+                        <Canvas.RenderTransform>
+                            <TranslateTransform Y="{Binding ChartTranslateY}"/>
+                        </Canvas.RenderTransform>
+                        <ItemsControl Width="320"
+                                      Height="{Binding ChartHeight}"
+                                      ItemsSource="{Binding Tasks}"
+                                      Panel.ZIndex="1">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type gantt:GanttTaskItemViewModel}">
+                                    <Grid Height="48">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="320"/>
+                                        </Grid.ColumnDefinitions>
+
+                                        <Border BorderBrush="{DynamicResource GanttChartBorderBrush}"
+                                                BorderThickness="0,0,1,1"
+                                                Padding="6"
+                                                MouseLeftButtonDown="GanttTaskItem_MouseLeftButtonDown"
+                                                MouseRightButtonUp="GanttTaskItem_MouseRightButtonUp">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Background" Value="{DynamicResource GanttRowHeaderBackgroundBrush}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                                            <Setter Property="Background" Value="{DynamicResource HistorySelectedBackgroundBrush}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="10"/>
+                                                    <ColumnDefinition Width="190"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <Border Grid.Column="0"
+                                                        Width="5"
+                                                        HorizontalAlignment="Left"
+                                                        Style="{StaticResource GanttStatusColorBarStyle}"/>
+                                                <TextBlock Grid.Column="1"
+                                                           Text="{Binding TaskName}"
+                                                           Style="{StaticResource TaskNameTextStyle}"
+                                                           VerticalAlignment="Center"
+                                                           TextTrimming="CharacterEllipsis"
+                                                           ToolTipService.IsEnabled="{Binding HasWarning}">
+                                                    <ToolTipService.ToolTip>
+                                                        <StackPanel>
+                                                            <TextBlock Text="{Binding TaskName}" FontWeight="Bold"/>
+                                                            <TextBlock Text="{Binding ErrorText}"
+                                                                       Foreground="{DynamicResource GanttWarningTextBrush}"/>
+                                                        </StackPanel>
+                                                    </ToolTipService.ToolTip>
+                                                </TextBlock>
+                                                <Grid Grid.Column="2">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Width="22"
+                                                            Height="22"
+                                                            Margin="0,0,6,0"
+                                                            VerticalAlignment="Center"
+                                                            Background="{DynamicResource MemberBadgeBackgroundBrush}"
+                                                            BorderBrush="{DynamicResource MemberBadgeBorderBrush}"
+                                                            BorderThickness="1"
+                                                            CornerRadius="11">
+                                                        <Border.Style>
+                                                            <Style TargetType="Border">
+                                                                <Setter Property="Visibility" Value="Visible"/>
+                                                                <Style.Triggers>
+                                                                    <DataTrigger Binding="{Binding HasAssigneeBadge}" Value="False">
+                                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                                    </DataTrigger>
+                                                                </Style.Triggers>
+                                                            </Style>
+                                                        </Border.Style>
+                                                        <TextBlock Text="{Binding AssigneeInitials}"
+                                                                   Foreground="{DynamicResource MemberBadgeTextBrush}"
+                                                                   FontSize="10"
+                                                                   FontWeight="Bold"
+                                                                   HorizontalAlignment="Center"
+                                                                   VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <TextBlock Grid.Column="1"
+                                                               Text="{Binding AssigneeName}"
+                                                               Opacity="0.8"
+                                                               VerticalAlignment="Center"
+                                                               TextTrimming="CharacterEllipsis"/>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Canvas>
+                </Border>
+
+                <Border x:Name="ChartBodyViewport"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        ClipToBounds="True"
+                        SizeChanged="ChartBodyViewport_SizeChanged"
+                        PreviewMouseWheel="GanttChartViewport_PreviewMouseWheel">
+                    <Canvas Width="{Binding ChartWidth}"
+                            Height="{Binding ChartHeight}"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
+                            ClipToBounds="True">
+                        <Canvas.RenderTransform>
+                            <TranslateTransform X="{Binding ChartTranslateX}"
+                                                Y="{Binding ChartTranslateY}"/>
+                        </Canvas.RenderTransform>
+
+                        <ItemsControl ItemsSource="{Binding TimelineDays}"
+                                      Width="{Binding ChartWidth}"
+                                      Height="{Binding ChartHeight}"
+                                      Panel.ZIndex="0">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas Width="{Binding ChartWidth}"
+                                            Height="{Binding ChartHeight}"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type gantt:GanttTimelineDayViewModel}">
+                                    <Border Width="{Binding Width}"
+                                            Height="{Binding DataContext.ChartHeight, Source={x:Reference GanttChartRoot}}"
+                                            BorderBrush="{DynamicResource GanttGridLineBrush}"
+                                            BorderThickness="0,0,1,0"
+                                            Style="{StaticResource GanttDayCellStyle}"
+                                            Opacity="0.35"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <ItemsControl ItemsSource="{Binding Tasks}"
+                                      Width="{Binding ChartWidth}"
+                                      Height="{Binding ChartHeight}"
+                                      Panel.ZIndex="1">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas Width="{Binding ChartWidth}"
+                                            Height="{Binding ChartHeight}"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemContainerStyle>
+                                <Style TargetType="ContentPresenter">
+                                    <Setter Property="Canvas.Top" Value="{Binding RowTop}"/>
+                                </Style>
+                            </ItemsControl.ItemContainerStyle>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type gantt:GanttTaskItemViewModel}">
+                                    <Canvas Width="{Binding DataContext.ChartWidth, Source={x:Reference GanttChartRoot}}"
+                                            Height="48">
+                                        <Border Width="{Binding DataContext.ChartWidth, Source={x:Reference GanttChartRoot}}"
+                                                Height="48"
+                                                BorderBrush="{DynamicResource GanttGridLineBrush}"
+                                                BorderThickness="0,0,0,1"
+                                                IsHitTestVisible="False"/>
+
+                                        <Border Canvas.Left="{Binding BarLeft}"
+                                                Canvas.Top="14"
+                                                Width="{Binding BarWidth}"
+                                                Height="20"
+                                                Style="{StaticResource GanttTaskBarStyle}"
+                                                MouseLeftButtonDown="GanttTaskItem_MouseLeftButtonDown"
+                                                MouseRightButtonUp="GanttTaskItem_MouseRightButtonUp">
+                                            <Grid ClipToBounds="True">
+                                                <ItemsControl ItemsSource="{Binding NonWorkingPeriods}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <Canvas/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemContainerStyle>
+                                                        <Style TargetType="ContentPresenter">
+                                                            <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                                                        </Style>
+                                                    </ItemsControl.ItemContainerStyle>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate DataType="{x:Type gantt:GanttUnavailablePeriodItemViewModel}">
+                                                            <Border Width="{Binding Width}"
+                                                                    Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                    Background="{StaticResource GanttNonWorkingHatchBrush}"
+                                                                    BorderBrush="{DynamicResource GanttNonWorkingBackgroundBrush}"
+                                                                    BorderThickness="2"
+                                                                    SnapsToDevicePixels="True"/>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <ItemsControl ItemsSource="{Binding OutOfParticipationPeriods}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <Canvas/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemContainerStyle>
+                                                        <Style TargetType="ContentPresenter">
+                                                            <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                                                        </Style>
+                                                    </ItemsControl.ItemContainerStyle>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate DataType="{x:Type gantt:GanttUnavailablePeriodItemViewModel}">
+                                                            <Border Width="{Binding Width}"
+                                                                    Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                    Background="{StaticResource GanttOutOfParticipationHatchBrush}"
+                                                                    BorderBrush="{DynamicResource GanttOutOfParticipationBackgroundBrush}"
+                                                                    BorderThickness="2"
+                                                                    SnapsToDevicePixels="True"/>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <ItemsControl ItemsSource="{Binding Suspensions}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <Canvas/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemContainerStyle>
+                                                        <Style TargetType="ContentPresenter">
+                                                            <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                                                        </Style>
+                                                    </ItemsControl.ItemContainerStyle>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate DataType="{x:Type gantt:GanttSuspensionItemViewModel}">
+                                                            <Border Width="{Binding Width}"
+                                                                    Height="20"
+                                                                    Background="{DynamicResource GanttSuspensionBackgroundBrush}"
+                                                                    Opacity="0.65"/>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </Grid>
+                                            <ToolTipService.ToolTip>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding TaskName}" FontWeight="Bold"/>
+                                                    <TextBlock Text="{Binding PeriodText}"/>
+                                                    <TextBlock Text="{Binding AssigneeName}"/>
+                                                </StackPanel>
+                                            </ToolTipService.ToolTip>
+                                        </Border>
+                                    </Canvas>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <ItemsControl ItemsSource="{Binding DependencyLines}"
+                                      IsHitTestVisible="False"
+                                      Panel.ZIndex="2">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <Canvas Width="{Binding ChartWidth}"
+                                            Height="{Binding ChartHeight}"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type gantt:GanttDependencyLineViewModel}">
+                                    <Canvas>
+                                        <Path Data="{Binding Geometry}"
+                                              Stroke="{DynamicResource GanttDependencyLineBrush}"
+                                              StrokeThickness="1.5"
+                                              Opacity="0.75"/>
+                                        <Polygon Points="{Binding ArrowPoints}"
+                                                 Fill="{DynamicResource GanttDependencyLineBrush}"
+                                                 Opacity="0.75"/>
+                                    </Canvas>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Canvas>
+                </Border>
+
+                <TextBlock Grid.Row="1"
+                           Grid.ColumnSpan="2"
+                           Text="表示可能なタスクがありません"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Opacity="0.7">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding HasNoTasks}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

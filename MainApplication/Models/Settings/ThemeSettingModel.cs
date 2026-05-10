@@ -1,0 +1,93 @@
+namespace MainApplication.Models.Settings
+{
+    /// <summary>
+    /// テーマ設定情報を表すモデル。
+    /// </summary>
+    public class ThemeSettingModel
+    {
+        /// <summary>
+        /// テーマ名。
+        /// </summary>
+        public string Name { get; set; } = "Default";
+
+        /// <summary>
+        /// テーマ内で利用する色設定。
+        /// </summary>
+        public Dictionary<string, string> Colors { get; set; } = new()
+        {
+            { "window-background", "#FFF5F5F5" },
+            { "window-text", "#FF1E1E1E" },
+            { "tab-window-background", "#FFF5F5F5" },
+            { "tab-item-background", "#FFECECEC" },
+            { "tab-item-selected-background", "#FFFFFFFF" },
+            { "tab-item-text", "#FF1E1E1E" },
+            { "tab-item-selected-text", "#FF1E1E1E" },
+            { "node-editor-border", "#FFD0D0D0" },
+            { "node-editor-canvas-background", "#FFFFFFFF" },
+            { "temporary-connection-stroke", "#FF808080" },
+            { "grid-line-minor", "#FFECECEC" },
+            { "grid-line-major", "#FFD0D0D0" },
+            { "grid-origin-axis-x", "#FFE51400" },
+            { "grid-origin-axis-y", "#FF007ACC" },
+            { "node-background", "#FFDDEEFF" },
+            { "node-selected-background", "#FF9ED8FF" },
+            { "node-border", "#FF007ACC" },
+            { "node-status-ready", "#FFD83B96" },
+            { "node-status-pending", "#FF808080" },
+            { "node-status-in-progress", "#FFFF8C00" },
+            { "node-status-done", "#FF43A047" },
+            { "node-text", "#FF1E1E1E" },
+            { "port-input-fill", "#FF388A34" },
+            { "port-output-fill", "#FFC43E1C" },
+            { "port-unknown-fill", "#FF808080" },
+            { "connection-stroke", "#FF1E1E1E" },
+            { "connection-selected-stroke", "#FF007ACC" },
+            { "side-panel-background", "#FFF3F3F3" },
+            { "splitter-background", "#FFD0D0D0" },
+            { "placeholder-text", "#FF6A6A6A" },
+            { "task-editor-heading-text", "#FF1E1E1E" },
+            { "history-panel-background", "#FFF3F3F3" },
+            { "history-list-background", "#FFFFFFFF" },
+            { "history-text", "#FF1E1E1E" },
+            { "history-timestamp-text", "#FF6A6A6A" },
+            { "history-current-text", "#FF007ACC" },
+            { "history-selected-background", "#FFD7EBFF" },
+            { "date-time-editor-background", "#FFF5F5F5" },
+            { "date-time-editor-text", "#FF1E1E1E" },
+            { "theme-setting-background", "#FFF5F5F5" },
+            { "theme-setting-text", "#FF1E1E1E" },
+            { "color-preview-border", "#FF808080" },
+            { "gantt-chart-background", "#FFFFFFFF" },
+            { "gantt-chart-border", "#FFD0D0D0" },
+            { "gantt-header-background", "#FFF5F5F5" },
+            { "gantt-header-text", "#FF1E1E1E" },
+            { "gantt-row-header-background", "#FFFFFFFF" },
+            { "gantt-grid-line", "#FFE5E5E5" },
+            { "gantt-warning-text", "#FFF9A825" },
+            { "gantt-suspension-background", "#FF808080" },
+            { "gantt-non-working-background", "#FFC8C8C8" },
+            { "gantt-out-of-participation-background", "#FFFFC8F4" },
+            { "gantt-dependency-line", "#FF606060" },
+            { "gantt-saturday-background", "#FFEAF4FF" },
+            { "gantt-saturday-text", "#FF0066B3" },
+            { "gantt-sunday-background", "#FFFFEEEE" },
+            { "gantt-sunday-text", "#FFB00020" },
+            { "gantt-special-holiday-background", "#FFFFEAF5" },
+            { "gantt-special-holiday-text", "#FFC2185B" },
+            { "gantt-today-background", "#FFFFF8C4" },
+            { "gantt-today-text", "#FF7A5A00" },
+            { "member-badge-background", "#FF007ACC" },
+            { "member-badge-text", "#FFFFFFFF" },
+            { "member-badge-border", "#FFFFFFFF" },
+            { "status-bar-background", "#FFECECEC" },
+            { "status-bar-text", "#FF1E1E1E" },
+            { "status-bar-border", "#FFD0D0D0" },
+            { "status-bar-warning-text", "#FFF9A825" },
+            { "status-bar-error-text", "#FFE51400" },
+            { "status-bar-progress-background", "#FFD0D0D0" },
+            { "status-bar-progress-foreground", "#FF007ACC" }
+        };
+    }
+}
+
+/* --- End of file --- */

@@ -1,0 +1,152 @@
+using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.DependencyEditorModel;
+using MainApplication.ViewModels.GanttChartModel;
+using MainApplication.ViewModels.StatusBarModel;
+using MainApplication.ViewModels.TeamModel;
+using System.Collections.ObjectModel;
+
+namespace MainApplication.ViewModels.ProjectModel
+{
+    /// <summary>
+    /// 1つのプロジェクトを表すViewModel
+    /// </summary>
+    public class ProjectViewModel : ViewModelBase
+    {
+        private string? _projectName;
+        private TabInfo? _selectedTab;
+        private int _selectedEditorTabIndex;
+
+        /// <summary>
+        /// プロジェクト名
+        /// </summary>
+        public string? ProjectName
+        {
+            get => _projectName;
+            set => SetProperty(ref _projectName, value);
+        }
+
+        /// <summary>
+        /// プロジェクトID
+        /// </summary>
+        public Guid ProjectId { get; set; } = Guid.NewGuid();
+
+        /// <summary>
+        /// 依存関係編集ViewModel
+        /// </summary>
+        public DependencyEditorViewModel DependencyEditor { get; }
+
+        /// <summary>
+        /// プロジェクトスケジュール用ガントチャートViewModel
+        /// </summary>
+        public GanttChartViewModel GanttChart { get; }
+
+        /// <summary>
+        /// 表示中のタブ一覧
+        /// </summary>
+        public ObservableCollection<TabInfo> Tabs { get; }
+
+        /// <summary>
+        /// 現在選択されているタブ
+        /// </summary>
+        public TabInfo? SelectedTab
+        {
+            get => _selectedTab;
+            set => SetProperty(
+                ref _selectedTab,
+                value,
+                [nameof(IsDependencyEditor)],
+                CreateHooksFromValue(
+                    value,
+                    post: (oldValue, newValue) =>
+                    {
+                        if (newValue?.Content == GanttChart)
+                        {
+                            GanttChart.Refresh();
+                        }
+                    }
+                )
+            );
+        }
+
+        /// <summary>
+        /// 現在のタブが依存関係編集かどうか
+        /// </summary>
+        public bool IsDependencyEditor => SelectedTab?.Content == DependencyEditor;
+
+        /// <summary>
+        /// エディタ領域で選択されているタブ番号
+        /// </summary>
+        public int SelectedEditorTabIndex
+        {
+            get => _selectedEditorTabIndex;
+            set => SetProperty(ref _selectedEditorTabIndex, value);
+        }
+
+        /// <summary>
+        /// ProjectViewModelを生成し、子ViewModelやサービスを初期化する
+        /// </summary>
+        /// <param name="name">プロジェクト名</param>
+        /// <param name="members">チームメンバー一覧</param>
+        /// <param name="specialHolidays">特別休日一覧</param>
+        public ProjectViewModel(
+            string name,
+            ObservableCollection<TeamMemberViewModel>? members = null,
+            ObservableCollection<DateOnly>? specialHolidays = null,
+            StatusBarViewModel? statusBar = null,
+            IProjectMemberAvailabilityProvider? memberAvailabilityProvider = null
+        )
+        {
+            ProjectName = name;
+            DependencyEditor = new DependencyEditorViewModel();
+            if (members != null)
+            {
+                DependencyEditor.SetTeamMembers(members);
+            }
+
+            GanttChart = new GanttChartViewModel(DependencyEditor, () => ProjectId, specialHolidays, statusBar, memberAvailabilityProvider);
+
+            var dependencyEditorTab = new TabInfo("タスク編集", DependencyEditor);
+            var ganttChartTab = new TabInfo("プロジェクトスケジュール", GanttChart);
+            Tabs =
+            [
+                dependencyEditorTab,
+                ganttChartTab
+            ];
+
+            SelectedTab = dependencyEditorTab;
+        }
+
+        /// <summary>
+        /// プロジェクト内メンバー稼働条件の参照先を設定する
+        /// </summary>
+        /// <param name="memberAvailabilityProvider">稼働条件提供元</param>
+        public void SetMemberAvailabilityProvider(IProjectMemberAvailabilityProvider? memberAvailabilityProvider)
+        {
+            GanttChart.MemberAvailabilityProvider = memberAvailabilityProvider;
+        }
+
+        /// <summary>
+        /// 指定タスクをプロジェクトスケジュール上で表示する
+        /// </summary>
+        /// <param name="node">表示対象タスク</param>
+        public void ShowTaskInGanttChart(TaskNodeViewModel node)
+        {
+            DependencyEditor.Nodes.SelectNode(node);
+            SelectedEditorTabIndex = 1;
+            GanttChart.RequestScrollToTask(node);
+        }
+
+        /// <summary>
+        /// 指定タスクを依存関係編集上で表示する
+        /// </summary>
+        /// <param name="node">表示対象タスク</param>
+        public void ShowTaskInDependencyEditor(TaskNodeViewModel node)
+        {
+            DependencyEditor.Nodes.SelectNode(node);
+            SelectedEditorTabIndex = 0;
+            DependencyEditor.ScrollToNode(node);
+        }
+    }
+}
+
+/* --- End of file --- */
