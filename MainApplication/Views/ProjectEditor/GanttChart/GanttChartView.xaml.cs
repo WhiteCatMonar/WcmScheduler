@@ -1,9 +1,9 @@
 using System.ComponentModel;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows;
 using System.Windows.Threading;
 using MainApplication.ViewModels.GanttChartModel;
+using System.Windows.Controls;
 
 namespace MainApplication.Views.ProjectEditor.GanttChart
 {
@@ -71,11 +71,12 @@ namespace MainApplication.Views.ProjectEditor.GanttChart
         /// </summary>
         /// <param name="sender">イベント送信元</param>
         /// <param name="e">イベント引数</param>
-        private void ChartScrollViewer_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
+        private void ChartBodyViewport_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             if (DataContext is GanttChartViewModel viewModel)
             {
                 viewModel.SetViewportChartWidth(e.NewSize.Width);
+                viewModel.SetViewportChartHeight(e.NewSize.Height);
             }
         }
 
@@ -84,21 +85,30 @@ namespace MainApplication.Views.ProjectEditor.GanttChart
         /// </summary>
         /// <param name="sender">イベント送信元</param>
         /// <param name="e">イベント引数</param>
-        private void ChartScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        private void GanttChartViewport_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            if (sender is not ScrollViewer scrollViewer)
+            if (DataContext is not GanttChartViewModel viewModel)
             {
+                return;
+            }
+
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                var anchorX = e.GetPosition(ChartBodyViewport).X;
+                var factor = e.Delta > 0 ? 1.1 : 1.0 / 1.1;
+                viewModel.ZoomHorizontal(factor, anchorX);
+                e.Handled = true;
                 return;
             }
 
             if ((Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift)
             {
-                scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - e.Delta);
+                viewModel.ScrollBy(-e.Delta, 0.0);
                 e.Handled = true;
                 return;
             }
 
-            VerticalScrollViewer.ScrollToVerticalOffset(VerticalScrollViewer.VerticalOffset - e.Delta);
+            viewModel.ScrollBy(0.0, -e.Delta);
             e.Handled = true;
         }
 
@@ -129,7 +139,7 @@ namespace MainApplication.Views.ProjectEditor.GanttChart
             }
 
             Dispatcher.BeginInvoke(
-                () => ChartScrollViewer.ScrollToHorizontalOffset(viewModel.TodayHorizontalOffset),
+                viewModel.ScrollToToday,
                 DispatcherPriority.Loaded
             );
         }
