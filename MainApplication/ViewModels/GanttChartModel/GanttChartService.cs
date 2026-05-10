@@ -27,15 +27,17 @@ namespace MainApplication.ViewModels.GanttChartModel
             DateOnly timelineStartDate,
             double dayWidth,
             double rowHeight,
-            IEnumerable<DateOnly> specialHolidays
+            IEnumerable<DateOnly> specialHolidays,
+            GanttChartDisplaySettingsViewModel displaySettings
         )
         {
             var holidays = specialHolidays.ToHashSet();
             var schedules = CalculateSchedules(dependencyEditor, holidays);
+            var dependencyOrder = CreateDependencyOrderMap(dependencyEditor);
             var result = new List<GanttTaskItemViewModel>();
             var index = 0;
 
-            foreach (var schedule in schedules.OrderBy(item => item.SortDateTime).ThenBy(item => item.Node.Detail.TaskName))
+            foreach (var schedule in SortSchedules(schedules.Where(item => displaySettings.IsTaskVisible(item.Node)), displaySettings.SelectedSortKey, dependencyOrder))
             {
                 var left = schedule.HasSchedule ? CalculateLeft(timelineStartDate, schedule.StartDateTime, dayWidth) : 0.0;
                 var scheduleWidth = schedule.HasSchedule
@@ -329,6 +331,82 @@ namespace MainApplication.ViewModels.GanttChartModel
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// ガントチャート表示用予定を指定キーで並び替える
+        /// </summary>
+        /// <param name="schedules">予定一覧</param>
+        /// <param name="sortKey">並び替えキー</param>
+        /// <param name="dependencyOrder">依存順インデックス</param>
+        /// <returns>並び替え済み予定一覧</returns>
+        private static IEnumerable<GanttTaskSchedule> SortSchedules(
+            IEnumerable<GanttTaskSchedule> schedules,
+            GanttSortKey sortKey,
+            IReadOnlyDictionary<TaskNodeViewModel, int> dependencyOrder
+        )
+        {
+            return sortKey switch
+            {
+                GanttSortKey.TaskName => schedules
+                    .OrderBy(item => item.Node.Detail.TaskName)
+                    .ThenBy(item => dependencyOrder.GetValueOrDefault(item.Node, int.MaxValue)),
+                GanttSortKey.StartDateTime => schedules
+                    .OrderBy(item => item.HasSchedule ? item.StartDateTime : DateTime.MaxValue)
+                    .ThenBy(item => item.Node.Detail.TaskName),
+                GanttSortKey.EndDateTime => schedules
+                    .OrderBy(item => item.HasSchedule ? item.EndDateTime : DateTime.MaxValue)
+                    .ThenBy(item => item.Node.Detail.TaskName),
+                _ => schedules
+                    .OrderBy(item => dependencyOrder.GetValueOrDefault(item.Node, int.MaxValue))
+                    .ThenBy(item => item.Node.Detail.TaskName)
+            };
+        }
+
+        /// <summary>
+        /// 依存関係に基づく表示順インデックスを作成する
+        /// </summary>
+        /// <param name="dependencyEditor">対象依存関係編集</param>
+        /// <returns>タスクノード別依存順インデックス</returns>
+        private static Dictionary<TaskNodeViewModel, int> CreateDependencyOrderMap(DependencyEditorViewModel dependencyEditor)
+        {
+            var orderedNodes = new List<TaskNodeViewModel>();
+            var visited = new HashSet<TaskNodeViewModel>();
+            foreach (var node in dependencyEditor.Nodes.Nodes)
+            {
+                VisitDependencyOrder(node, dependencyEditor, visited, orderedNodes);
+            }
+
+            return orderedNodes
+                .Select((node, index) => new { node, index })
+                .ToDictionary(item => item.node, item => item.index);
+        }
+
+        /// <summary>
+        /// 前段タスクを優先して依存順一覧へノードを追加する
+        /// </summary>
+        /// <param name="node">対象ノード</param>
+        /// <param name="dependencyEditor">対象依存関係編集</param>
+        /// <param name="visited">訪問済みノード集合</param>
+        /// <param name="orderedNodes">依存順ノード一覧</param>
+        private static void VisitDependencyOrder(
+            TaskNodeViewModel node,
+            DependencyEditorViewModel dependencyEditor,
+            HashSet<TaskNodeViewModel> visited,
+            List<TaskNodeViewModel> orderedNodes
+        )
+        {
+            if (!visited.Add(node))
+            {
+                return;
+            }
+
+            foreach (var predecessor in GetPredecessors(node, dependencyEditor))
+            {
+                VisitDependencyOrder(predecessor, dependencyEditor, visited, orderedNodes);
+            }
+
+            orderedNodes.Add(node);
         }
 
         /// <summary>

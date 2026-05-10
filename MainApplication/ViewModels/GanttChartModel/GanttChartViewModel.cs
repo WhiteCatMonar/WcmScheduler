@@ -74,6 +74,9 @@ namespace MainApplication.ViewModels.GanttChartModel
 
             RefreshCommand = new RelayCommand(RequestRefresh);
             SelectTaskCommand = new RelayCommand<GanttTaskItemViewModel>(SelectTask, task => task != null);
+            DisplaySettings = new GanttChartDisplaySettingsViewModel(RequestRefresh);
+            DisplaySettings.RefreshMemberOptions(_dependencyEditor.TeamMembers);
+            DisplaySettings.RefreshStatusOptions();
             Refresh();
         }
 
@@ -91,6 +94,11 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 依存関係線一覧
         /// </summary>
         public ObservableCollection<GanttDependencyLineViewModel> DependencyLines { get; } = [];
+
+        /// <summary>
+        /// ガントチャート表示設定
+        /// </summary>
+        public GanttChartDisplaySettingsViewModel DisplaySettings { get; }
 
         /// <summary>
         /// プロジェクト内メンバー稼働条件の参照先
@@ -352,6 +360,8 @@ namespace MainApplication.ViewModels.GanttChartModel
             try
             {
                 _dependencyEditor.RefreshTaskStatuses();
+                DisplaySettings.RefreshMemberOptions(_dependencyEditor.TeamMembers);
+                DisplaySettings.RefreshStatusOptions();
 
                 var startDate = GetTimelineStartDate();
                 TimelineStartDate = startDate;
@@ -363,7 +373,8 @@ namespace MainApplication.ViewModels.GanttChartModel
                     startDate,
                     DayWidth,
                     RowHeight,
-                    _specialHolidays
+                    _specialHolidays,
+                    DisplaySettings
                 );
                 var endDate = GetTimelineEndDate(tasks, startDate);
                 _timelineEndDate = endDate;
@@ -660,7 +671,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         {
             if (sender is TaskNodeViewModel node && e.PropertyName == nameof(TaskNodeViewModel.Status))
             {
-                RefreshTaskDisplayForNode(node);
+                RequestRefresh();
             }
         }
 
@@ -672,6 +683,12 @@ namespace MainApplication.ViewModels.GanttChartModel
             if (sender is TaskDetailViewModel detail && e.PropertyName == nameof(TaskDetailViewModel.TaskName))
             {
                 RefreshTaskDisplayForDetail(detail);
+            }
+
+            if (e.PropertyName == nameof(TaskDetailViewModel.AssigneeMemberId) ||
+                e.PropertyName == nameof(TaskDetailViewModel.CollaboratorMemberIds))
+            {
+                RequestRefresh();
             }
         }
 

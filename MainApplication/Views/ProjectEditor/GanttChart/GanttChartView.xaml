@@ -166,11 +166,182 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <DockPanel Grid.Row="0">
-            <TextBlock Text="{Binding TimelineRangeText}"
-                       FontWeight="Bold"
-                       VerticalAlignment="Center"/>
-        </DockPanel>
+        <StackPanel Grid.Row="0">
+            <DockPanel>
+                <TextBlock Text="{Binding TimelineRangeText}"
+                           FontWeight="Bold"
+                           VerticalAlignment="Center"/>
+            </DockPanel>
+
+            <Grid Margin="0,6,0,0"
+                  VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0"
+                            Margin="0,0,12,4"
+                            VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal"
+                                Margin="0,0,0,4">
+                        <TextBlock Text="並び替え"
+                                   Foreground="{DynamicResource WindowTextBrush}"
+                                   Margin="0,0,6,0"
+                                   VerticalAlignment="Center"/>
+                        <ComboBox Width="120"
+                                  ItemsSource="{Binding DisplaySettings.SortOptions}"
+                                  DisplayMemberPath="DisplayText"
+                                  SelectedValuePath="SortKey"
+                                  SelectedValue="{Binding DisplaySettings.SelectedSortKey, Mode=TwoWay}"/>
+                    </StackPanel>
+
+                    <GroupBox Header="ステータス"
+                              Foreground="{DynamicResource WindowTextBrush}"
+                              Padding="6,2">
+                        <ItemsControl ItemsSource="{Binding DisplaySettings.StatusFilterItems}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type gantt:GanttStatusFilterItemViewModel}">
+                                    <CheckBox Content="{Binding DisplayText}"
+                                              Foreground="{DynamicResource WindowTextBrush}"
+                                              IsChecked="{Binding IsSelected, Mode=TwoWay}"
+                                              Margin="0,0,8,0"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </GroupBox>
+                </StackPanel>
+
+                <GroupBox Grid.Column="1"
+                          Header="担当者"
+                          Foreground="{DynamicResource WindowTextBrush}"
+                          Margin="0,0,12,4"
+                          Padding="6,2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Width="120"
+                                  Height="24"
+                                  Margin="0,0,4,0"
+                                  VerticalAlignment="Center"
+                                  ItemsSource="{Binding DisplaySettings.AvailableAssigneeFilterItems}"
+                                  DisplayMemberPath="DisplayText"
+                                  SelectedItem="{Binding DisplaySettings.SelectedAssigneeFilterCandidate, Mode=TwoWay}"/>
+                        <Button Content="追加"
+                                Grid.Column="1"
+                                Command="{Binding DisplaySettings.AddAssigneeFilterCommand}"
+                                Height="24"
+                                MinWidth="46"
+                                Margin="0,0,6,0"
+                                VerticalAlignment="Center"/>
+                        <ScrollViewer Grid.Column="2"
+                                      Height="40"
+                                      MinWidth="120"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding DisplaySettings.SelectedAssigneeFilterItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type gantt:GanttMemberFilterItemViewModel}">
+                                        <Border BorderBrush="{DynamicResource GanttChartBorderBrush}"
+                                                BorderThickness="1"
+                                                Padding="4,1"
+                                                Margin="0,0,4,0"
+                                                Background="{DynamicResource GanttHeaderBackgroundBrush}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding DisplayText}"
+                                                           Foreground="{DynamicResource WindowTextBrush}"
+                                                           VerticalAlignment="Center"/>
+                                                <Button Content="削除"
+                                                        Command="{Binding DataContext.DisplaySettings.RemoveAssigneeFilterCommand, Source={x:Reference GanttChartRoot}}"
+                                                        CommandParameter="{Binding}"
+                                                        MinWidth="38"
+                                                        Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </GroupBox>
+
+                <GroupBox Grid.Column="2"
+                          Header="作業協力者"
+                          Foreground="{DynamicResource WindowTextBrush}"
+                          Margin="0,0,12,4"
+                          Padding="6,2">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="120"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ComboBox Width="120"
+                                  Height="24"
+                                  Margin="0,0,4,0"
+                                  VerticalAlignment="Center"
+                                  ItemsSource="{Binding DisplaySettings.AvailableCollaboratorFilterItems}"
+                                  DisplayMemberPath="DisplayText"
+                                  SelectedItem="{Binding DisplaySettings.SelectedCollaboratorFilterCandidate, Mode=TwoWay}"/>
+                        <Button Content="追加"
+                                Grid.Column="1"
+                                Command="{Binding DisplaySettings.AddCollaboratorFilterCommand}"
+                                Height="24"
+                                MinWidth="46"
+                                Margin="0,0,6,0"
+                                VerticalAlignment="Center"/>
+                        <ScrollViewer Grid.Column="2"
+                                      Height="40"
+                                      MinWidth="120"
+                                      HorizontalScrollBarVisibility="Auto"
+                                      VerticalScrollBarVisibility="Disabled">
+                            <ItemsControl ItemsSource="{Binding DisplaySettings.SelectedCollaboratorFilterItems}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel Orientation="Horizontal"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="{x:Type gantt:GanttMemberFilterItemViewModel}">
+                                        <Border BorderBrush="{DynamicResource GanttChartBorderBrush}"
+                                                BorderThickness="1"
+                                                Padding="4,1"
+                                                Margin="0,0,4,0"
+                                                Background="{DynamicResource GanttHeaderBackgroundBrush}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding DisplayText}"
+                                                           Foreground="{DynamicResource WindowTextBrush}"
+                                                           VerticalAlignment="Center"/>
+                                                <Button Content="削除"
+                                                        Command="{Binding DataContext.DisplaySettings.RemoveCollaboratorFilterCommand, Source={x:Reference GanttChartRoot}}"
+                                                        CommandParameter="{Binding}"
+                                                        MinWidth="38"
+                                                        Margin="4,0,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Grid>
+                </GroupBox>
+
+            </Grid>
+        </StackPanel>
 
         <Border Grid.Row="2"
                 BorderBrush="{DynamicResource GanttChartBorderBrush}"
