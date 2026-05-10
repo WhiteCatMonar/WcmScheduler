@@ -1,4 +1,4 @@
-﻿using MainApplication.Infrastructure;
+using MainApplication.Infrastructure;
 using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.SettingsModel;
@@ -183,6 +183,7 @@ namespace MainApplication.ViewModels
             var specialHolidays = new ObservableCollection<DateOnly>();
             TeamProjects = new TeamProjectsViewModel(teamMembers, specialHolidays, StatusBar);
             TeamSettings = new TeamSettingsViewModel(TeamProjects, teamMembers, specialHolidays);
+            TeamProjects.SetMemberAvailabilityProvider(TeamSettings);
             /* TODO:タブごとの機能追加 */
 
             /* タブ管理 */

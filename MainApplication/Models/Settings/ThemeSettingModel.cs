@@ -65,6 +65,8 @@ namespace MainApplication.Models.Settings
             { "gantt-grid-line", "#FFE5E5E5" },
             { "gantt-warning-text", "#FFF9A825" },
             { "gantt-suspension-background", "#FF808080" },
+            { "gantt-non-working-background", "#FFC8C8C8" },
+            { "gantt-out-of-participation-background", "#FFFFC8F4" },
             { "gantt-dependency-line", "#FF606060" },
             { "gantt-saturday-background", "#FFEAF4FF" },
             { "gantt-saturday-text", "#FF0066B3" },

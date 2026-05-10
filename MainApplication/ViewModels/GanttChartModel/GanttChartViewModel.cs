@@ -2,6 +2,7 @@ using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using MainApplication.ViewModels.StatusBarModel;
+using MainApplication.ViewModels.TeamModel;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -19,6 +20,7 @@ namespace MainApplication.ViewModels.GanttChartModel
         private const double DefaultRowHeight = 48.0;
         private const int DefaultVisibleDays = 14;
         private readonly DependencyEditorViewModel _dependencyEditor;
+        private readonly Func<Guid> _projectIdProvider;
         private readonly ObservableCollection<DateOnly> _specialHolidays;
         private readonly StatusBarViewModel? _statusBar;
         private readonly GanttChartService _service = new();
@@ -42,16 +44,21 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// ガントチャートViewModelを生成する
         /// </summary>
         /// <param name="dependencyEditor">対象依存関係編集</param>
+        /// <param name="projectIdProvider">対象プロジェクトID提供元</param>
         /// <param name="specialHolidays">特別休日一覧</param>
         public GanttChartViewModel(
             DependencyEditorViewModel dependencyEditor,
+            Func<Guid> projectIdProvider,
             ObservableCollection<DateOnly>? specialHolidays = null,
-            StatusBarViewModel? statusBar = null
+            StatusBarViewModel? statusBar = null,
+            IProjectMemberAvailabilityProvider? memberAvailabilityProvider = null
         )
         {
             _dependencyEditor = dependencyEditor;
+            _projectIdProvider = projectIdProvider;
             _specialHolidays = specialHolidays ?? [];
             _statusBar = statusBar;
+            MemberAvailabilityProvider = memberAvailabilityProvider;
             _dispatcher = Dispatcher.CurrentDispatcher;
             _dependencyEditor.Nodes.PropertyChanged += NodeCollection_PropertyChanged;
             _dependencyEditor.CurrentHistoryChanged += DependencyEditor_CurrentHistoryChanged;
@@ -82,6 +89,11 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 依存関係線一覧
         /// </summary>
         public ObservableCollection<GanttDependencyLineViewModel> DependencyLines { get; } = [];
+
+        /// <summary>
+        /// プロジェクト内メンバー稼働条件の参照先
+        /// </summary>
+        public IProjectMemberAvailabilityProvider? MemberAvailabilityProvider { get; set; }
 
         /// <summary>
         /// 表示更新コマンド
@@ -328,7 +340,15 @@ namespace MainApplication.ViewModels.GanttChartModel
                 var startDate = GetTimelineStartDate();
                 TimelineStartDate = startDate;
 
-                var tasks = _service.CreateProjectTasks(_dependencyEditor, startDate, DayWidth, RowHeight, _specialHolidays);
+                var tasks = _service.CreateProjectTasks(
+                    _dependencyEditor,
+                    _projectIdProvider(),
+                    MemberAvailabilityProvider,
+                    startDate,
+                    DayWidth,
+                    RowHeight,
+                    _specialHolidays
+                );
                 var endDate = GetTimelineEndDate(tasks, startDate);
                 _timelineEndDate = endDate;
                 RebuildTimeline(startDate, endDate);

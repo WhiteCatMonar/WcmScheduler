@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels.DependencyEditorModel;
+using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using MainApplication.ViewModels.TeamModel;
 
@@ -13,6 +13,8 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// プロジェクト内ノードから表示可能なガントタスクを生成する
         /// </summary>
         /// <param name="dependencyEditor">対象依存関係編集</param>
+        /// <param name="projectId">対象プロジェクトID</param>
+        /// <param name="memberAvailabilityProvider">プロジェクト内メンバー稼働条件提供元</param>
         /// <param name="timelineStartDate">表示開始日</param>
         /// <param name="dayWidth">1日分の表示幅</param>
         /// <param name="rowHeight">1行分の表示高さ</param>
@@ -20,6 +22,8 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// <returns>ガントタスク一覧</returns>
         public List<GanttTaskItemViewModel> CreateProjectTasks(
             DependencyEditorViewModel dependencyEditor,
+            Guid projectId,
+            IProjectMemberAvailabilityProvider? memberAvailabilityProvider,
             DateOnly timelineStartDate,
             double dayWidth,
             double rowHeight,
@@ -58,6 +62,18 @@ namespace MainApplication.ViewModels.GanttChartModel
 
                 if (schedule.HasSchedule)
                 {
+                    AddUnavailablePeriods(
+                        task,
+                        schedule,
+                        projectId,
+                        ResolveAssignee(dependencyEditor, schedule.Node.Detail.AssigneeMemberId),
+                        memberAvailabilityProvider,
+                        timelineStartDate,
+                        dayWidth,
+                        left,
+                        holidays
+                    );
+
                     foreach (var period in schedule.Node.Detail.NormalizedSuspensionPeriods)
                     {
                         var overlapStart = period.StartDateTime > schedule.StartDateTime ? period.StartDateTime : schedule.StartDateTime;
@@ -79,6 +95,84 @@ namespace MainApplication.ViewModels.GanttChartModel
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 参加期間外と作業不可日の表示区間を追加する
+        /// </summary>
+        /// <param name="task">追加対象ガントタスク</param>
+        /// <param name="schedule">予定期間</param>
+        /// <param name="projectId">対象プロジェクトID</param>
+        /// <param name="assignee">担当者</param>
+        /// <param name="memberAvailabilityProvider">プロジェクト内メンバー稼働条件提供元</param>
+        /// <param name="timelineStartDate">表示開始日</param>
+        /// <param name="dayWidth">1日分の表示幅</param>
+        /// <param name="barLeft">タスクバー左位置</param>
+        /// <param name="specialHolidays">特別休日一覧</param>
+        private static void AddUnavailablePeriods(
+            GanttTaskItemViewModel task,
+            GanttTaskSchedule schedule,
+            Guid projectId,
+            TeamMemberViewModel? assignee,
+            IProjectMemberAvailabilityProvider? memberAvailabilityProvider,
+            DateOnly timelineStartDate,
+            double dayWidth,
+            double barLeft,
+            IReadOnlySet<DateOnly> specialHolidays
+        )
+        {
+            if (assignee == null)
+            {
+                return;
+            }
+
+            var startDate = DateOnly.FromDateTime(schedule.StartDateTime.Date);
+            var endDate = DateOnly.FromDateTime(schedule.EndDateTime.Date);
+            for (var date = startDate; date <= endDate; date = date.AddDays(1))
+            {
+                var segmentStart = Max(schedule.StartDateTime, date.ToDateTime(TimeOnly.MinValue));
+                var segmentEnd = Min(schedule.EndDateTime, date.AddDays(1).ToDateTime(TimeOnly.MinValue));
+                if (segmentStart >= segmentEnd)
+                {
+                    continue;
+                }
+
+                if (memberAvailabilityProvider?.IsParticipating(projectId, assignee.MemberId, date) == false)
+                {
+                    task.OutOfParticipationPeriods.Add(CreateUnavailablePeriod(timelineStartDate, segmentStart, segmentEnd, dayWidth, barLeft));
+                    continue;
+                }
+
+                var workMinutes = memberAvailabilityProvider?.GetEffectiveWorkTimeMinutes(projectId, assignee, date)
+                                  ?? assignee.GetDefaultWorkTimeMinutes(date, specialHolidays);
+                if (workMinutes <= 0)
+                {
+                    task.NonWorkingPeriods.Add(CreateUnavailablePeriod(timelineStartDate, segmentStart, segmentEnd, dayWidth, barLeft));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 稼働不可区間表示を生成する
+        /// </summary>
+        /// <param name="timelineStartDate">表示開始日</param>
+        /// <param name="start">区間開始日時</param>
+        /// <param name="end">区間終了日時</param>
+        /// <param name="dayWidth">1日分の表示幅</param>
+        /// <param name="barLeft">タスクバー左位置</param>
+        /// <returns>稼働不可区間表示</returns>
+        private static GanttUnavailablePeriodItemViewModel CreateUnavailablePeriod(
+            DateOnly timelineStartDate,
+            DateTime start,
+            DateTime end,
+            double dayWidth,
+            double barLeft
+        )
+        {
+            return new GanttUnavailablePeriodItemViewModel(
+                CalculateLeft(timelineStartDate, start, dayWidth) - barLeft,
+                Math.Max(2.0, CalculateWidth(start, end, dayWidth))
+            );
         }
 
         /// <summary>
@@ -432,6 +526,28 @@ namespace MainApplication.ViewModels.GanttChartModel
         private static double CalculateWidth(DateTime start, DateTime end, double dayWidth)
         {
             return Math.Max(1.0, (end - start).TotalDays * dayWidth);
+        }
+
+        /// <summary>
+        /// 遅い日時を取得する
+        /// </summary>
+        /// <param name="left">比較対象日時1</param>
+        /// <param name="right">比較対象日時2</param>
+        /// <returns>遅い日時</returns>
+        private static DateTime Max(DateTime left, DateTime right)
+        {
+            return left >= right ? left : right;
+        }
+
+        /// <summary>
+        /// 早い日時を取得する
+        /// </summary>
+        /// <param name="left">比較対象日時1</param>
+        /// <param name="right">比較対象日時2</param>
+        /// <returns>早い日時</returns>
+        private static DateTime Min(DateTime left, DateTime right)
+        {
+            return left <= right ? left : right;
         }
 
         /// <summary>

@@ -5,6 +5,46 @@
              xmlns:gantt="clr-namespace:MainApplication.ViewModels.GanttChartModel"
              xmlns:dependencyModel="clr-namespace:MainApplication.ViewModels.DependencyEditorModel">
     <UserControl.Resources>
+        <DrawingBrush x:Key="GanttNonWorkingHatchBrush"
+                      Viewport="0,0,20,20"
+                      ViewportUnits="Absolute"
+                      TileMode="Tile"
+                      Stretch="None">
+            <DrawingBrush.Drawing>
+                <GeometryDrawing>
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="{DynamicResource GanttNonWorkingBackgroundBrush}"
+                             Thickness="6"/>
+                    </GeometryDrawing.Pen>
+                    <GeometryDrawing.Geometry>
+                        <GeometryGroup>
+                            <LineGeometry StartPoint="0,20" EndPoint="20,0"/>
+                        </GeometryGroup>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <DrawingBrush x:Key="GanttOutOfParticipationHatchBrush"
+                      Viewport="0,0,20,20"
+                      ViewportUnits="Absolute"
+                      TileMode="Tile"
+                      Stretch="None">
+            <DrawingBrush.Drawing>
+                <GeometryDrawing>
+                    <GeometryDrawing.Pen>
+                        <Pen Brush="{DynamicResource GanttOutOfParticipationBackgroundBrush}"
+                             Thickness="6"/>
+                    </GeometryDrawing.Pen>
+                    <GeometryDrawing.Geometry>
+                        <GeometryGroup>
+                            <LineGeometry StartPoint="0,20" EndPoint="20,0"/>
+                        </GeometryGroup>
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
         <Style x:Key="TaskNameTextStyle" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{DynamicResource WindowTextBrush}"/>
             <Style.Triggers>
@@ -402,6 +442,52 @@
                                                 Style="{StaticResource GanttTaskBarStyle}"
                                                 MouseLeftButtonDown="GanttTaskItem_MouseLeftButtonDown">
                                             <Grid ClipToBounds="True">
+                                                <ItemsControl ItemsSource="{Binding NonWorkingPeriods}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <Canvas/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemContainerStyle>
+                                                        <Style TargetType="ContentPresenter">
+                                                            <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                                                        </Style>
+                                                    </ItemsControl.ItemContainerStyle>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate DataType="{x:Type gantt:GanttUnavailablePeriodItemViewModel}">
+                                                            <Border Width="{Binding Width}"
+                                                                    Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                    Background="{StaticResource GanttNonWorkingHatchBrush}"
+                                                                    BorderBrush="{DynamicResource GanttNonWorkingBackgroundBrush}"
+                                                                    BorderThickness="2"
+                                                                    SnapsToDevicePixels="True"/>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <ItemsControl ItemsSource="{Binding OutOfParticipationPeriods}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <Canvas/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemContainerStyle>
+                                                        <Style TargetType="ContentPresenter">
+                                                            <Setter Property="Canvas.Left" Value="{Binding Left}"/>
+                                                        </Style>
+                                                    </ItemsControl.ItemContainerStyle>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate DataType="{x:Type gantt:GanttUnavailablePeriodItemViewModel}">
+                                                            <Border Width="{Binding Width}"
+                                                                    Height="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                                    Background="{StaticResource GanttOutOfParticipationHatchBrush}"
+                                                                    BorderBrush="{DynamicResource GanttOutOfParticipationBackgroundBrush}"
+                                                                    BorderThickness="2"
+                                                                    SnapsToDevicePixels="True"/>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
                                                 <ItemsControl ItemsSource="{Binding Suspensions}">
                                                     <ItemsControl.ItemsPanel>
                                                         <ItemsPanelTemplate>

@@ -1,4 +1,4 @@
-﻿using MainApplication.Models.SaveData;
+using MainApplication.Models.SaveData;
 using MainApplication.Views;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.DependencyEditorModel;
@@ -13,7 +13,7 @@ namespace MainApplication.ViewModels.TeamModel
     /// <summary>
     /// チーム設定タブのViewModel
     /// </summary>
-    public class TeamSettingsViewModel : ViewModelBase
+    public class TeamSettingsViewModel : ViewModelBase, IProjectMemberAvailabilityProvider
     {
         private const int CalendarDays = 7;
         private readonly TeamProjectsViewModel _teamProjects;
@@ -280,6 +280,39 @@ namespace MainApplication.ViewModels.TeamModel
                     };
                 })
             ];
+        }
+
+        /// <summary>
+        /// 指定メンバーが対象日にプロジェクトへ参加しているかどうかを取得する
+        /// </summary>
+        /// <param name="projectId">対象プロジェクトID</param>
+        /// <param name="memberId">対象メンバーID</param>
+        /// <param name="date">対象日</param>
+        /// <returns>参加期間内の場合はtrue</returns>
+        public bool IsParticipating(Guid projectId, Guid memberId, DateOnly date)
+        {
+            return !_projectParticipations.TryGetValue((projectId, memberId), out var participation) ||
+                   (participation.StartDate == null || participation.StartDate <= date) &&
+                   (participation.EndDate == null || date <= participation.EndDate);
+        }
+
+        /// <summary>
+        /// 指定メンバーの対象日におけるプロジェクト作業可能時間を取得する
+        /// </summary>
+        /// <param name="projectId">対象プロジェクトID</param>
+        /// <param name="member">対象メンバー</param>
+        /// <param name="date">対象日</param>
+        /// <returns>作業可能時間。単位は分</returns>
+        public int GetEffectiveWorkTimeMinutes(Guid projectId, TeamMemberViewModel member, DateOnly date)
+        {
+            if (!IsParticipating(projectId, member.MemberId, date))
+            {
+                return 0;
+            }
+
+            return _workTimeOverrides.TryGetValue((projectId, member.MemberId, date), out var minutes)
+                ? minutes
+                : member.GetDefaultWorkTimeMinutes(date, _specialHolidays);
         }
 
 

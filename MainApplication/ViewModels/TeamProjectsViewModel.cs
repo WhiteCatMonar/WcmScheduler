@@ -1,4 +1,4 @@
-﻿using MainApplication.Models.SaveData;
+using MainApplication.Models.SaveData;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
@@ -17,6 +17,7 @@ namespace MainApplication.ViewModels
         private readonly ObservableCollection<TeamMemberViewModel> _members;
         private readonly ObservableCollection<DateOnly> _specialHolidays;
         private readonly StatusBarViewModel? _statusBar;
+        private IProjectMemberAvailabilityProvider? _memberAvailabilityProvider;
         private ProjectViewModel? _selectedProject;
         private TabInfo? _selectedTab;
 
@@ -92,7 +93,7 @@ namespace MainApplication.ViewModels
             _statusBar = statusBar;
             Projects = [];
 
-            var project = new ProjectViewModel("New Project", members, specialHolidays, statusBar);
+            var project = new ProjectViewModel("New Project", members, specialHolidays, statusBar, _memberAvailabilityProvider);
             Projects.Add(project);
 
             var newProjectTab = CreateProjectTab(project);
@@ -118,7 +119,7 @@ namespace MainApplication.ViewModels
 
             foreach (var projectData in projects)
             {
-                var project = new ProjectViewModel(projectData.ProjectName ?? string.Empty, _members, _specialHolidays, _statusBar)
+                var project = new ProjectViewModel(projectData.ProjectName ?? string.Empty, _members, _specialHolidays, _statusBar, _memberAvailabilityProvider)
                 {
                     ProjectId = projectData.ProjectId == Guid.Empty ? Guid.NewGuid() : projectData.ProjectId
                 };
@@ -129,7 +130,7 @@ namespace MainApplication.ViewModels
 
             if (Projects.Count == 0)
             {
-                var project = new ProjectViewModel("New Project", _members, _specialHolidays, _statusBar);
+                var project = new ProjectViewModel("New Project", _members, _specialHolidays, _statusBar, _memberAvailabilityProvider);
                 Projects.Add(project);
                 Tabs.Add(CreateProjectTab(project));
             }
@@ -153,7 +154,7 @@ namespace MainApplication.ViewModels
         /// </summary>
         private void AddProject()
         {
-            var project = new ProjectViewModel(CreateDefaultProjectName(), _members, _specialHolidays, _statusBar);
+            var project = new ProjectViewModel(CreateDefaultProjectName(), _members, _specialHolidays, _statusBar, _memberAvailabilityProvider);
             var tab = CreateProjectTab(project);
             Projects.Add(project);
             Tabs.Add(tab);
@@ -205,6 +206,19 @@ namespace MainApplication.ViewModels
             }
 
             return $"{baseName} {index}";
+        }
+
+        /// <summary>
+        /// プロジェクト内メンバー稼働条件の参照先を設定する
+        /// </summary>
+        /// <param name="memberAvailabilityProvider">稼働条件提供元</param>
+        public void SetMemberAvailabilityProvider(IProjectMemberAvailabilityProvider? memberAvailabilityProvider)
+        {
+            _memberAvailabilityProvider = memberAvailabilityProvider;
+            foreach (var project in Projects)
+            {
+                project.SetMemberAvailabilityProvider(memberAvailabilityProvider);
+            }
         }
     }
 }

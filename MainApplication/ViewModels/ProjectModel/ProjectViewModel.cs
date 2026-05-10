@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.GanttChartModel;
 using MainApplication.ViewModels.StatusBarModel;
@@ -82,7 +82,8 @@ namespace MainApplication.ViewModels.ProjectModel
             string name,
             ObservableCollection<TeamMemberViewModel>? members = null,
             ObservableCollection<DateOnly>? specialHolidays = null,
-            StatusBarViewModel? statusBar = null
+            StatusBarViewModel? statusBar = null,
+            IProjectMemberAvailabilityProvider? memberAvailabilityProvider = null
         )
         {
             ProjectName = name;
@@ -92,7 +93,7 @@ namespace MainApplication.ViewModels.ProjectModel
                 DependencyEditor.SetTeamMembers(members);
             }
 
-            GanttChart = new GanttChartViewModel(DependencyEditor, specialHolidays, statusBar);
+            GanttChart = new GanttChartViewModel(DependencyEditor, () => ProjectId, specialHolidays, statusBar, memberAvailabilityProvider);
 
             var dependencyEditorTab = new TabInfo("タスク編集", DependencyEditor);
             var ganttChartTab = new TabInfo("プロジェクトスケジュール", GanttChart);
@@ -103,6 +104,15 @@ namespace MainApplication.ViewModels.ProjectModel
             ];
 
             SelectedTab = dependencyEditorTab;
+        }
+
+        /// <summary>
+        /// プロジェクト内メンバー稼働条件の参照先を設定する
+        /// </summary>
+        /// <param name="memberAvailabilityProvider">稼働条件提供元</param>
+        public void SetMemberAvailabilityProvider(IProjectMemberAvailabilityProvider? memberAvailabilityProvider)
+        {
+            GanttChart.MemberAvailabilityProvider = memberAvailabilityProvider;
         }
     }
 }

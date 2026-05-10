@@ -71,6 +71,8 @@ namespace MainApplication.ViewModels.Core
             { "gantt-grid-line", "GanttGridLineBrush" },
             { "gantt-warning-text", "GanttWarningTextBrush" },
             { "gantt-suspension-background", "GanttSuspensionBackgroundBrush" },
+            { "gantt-non-working-background", "GanttNonWorkingBackgroundBrush" },
+            { "gantt-out-of-participation-background", "GanttOutOfParticipationBackgroundBrush" },
             { "gantt-dependency-line", "GanttDependencyLineBrush" },
             { "gantt-saturday-background", "GanttSaturdayBackgroundBrush" },
             { "gantt-saturday-text", "GanttSaturdayTextBrush" },

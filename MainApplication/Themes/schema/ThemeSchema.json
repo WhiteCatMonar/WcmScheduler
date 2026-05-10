@@ -218,6 +218,14 @@
           "description": "ガントチャート中断期間表示",
           "$ref": "#/$defs/argbColor"
         },
+        "gantt-non-working-background": {
+          "description": "ガントチャート作業不可日表示",
+          "$ref": "#/$defs/argbColor"
+        },
+        "gantt-out-of-participation-background": {
+          "description": "ガントチャート参加期間外表示",
+          "$ref": "#/$defs/argbColor"
+        },
         "gantt-dependency-line": {
           "description": "ガントチャート依存関係線",
           "$ref": "#/$defs/argbColor"

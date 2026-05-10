@@ -52,6 +52,8 @@
     "gantt-grid-line": "#FF3F3F46",
     "gantt-warning-text": "#FFDCDCAA",
     "gantt-suspension-background": "#FF707070",
+    "gantt-non-working-background": "#FF606060",
+    "gantt-out-of-participation-background": "#FFC586C0",
     "gantt-dependency-line": "#FFD4D4D4",
     "gantt-saturday-background": "#FF172A3A",
     "gantt-saturday-text": "#FF9CDCFE",

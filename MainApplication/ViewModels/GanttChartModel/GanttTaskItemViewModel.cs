@@ -1,4 +1,4 @@
-﻿using MainApplication.ViewModels.Core;
+using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.DependencyEditorModel;
 using MainApplication.ViewModels.ProjectModel;
 using System.Collections.ObjectModel;
@@ -86,6 +86,16 @@ namespace MainApplication.ViewModels.GanttChartModel
         /// 中断期間表示一覧
         /// </summary>
         public ObservableCollection<GanttSuspensionItemViewModel> Suspensions { get; } = [];
+
+        /// <summary>
+        /// プロジェクト参加期間外表示一覧
+        /// </summary>
+        public ObservableCollection<GanttUnavailablePeriodItemViewModel> OutOfParticipationPeriods { get; } = [];
+
+        /// <summary>
+        /// 作業不可日表示一覧
+        /// </summary>
+        public ObservableCollection<GanttUnavailablePeriodItemViewModel> NonWorkingPeriods { get; } = [];
 
         /// <summary>
         /// 予定期間表示文字列
