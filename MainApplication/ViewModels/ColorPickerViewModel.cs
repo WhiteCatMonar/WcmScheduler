@@ -1,5 +1,6 @@
 using MainApplication.ViewModels.Core;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -18,6 +19,10 @@ namespace MainApplication.ViewModels
         private int _red;
         private int _green;
         private int _blue;
+        private string _alphaText = "255";
+        private string _redText = "255";
+        private string _greenText = "255";
+        private string _blueText = "255";
         private string _hexText;
         private string? _result;
 
@@ -31,7 +36,7 @@ namespace MainApplication.ViewModels
             _hexText = _initialDisplayHex;
             ApplyHexToComponents(_initialDisplayHex);
 
-            ConfirmCommand = new RelayCommand(Confirm, () => IsHexValid);
+            ConfirmCommand = new RelayCommand(Confirm, () => IsInputValid);
             ResetCommand = new RelayCommand(Reset);
         }
 
@@ -41,7 +46,16 @@ namespace MainApplication.ViewModels
         public int Alpha
         {
             get => _alpha;
-            set => SetComponent(ref _alpha, value);
+            set => SetComponent(ref _alpha, value, nameof(AlphaText));
+        }
+
+        /// <summary>
+        /// アルファ値入力文字列。
+        /// </summary>
+        public string AlphaText
+        {
+            get => _alphaText;
+            set => SetComponentText(ref _alphaText, value, ref _alpha, nameof(Alpha));
         }
 
         /// <summary>
@@ -50,7 +64,16 @@ namespace MainApplication.ViewModels
         public int Red
         {
             get => _red;
-            set => SetComponent(ref _red, value);
+            set => SetComponent(ref _red, value, nameof(RedText));
+        }
+
+        /// <summary>
+        /// 赤成分入力文字列。
+        /// </summary>
+        public string RedText
+        {
+            get => _redText;
+            set => SetComponentText(ref _redText, value, ref _red, nameof(Red));
         }
 
         /// <summary>
@@ -59,7 +82,16 @@ namespace MainApplication.ViewModels
         public int Green
         {
             get => _green;
-            set => SetComponent(ref _green, value);
+            set => SetComponent(ref _green, value, nameof(GreenText));
+        }
+
+        /// <summary>
+        /// 緑成分入力文字列。
+        /// </summary>
+        public string GreenText
+        {
+            get => _greenText;
+            set => SetComponentText(ref _greenText, value, ref _green, nameof(Green));
         }
 
         /// <summary>
@@ -68,7 +100,16 @@ namespace MainApplication.ViewModels
         public int Blue
         {
             get => _blue;
-            set => SetComponent(ref _blue, value);
+            set => SetComponent(ref _blue, value, nameof(BlueText));
+        }
+
+        /// <summary>
+        /// 青成分入力文字列。
+        /// </summary>
+        public string BlueText
+        {
+            get => _blueText;
+            set => SetComponentText(ref _blueText, value, ref _blue, nameof(Blue));
         }
 
         /// <summary>
@@ -79,10 +120,12 @@ namespace MainApplication.ViewModels
             get => _hexText;
             set
             {
-                if (!SetProperty(ref _hexText, value, [nameof(IsHexValid), nameof(SelectedBrush)]))
+                if (!SetProperty(ref _hexText, value, [nameof(IsHexValid), nameof(IsInputValid), nameof(SelectedBrush)]))
                 {
                     return;
                 }
+
+                CommandManager.InvalidateRequerySuggested();
 
                 if (_isSynchronizing || !IsHexValid)
                 {
@@ -99,6 +142,15 @@ namespace MainApplication.ViewModels
         /// 入力中の色文字列が有効かどうか。
         /// </summary>
         public bool IsHexValid => IsValidHexColor(HexText);
+
+        /// <summary>
+        /// 確定可能な入力状態かどうか。
+        /// </summary>
+        public bool IsInputValid => IsHexValid &&
+                                    IsValidComponentText(AlphaText) &&
+                                    IsValidComponentText(RedText) &&
+                                    IsValidComponentText(GreenText) &&
+                                    IsValidComponentText(BlueText);
 
         /// <summary>
         /// 現在選択中の色を表示するブラシ。
@@ -154,14 +206,22 @@ namespace MainApplication.ViewModels
         /// </summary>
         /// <param name="field">更新対象フィールド。</param>
         /// <param name="value">設定する値。</param>
-        private void SetComponent(ref int field, int value)
+        /// <param name="textPropertyName">連動する入力文字列プロパティ名。</param>
+        /// <param name="propertyName">変更通知対象プロパティ名。</param>
+        private void SetComponent(
+            ref int field,
+            int value,
+            string textPropertyName,
+            [CallerMemberName] string? propertyName = null
+        )
         {
             int clampedValue = Math.Clamp(value, 0, 255);
-            if (!SetProperty(ref field, clampedValue, [nameof(SelectedBrush)]))
+            if (!SetProperty(ref field, clampedValue, [nameof(IsInputValid), nameof(SelectedBrush)], propertyName))
             {
                 return;
             }
 
+            SetComponentTextFromValue(textPropertyName, clampedValue);
             if (_isSynchronizing)
             {
                 return;
@@ -170,6 +230,68 @@ namespace MainApplication.ViewModels
             _isSynchronizing = true;
             HexText = FormatHexFromComponents();
             _isSynchronizing = false;
+            CommandManager.InvalidateRequerySuggested();
+        }
+
+        /// <summary>
+        /// 成分値入力文字列を設定し、有効な場合は数値と色文字列を更新する。
+        /// </summary>
+        /// <param name="textField">更新対象入力文字列フィールド。</param>
+        /// <param name="value">設定する入力文字列。</param>
+        /// <param name="componentField">更新対象成分値フィールド。</param>
+        /// <param name="componentPropertyName">連動する成分値プロパティ名。</param>
+        /// <param name="propertyName">変更通知対象プロパティ名。</param>
+        private void SetComponentText(
+            ref string textField,
+            string value,
+            ref int componentField,
+            string componentPropertyName,
+            [CallerMemberName] string? propertyName = null
+        )
+        {
+            if (!SetProperty(ref textField, value, [nameof(IsInputValid)], propertyName))
+            {
+                return;
+            }
+
+            CommandManager.InvalidateRequerySuggested();
+            if (_isSynchronizing || !TryParseComponentText(value, out var componentValue))
+            {
+                return;
+            }
+
+            _isSynchronizing = true;
+            if (SetProperty(ref componentField, componentValue, [nameof(IsInputValid), nameof(SelectedBrush)], componentPropertyName))
+            {
+                HexText = FormatHexFromComponents();
+            }
+
+            _isSynchronizing = false;
+        }
+
+        /// <summary>
+        /// 成分値を対応する入力文字列へ反映する。
+        /// </summary>
+        /// <param name="textPropertyName">入力文字列プロパティ名。</param>
+        /// <param name="value">反映する成分値。</param>
+        private void SetComponentTextFromValue(string textPropertyName, int value)
+        {
+            var text = value.ToString(CultureInfo.InvariantCulture);
+            switch (textPropertyName)
+            {
+                case nameof(AlphaText):
+                    SetProperty(ref _alphaText, text, [nameof(IsInputValid)], nameof(AlphaText));
+                    break;
+                case nameof(RedText):
+                    SetProperty(ref _redText, text, [nameof(IsInputValid)], nameof(RedText));
+                    break;
+                case nameof(GreenText):
+                    SetProperty(ref _greenText, text, [nameof(IsInputValid)], nameof(GreenText));
+                    break;
+                case nameof(BlueText):
+                    SetProperty(ref _blueText, text, [nameof(IsInputValid)], nameof(BlueText));
+                    break;
+            }
         }
 
         /// <summary>
@@ -191,6 +313,29 @@ namespace MainApplication.ViewModels
             Red = ParseHexComponent(hex, 3);
             Green = ParseHexComponent(hex, 5);
             Blue = ParseHexComponent(hex, 7);
+        }
+
+        /// <summary>
+        /// 成分値入力文字列が0から255までの整数かどうかを判定する。
+        /// </summary>
+        /// <param name="value">判定対象文字列。</param>
+        /// <returns>有効な成分値入力であればtrue。</returns>
+        private static bool IsValidComponentText(string? value)
+        {
+            return TryParseComponentText(value, out _);
+        }
+
+        /// <summary>
+        /// 成分値入力文字列を整数値へ変換する。
+        /// </summary>
+        /// <param name="value">変換対象文字列。</param>
+        /// <param name="component">変換後成分値。</param>
+        /// <returns>変換できた場合はtrue。</returns>
+        private static bool TryParseComponentText(string? value, out int component)
+        {
+            return int.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out component) &&
+                   component >= 0 &&
+                   component <= 255;
         }
 
         /// <summary>
@@ -234,7 +379,7 @@ namespace MainApplication.ViewModels
         /// </summary>
         private void Confirm()
         {
-            if (!IsHexValid)
+            if (!IsInputValid)
             {
                 return;
             }

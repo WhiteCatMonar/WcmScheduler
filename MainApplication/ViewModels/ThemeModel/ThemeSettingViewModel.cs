@@ -2,6 +2,7 @@ using MainApplication.Models.Settings;
 using MainApplication.ViewModels.Core;
 using MainApplication.ViewModels.Service;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -61,7 +62,12 @@ namespace MainApplication.ViewModels.ThemeModel
                 EditableColors.Add(new ColorItemViewModel(key, value ?? defaultValue ?? ""));
             }
 
-            SaveCommand = new RelayCommand(Save);
+            foreach (var item in EditableColors)
+            {
+                item.PropertyChanged += OnColorItemPropertyChanged;
+            }
+
+            SaveCommand = new RelayCommand(Save, CanSave);
             EditColorCommand = new RelayCommand<ColorItemViewModel>(EditColor, item => item != null);
         }
 
@@ -75,17 +81,44 @@ namespace MainApplication.ViewModels.ThemeModel
         /// </summary>
         private void Save()
         {
+            if (!CanSave())
+            {
+                return;
+            }
+
             var model = new ThemeSettingModel
             {
                 Name = ThemeName,
-                Colors = EditableColors.Where(x => IsValidThemeColor(x.Value))
-                                       .ToDictionary(x => x.Key, x => ColorPickerViewModel.Normalize(x.Value))
+                Colors = EditableColors.ToDictionary(x => x.Key, x => ColorPickerViewModel.Normalize(x.Value))
             };
 
             ThemeManager.SaveTheme(model);
             ThemeManager.LoadThemes();
             ThemeManager.ApplyTheme(model);
             ThemeSaved?.Invoke();
+        }
+
+        /// <summary>
+        /// テーマ保存が可能かどうかを返す
+        /// </summary>
+        /// <returns>保存可能な場合はtrue</returns>
+        private bool CanSave()
+        {
+            return EditableColors.All(x => x.IsValueValid);
+        }
+
+        /// <summary>
+        /// 色項目の変更時に保存可否を再評価する
+        /// </summary>
+        /// <param name="sender">イベント送信元</param>
+        /// <param name="e">イベント引数</param>
+        private void OnColorItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(ColorItemViewModel.IsValueValid) ||
+                e.PropertyName == nameof(ColorItemViewModel.Value))
+            {
+                CommandManager.InvalidateRequerySuggested();
+            }
         }
 
         /// <summary>
@@ -160,8 +193,18 @@ namespace MainApplication.ViewModels.ThemeModel
         public string Value
         {
             get => _value;
-            set => SetProperty(ref _value, value, [nameof(PreviewBrush)]);
+            set => SetProperty(ref _value, value, [nameof(PreviewBrush), nameof(IsValueValid), nameof(IsValueInvalid)]);
         }
+
+        /// <summary>
+        /// 色文字列が有効かどうか
+        /// </summary>
+        public bool IsValueValid => ColorPickerViewModel.IsValidHexColor(Value);
+
+        /// <summary>
+        /// 色文字列が無効かどうか
+        /// </summary>
+        public bool IsValueInvalid => !IsValueValid;
 
         /// <summary>
         /// 色プレビュー用ブラシ。

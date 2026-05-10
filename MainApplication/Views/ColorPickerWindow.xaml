@@ -36,7 +36,17 @@
             <TextBox Text="{Binding HexText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      CharacterCasing="Upper"
                      MaxLength="9"
-                     VerticalContentAlignment="Center"/>
+                     VerticalContentAlignment="Center">
+                <TextBox.Style>
+                    <Style TargetType="TextBox">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsHexValid}" Value="False">
+                                <Setter Property="Foreground" Value="{DynamicResource StatusBarErrorTextBrush}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBox.Style>
+            </TextBox>
         </DockPanel>
 
         <Grid Grid.Row="2">
@@ -56,25 +66,25 @@
             <TextBlock Grid.Row="0" Grid.Column="0" Text="A" VerticalAlignment="Center"/>
             <Slider Grid.Row="0" Grid.Column="1" Minimum="0" Maximum="255" TickFrequency="1"
                     IsSnapToTickEnabled="True" Value="{Binding Alpha, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding Alpha, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding AlphaText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      PreviewTextInput="DigitsOnly" MaxLength="3" HorizontalContentAlignment="Right"/>
 
             <TextBlock Grid.Row="1" Grid.Column="0" Text="R" VerticalAlignment="Center"/>
             <Slider Grid.Row="1" Grid.Column="1" Minimum="0" Maximum="255" TickFrequency="1"
                     IsSnapToTickEnabled="True" Value="{Binding Red, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding Red, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding RedText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      PreviewTextInput="DigitsOnly" MaxLength="3" HorizontalContentAlignment="Right"/>
 
             <TextBlock Grid.Row="2" Grid.Column="0" Text="G" VerticalAlignment="Center"/>
             <Slider Grid.Row="2" Grid.Column="1" Minimum="0" Maximum="255" TickFrequency="1"
                     IsSnapToTickEnabled="True" Value="{Binding Green, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding Green, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding GreenText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      PreviewTextInput="DigitsOnly" MaxLength="3" HorizontalContentAlignment="Right"/>
 
             <TextBlock Grid.Row="3" Grid.Column="0" Text="B" VerticalAlignment="Center"/>
             <Slider Grid.Row="3" Grid.Column="1" Minimum="0" Maximum="255" TickFrequency="1"
                     IsSnapToTickEnabled="True" Value="{Binding Blue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding Blue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            <TextBox Grid.Row="3" Grid.Column="2" Text="{Binding BlueText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      PreviewTextInput="DigitsOnly" MaxLength="3" HorizontalContentAlignment="Right"/>
         </Grid>
 

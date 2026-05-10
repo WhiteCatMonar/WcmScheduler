@@ -56,7 +56,17 @@
                                          Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                          MaxLength="9"
                                          CharacterCasing="Upper"
-                                         VerticalContentAlignment="Center"/>
+                                         VerticalContentAlignment="Center">
+                                    <TextBox.Style>
+                                        <Style TargetType="TextBox">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsValueInvalid}" Value="True">
+                                                    <Setter Property="Foreground" Value="{DynamicResource StatusBarErrorTextBrush}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBox.Style>
+                                </TextBox>
 
                                 <Button Grid.Column="2"
                                         Content="選択"
