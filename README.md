@@ -183,6 +183,13 @@
 
 - [タスクエディタ仕様](documentation/task_editor_spec.md)
 
+## 操作マニュアル
+
+WcmScheduler の基本操作と、AIツールから保存ファイルを編集するための手順は以下にまとめています。
+
+- [操作マニュアル](documentation/operation_manual.adoc)
+- [AI向け操作マニュアル](documentation/ai_operation_manual.md)
+
 ## メンバー管理仕様
 
 メンバー管理、タスク担当者、作業協力者、日次作業可能時間設定に関する仕様は以下にまとめています。
